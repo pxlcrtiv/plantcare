@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../services/plantnet_service.dart';
 import './widgets/camera_controls_widget.dart';
 import './widgets/identification_results_widget.dart';
 import './widgets/identification_tips_widget.dart';
@@ -33,49 +34,27 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
   bool _showResults = false;
   String? _capturedImagePath;
   final ImagePicker _imagePicker = ImagePicker();
+  late PlantNetService _plantNetService;
+  final List<Map<String, dynamic>> _mockResults = [];
 
-  // Mock identification results
-  final List<Map<String, dynamic>> _mockResults = [
-    {
-      "id": 1,
-      "name": "Monstera Deliciosa",
-      "scientificName": "Monstera deliciosa",
-      "confidence": 0.92,
-      "careDifficulty": "Easy",
-      "wateringFrequency": "Weekly",
-      "image":
-          "https://images.pexels.com/photos/6208086/pexels-photo-6208086.jpeg?auto=compress&cs=tinysrgb&w=800",
-      "description": "Popular houseplant with distinctive split leaves",
-      "lightRequirement": "Bright indirect light",
-      "humidity": "Medium to high",
-    },
-    {
-      "id": 2,
-      "name": "Fiddle Leaf Fig",
-      "scientificName": "Ficus lyrata",
-      "confidence": 0.78,
-      "careDifficulty": "Medium",
-      "wateringFrequency": "Bi-weekly",
-      "image":
-          "https://images.pexels.com/photos/6208087/pexels-photo-6208087.jpeg?auto=compress&cs=tinysrgb&w=800",
-      "description": "Elegant plant with large, violin-shaped leaves",
-      "lightRequirement": "Bright indirect light",
-      "humidity": "Medium",
-    },
-    {
-      "id": 3,
-      "name": "Snake Plant",
-      "scientificName": "Sansevieria trifasciata",
-      "confidence": 0.65,
-      "careDifficulty": "Easy",
-      "wateringFrequency": "Monthly",
-      "image":
-          "https://images.pexels.com/photos/6208088/pexels-photo-6208088.jpeg?auto=compress&cs=tinysrgb&w=800",
-      "description": "Low-maintenance plant with upright, sword-like leaves",
-      "lightRequirement": "Low to bright light",
-      "humidity": "Low",
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    
+    // Initialize PlantNet service with API key from env
+    _plantNetService = PlantNetService(
+      apiKey: _getPlantNetApiKey(), // You'll need to add your API key here
+    );
+    
+    _initializeCamera();
+  }
+
+  String _getPlantNetApiKey() {
+    // In a real implementation, you would load the API key securely
+    // This is just a placeholder - you should never hardcode API keys
+    return "your_plantnet_api_key_here";
+  }
 
   @override
   void initState() {
@@ -181,8 +160,8 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
         _isProcessing = true;
       });
 
-      // Simulate processing time
-      await Future.delayed(const Duration(seconds: 3));
+      // Call PlantNet API to identify the plant
+      await _identifyPlantFromImage(photo.path);
 
       if (mounted) {
         setState(() {
@@ -193,7 +172,7 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
     } catch (e) {
       debugPrint('Photo capture error: $e');
       if (mounted) {
-        _showErrorDialog('Failed to capture photo. Please try again.');
+        _showErrorDialog('Failed to capture photo or identify plant. Please try again.');
       }
     }
   }
@@ -211,7 +190,8 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
           _isProcessing = true;
         });
 
-        await Future.delayed(const Duration(seconds: 2));
+        // Call PlantNet API to identify the plant
+        await _identifyPlantFromImage(image.path);
 
         if (mounted) {
           setState(() {
@@ -296,6 +276,113 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
         ],
       ),
     );
+  }
+
+  Future<void> _identifyPlantFromImage(String imagePath) async {
+    try {
+      final result = await _plantNetService.identifyPlantFromImageFile(imagePath);
+      
+      // Convert PlantNet API results to the format expected by the UI
+      final identificationResults = _convertResultsForUI(result);
+      
+      // Update the mock results to use the actual API results
+      setState(() {
+        _mockResults.clear();
+        _mockResults.addAll(identificationResults);
+      });
+    } catch (e) {
+      debugPrint('Plant identification error: $e');
+      if (mounted) {
+        _showErrorDialog(
+          'Failed to identify plant: ${e.toString()}. Using fallback method.'
+        );
+        // Fallback to simple mock results
+        setState(() {
+          _mockResults.clear();
+          _mockResults = [
+            {
+              "id": 1,
+              "name": "Unknown Plant",
+              "scientificName": "Unknown",
+              "confidence": 0.0,
+              "careDifficulty": "Easy",
+              "wateringFrequency": "Weekly",
+              "image": imagePath,
+              "description": "Could not identify plant. Please try another image or search manually.",
+              "lightRequirement": "Varies",
+              "humidity": "Varies",
+            }
+          ];
+        });
+      }
+    }
+  }
+
+  List<Map<String, dynamic>> _convertResultsForUI(PlantIdentificationResult result) {
+    final results = <Map<String, dynamic>>[];
+    
+    for (final item in result.results) {
+      if (item.score != null && item.scientificName != null) {
+        results.add({
+          "id": results.length + 1,
+          "name": _extractCommonName(item) ?? item.scientificName!,
+          "scientificName": item.scientificName!,
+          "confidence": item.score!,
+          "careDifficulty": _estimateCareDifficulty(item),
+          "wateringFrequency": _estimateWateringFrequency(item),
+          "image": item.images?.isNotEmpty == true 
+              ? item.images!.first.url ?? ""
+              : "https://via.placeholder.com/400x300",
+          "description": _generatePlantDescription(item),
+          "lightRequirement": _estimateLightRequirement(item),
+          "humidity": _estimateHumidityRequirement(item),
+        });
+      }
+    }
+    
+    return results;
+  }
+
+  String? _extractCommonName(PlantResult result) {
+    // Try to get common name in English
+    if (result.commonNames != null && result.commonNames!['en'] != null) {
+      var commonName = result.commonNames!['en'];
+      if (commonName is List && commonName.isNotEmpty) {
+        return commonName.first.toString();
+      } else if (commonName is String) {
+        return commonName;
+      }
+    }
+    return null;
+  }
+
+  String _estimateCareDifficulty(PlantResult result) {
+    // Placeholder - in a real implementation, you might have a more sophisticated system
+    return "Medium"; 
+  }
+
+  String _estimateWateringFrequency(PlantResult result) {
+    // Placeholder - in a real implementation, you might fetch this from a database
+    return "Weekly";
+  }
+
+  String _estimateLightRequirement(PlantResult result) {
+    // Placeholder - in a real implementation, you might fetch this from a database
+    return "Bright indirect light";
+  }
+
+  String _estimateHumidityRequirement(PlantResult result) {
+    // Placeholder - in a real implementation, you might fetch this from a database
+    return "Medium to high";
+  }
+
+  String _generatePlantDescription(PlantResult result) {
+    final commonName = _extractCommonName(result);
+    if (commonName != null) {
+      return "This is $commonName (${result.scientificName}). Confidence: ${(result.score! * 100).toStringAsFixed(0)}%";
+    } else {
+      return "Scientific name: ${result.scientificName}. Confidence: ${(result.score! * 100).toStringAsFixed(0)}%";
+    }
   }
 
   void _showErrorDialog(String message) {

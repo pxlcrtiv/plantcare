@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/app_export.dart';
 
@@ -31,7 +32,7 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
             Center(
               child: InteractiveViewer(
                 child: CustomImageWidget(
-                  imageUrl: widget.photos[index]['url'] as String,
+                  imageUrl: widget.photos[index]['url'] as String? ?? '',
                   width: double.infinity,
                   height: double.infinity,
                   fit: BoxFit.contain,
@@ -64,14 +65,15 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'Taken on ${(widget.photos[index]['date'] as DateTime).day}/${(widget.photos[index]['date'] as DateTime).month}/${(widget.photos[index]['date'] as DateTime).year}',
-                      style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
+                    // Handle date properly - could be Timestamp from Firestore or DateTime
+                    if (widget.photos[index]['date'] != null) 
+                      Text(
+                        'Taken on ${_formatDate(widget.photos[index]['date'])}',
+                        style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    if (widget.photos[index]['caption'] != null) ...[
-                      SizedBox(height: 0.5.h),
+                    if (widget.photos[index]['caption'] != null && widget.photos[index]['caption'] != '') 
                       Text(
                         widget.photos[index]['caption'] as String,
                         style:
@@ -79,7 +81,6 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
                           color: Colors.white70,
                         ),
                       ),
-                    ],
                   ],
                 ),
               ),
@@ -88,6 +89,20 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
         ),
       ),
     );
+  }
+  
+  String _formatDate(dynamic dateValue) {
+    if (dateValue is Timestamp) {
+      final date = dateValue.toDate();
+      return '${date.day}/${date.month}/${date.year}';
+    } else if (dateValue is String) {
+      final date = DateTime.parse(dateValue);
+      return '${date.day}/${date.month}/${date.year}';
+    } else if (dateValue is DateTime) {
+      return '${dateValue.day}/${dateValue.month}/${dateValue.year}';
+    } else {
+      return 'Unknown date';
+    }
   }
 
   @override
@@ -196,9 +211,11 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
                   itemCount: widget.photos.length,
                   itemBuilder: (context, index) {
                     final photo = widget.photos[index];
-                    final date = photo['date'] as DateTime;
-                    final url = photo['url'] as String;
-                    final caption = photo['caption'] as String?;
+                    
+                    // Handle date properly - could be Timestamp from Firestore or DateTime
+                    String dateString = _formatDate(photo['date']);
+                    final url = photo['url'] as String? ?? '';
+                    final caption = photo['caption'] as String? ?? '';
 
                     return GestureDetector(
                       onTap: () => _showPhotoViewer(index),
@@ -217,12 +234,21 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: CustomImageWidget(
-                                imageUrl: url,
-                                width: double.infinity,
-                                height: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
+                              child: url.isNotEmpty 
+                                ? CustomImageWidget(
+                                    imageUrl: url,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Container(
+                                    color: Colors.grey[300],
+                                    child: Icon(
+                                      Icons.image,
+                                      color: Colors.grey[600],
+                                      size: 40,
+                                    ),
+                                  ),
                             ),
 
                             // Date stamp
@@ -251,7 +277,7 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      '${date.day}/${date.month}/${date.year}',
+                                      dateString,
                                       style: AppTheme
                                           .lightTheme.textTheme.labelSmall
                                           ?.copyWith(
@@ -259,8 +285,7 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    if (caption != null &&
-                                        caption.isNotEmpty) ...[
+                                    if (caption.isNotEmpty) ...[
                                       SizedBox(height: 0.5.h),
                                       Text(
                                         caption,

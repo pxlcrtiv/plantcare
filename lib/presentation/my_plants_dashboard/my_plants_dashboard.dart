@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sizer/sizer.dart';
+import 'dart:async';
 
 import '../../core/app_export.dart';
+import '../../repositories/plant_repository.dart';
+import '../../repositories/plant_repository_impl.dart';
+import '../../services/firebase_service.dart';
+import '../../models/plant.dart';
 import './widgets/bottom_navigation_widget.dart';
 import './widgets/empty_state_widget.dart';
 import './widgets/greeting_header_widget.dart';
@@ -25,110 +30,60 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
   String _searchQuery = '';
   bool _isRefreshing = false;
 
-  // Mock data for plants
-  final List<Map<String, dynamic>> _allPlants = [
-    {
-      "id": 1,
-      "name": "Monstera Deliciosa",
-      "species": "Monstera deliciosa",
-      "image":
-          "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "status": "healthy",
-      "lastWatered": "2 days ago",
-      "nextWatering": "Tomorrow",
-      "careNotes": "Loves bright, indirect light",
-    },
-    {
-      "id": 2,
-      "name": "Snake Plant",
-      "species": "Sansevieria trifasciata",
-      "image":
-          "https://images.unsplash.com/photo-1593691509543-c55fb32d8de5?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "status": "needs_attention",
-      "lastWatered": "1 week ago",
-      "nextWatering": "Today",
-      "careNotes": "Very low maintenance, drought tolerant",
-    },
-    {
-      "id": 3,
-      "name": "Fiddle Leaf Fig",
-      "species": "Ficus lyrata",
-      "image":
-          "https://images.unsplash.com/photo-1586093248292-4e6636b4e3b8?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "status": "overdue",
-      "lastWatered": "10 days ago",
-      "nextWatering": "Overdue",
-      "careNotes": "Needs consistent watering schedule",
-    },
-    {
-      "id": 4,
-      "name": "Peace Lily",
-      "species": "Spathiphyllum wallisii",
-      "image":
-          "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "status": "healthy",
-      "lastWatered": "3 days ago",
-      "nextWatering": "In 4 days",
-      "careNotes": "Droops when thirsty",
-    },
-    {
-      "id": 5,
-      "name": "Rubber Plant",
-      "species": "Ficus elastica",
-      "image":
-          "https://images.unsplash.com/photo-1509423350716-97f2360af2e4?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "status": "healthy",
-      "lastWatered": "1 day ago",
-      "nextWatering": "In 6 days",
-      "careNotes": "Wipe leaves regularly for shine",
-    },
-    {
-      "id": 6,
-      "name": "Pothos",
-      "species": "Epipremnum aureum",
-      "image":
-          "https://images.unsplash.com/photo-1586093248292-4e6636b4e3b8?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "status": "needs_attention",
-      "lastWatered": "5 days ago",
-      "nextWatering": "Today",
-      "careNotes": "Great for beginners, very forgiving",
-    },
-  ];
-
-  List<Map<String, dynamic>> get _filteredPlants {
-    if (_searchQuery.isEmpty) {
-      return _allPlants;
-    }
-    return _allPlants.where((plant) {
-      final name = (plant['name'] as String).toLowerCase();
-      final species = (plant['species'] as String).toLowerCase();
-      final query = _searchQuery.toLowerCase();
-      return name.contains(query) || species.contains(query);
-    }).toList();
-  }
+  late PlantRepository _plantRepository;
+  StreamSubscription<List<Plant>>? _plantsSubscription;
+  List<Plant> _allPlants = [];
+  List<Plant> _filteredPlants = [];
 
   int get _plantsNeedingCare {
     return _allPlants
         .where((plant) =>
-            plant['status'] == 'needs_attention' ||
-            plant['status'] == 'overdue')
+            plant.status == 'needs_attention' ||
+            plant.status == 'overdue')
         .length;
   }
 
   @override
   void initState() {
     super.initState();
+    
+    // Initialize the repository
+    _plantRepository = PlantRepositoryImpl(FirebaseService());
+    
+    // Listen to plant changes
+    _plantsSubscription = _plantRepository.getPlants().listen((plants) {
+      setState(() {
+        _allPlants = plants;
+        _applySearchFilter();
+      });
+    });
+    
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text;
+        _applySearchFilter();
       });
     });
+  }
+  
+  void _applySearchFilter() {
+    if (_searchQuery.isEmpty) {
+      _filteredPlants = _allPlants;
+    } else {
+      _filteredPlants = _allPlants.where((plant) {
+        final name = plant.name.toLowerCase();
+        final species = plant.species.toLowerCase();
+        final query = _searchQuery.toLowerCase();
+        return name.contains(query) || species.contains(query);
+      }).toList();
+    }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _plantsSubscription?.cancel();
     super.dispose();
   }
 
@@ -137,8 +92,9 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
       _isRefreshing = true;
     });
 
-    // Simulate API call
-    await Future.delayed(Duration(seconds: 2));
+    // In a real implementation, we could force refresh from server if needed
+    // For Firestore, the real-time listener already keeps data updated
+    await Future.delayed(Duration(milliseconds: 500));
 
     setState(() {
       _isRefreshing = false;
@@ -151,17 +107,42 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
     );
   }
 
-  void _handlePlantTap(Map<String, dynamic> plant) {
-    Navigator.pushNamed(context, '/plant-detail-screen', arguments: plant);
+  void _handlePlantTap(Plant plant) {
+    // Convert Plant object to Map for navigation (for compatibility with existing detail screen)
+    final plantMap = {
+      'id': plant.id,
+      'name': plant.name,
+      'species': plant.species,
+      'imageUrl': plant.imageUrl,
+      'status': plant.status,
+      'lastWatered': plant.lastWatered,
+      'nextWatering': plant.nextWatering,
+      'careNotes': plant.careNotes,
+      'location': plant.location,
+      'dateAdded': plant.dateAdded.toString(),
+      'careSchedule': plant.careSchedule,
+      'photos': plant.photos,
+    };
+    Navigator.pushNamed(context, '/plant-detail-screen', arguments: plantMap);
   }
 
-  void _handlePlantLongPress(Map<String, dynamic> plant) {
+  void _handlePlantLongPress(Plant plant) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => QuickActionsSheetWidget(
-        plant: plant,
+        plant: {
+          'id': plant.id,
+          'name': plant.name,
+          'species': plant.species,
+          'imageUrl': plant.imageUrl,
+          'status': plant.status,
+          'lastWatered': plant.lastWatered,
+          'nextWatering': plant.nextWatering,
+          'careNotes': plant.careNotes,
+          'location': plant.location,
+        },
         onWaterNow: () => _handleWaterPlant(plant),
         onViewDetails: () => _handlePlantTap(plant),
         onEdit: () => _handleEditPlant(plant),
@@ -170,56 +151,69 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
     );
   }
 
-  void _handleWaterPlant(Map<String, dynamic> plant) {
-    setState(() {
-      final index = _allPlants.indexWhere((p) => p['id'] == plant['id']);
-      if (index != -1) {
-        _allPlants[index]['status'] = 'healthy';
-        _allPlants[index]['lastWatered'] = 'Just now';
-        _allPlants[index]['nextWatering'] = 'In 7 days';
-      }
-    });
+  Future<void> _handleWaterPlant(Plant plant) async {
+    try {
+      await _plantRepository.updatePlant(plant.id, {
+        'status': 'healthy',
+        'lastWatered': Timestamp.now(),
+        'nextWatering': Timestamp.fromDate(DateTime.now().add(Duration(days: plant.careSchedule['wateringFrequency'] ?? 7))),
+      });
 
-    Fluttertoast.showToast(
-      msg: "${plant['name']} watered successfully! 💧",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
+      // Add care event
+      await _plantRepository.addCareEvent(plant.id, {
+        'type': 'watering',
+        'date': Timestamp.now(),
+        'notes': 'Watered via app',
+        'createdAt': Timestamp.now(),
+      });
+
+      Fluttertoast.showToast(
+        msg: "${plant.name} watered successfully! 💧",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Failed to update plant: ${e.toString()}",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+    }
   }
 
-  void _handleEditPlant(Map<String, dynamic> plant) {
-    Navigator.pushNamed(context, '/add-plant-screen', arguments: plant);
+  void _handleEditPlant(Plant plant) {
+    // Convert Plant object to Map for navigation
+    final plantMap = {
+      'id': plant.id,
+      'name': plant.name,
+      'species': plant.species,
+      'imageUrl': plant.imageUrl,
+      'status': plant.status,
+      'lastWatered': plant.lastWatered,
+      'nextWatering': plant.nextWatering,
+      'careNotes': plant.careNotes,
+      'location': plant.location,
+      'careSchedule': plant.careSchedule,
+    };
+    Navigator.pushNamed(context, '/add-plant-screen', arguments: plantMap);
   }
 
-  void _handleRemovePlant(Map<String, dynamic> plant) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Remove Plant'),
-        content: Text(
-            'Are you sure you want to remove ${plant['name']} from your collection?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _allPlants.removeWhere((p) => p['id'] == plant['id']);
-              });
-              Navigator.pop(context);
-              Fluttertoast.showToast(
-                msg: "${plant['name']} removed from collection",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-              );
-            },
-            child: Text('Remove'),
-          ),
-        ],
-      ),
-    );
+  Future<void> _handleRemovePlant(Plant plant) async {
+    try {
+      await _plantRepository.deletePlant(plant.id);
+      
+      Fluttertoast.showToast(
+        msg: "${plant.name} removed from collection",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Failed to remove plant: ${e.toString()}",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+    }
   }
 
   void _handleAddPlant() {
@@ -350,12 +344,8 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
         Navigator.pushNamed(context, '/plant-identification-camera');
         break;
       case 3:
-        // Navigate to Profile (placeholder)
-        Fluttertoast.showToast(
-          msg: "Profile feature coming soon!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-        );
+        // Navigate to Profile
+        Navigator.pushNamed(context, '/profile-screen');
         break;
     }
   }
@@ -392,6 +382,7 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
               onChanged: (value) {
                 setState(() {
                   _searchQuery = value;
+                  _applySearchFilter();
                 });
               },
               onClear: _clearSearch,
@@ -419,7 +410,16 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
                         itemBuilder: (context, index) {
                           final plant = _filteredPlants[index];
                           return PlantCardWidget(
-                            plant: plant,
+                            plant: {
+                              'id': plant.id,
+                              'name': plant.name,
+                              'species': plant.species,
+                              'imageUrl': plant.imageUrl,
+                              'status': plant.status,
+                              'lastWatered': plant.lastWatered,
+                              'nextWatering': plant.nextWatering,
+                              'careNotes': plant.careNotes,
+                            },
                             onTap: () => _handlePlantTap(plant),
                             onLongPress: () => _handlePlantLongPress(plant),
                             onWaterTap: () => _handleWaterPlant(plant),

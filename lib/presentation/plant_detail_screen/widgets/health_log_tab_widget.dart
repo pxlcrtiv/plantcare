@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/app_export.dart';
 
@@ -21,6 +22,8 @@ class HealthLogTabWidget extends StatelessWidget {
         return Colors.blue;
       case 'milestone':
         return AppTheme.getAccentColor(true);
+      case 'note':
+        return Colors.grey; // For personal notes
       default:
         return AppTheme.lightTheme.colorScheme.primary;
     }
@@ -36,6 +39,8 @@ class HealthLogTabWidget extends StatelessWidget {
         return Icons.favorite;
       case 'milestone':
         return Icons.star;
+      case 'note':
+        return Icons.note_alt;
       default:
         return Icons.note;
     }
@@ -60,7 +65,7 @@ class HealthLogTabWidget extends StatelessWidget {
               ),
               TextButton.icon(
                 onPressed: () {
-                  // Add new log entry
+                  // Add new log entry functionality would go here
                 },
                 icon: CustomIconWidget(
                   iconName: 'add',
@@ -81,11 +86,22 @@ class HealthLogTabWidget extends StatelessWidget {
             itemCount: healthLogs.length,
             itemBuilder: (context, index) {
               final log = healthLogs[index];
-              final date = log['date'] as DateTime;
-              final type = log['type'] as String;
-              final title = log['title'] as String;
-              final description = log['description'] as String;
-              final hasPhoto = log['hasPhoto'] as bool? ?? false;
+              
+              // Handle date properly - could be Timestamp from Firestore or DateTime
+              DateTime date;
+              if (log['date'] is Timestamp) {
+                date = (log['date'] as Timestamp).toDate();
+              } else if (log['date'] is String) {
+                date = DateTime.parse(log['date'] as String);
+              } else if (log['date'] is DateTime) {
+                date = log['date'] as DateTime;
+              } else {
+                date = DateTime.now(); // fallback
+              }
+              
+              final type = log['type'] as String? ?? 'note';
+              final title = log['title'] as String? ?? type.toUpperCase();
+              final description = log['description'] as String? ?? log['content'] as String? ?? '';
               final photoUrl = log['photoUrl'] as String?;
 
               return Container(
@@ -100,8 +116,7 @@ class HealthLogTabWidget extends StatelessWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color:
-                                _getLogTypeColor(type).withValues(alpha: 0.1),
+                            color: _getLogTypeColor(type).withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: _getLogTypeColor(type),
@@ -197,7 +212,7 @@ class HealthLogTabWidget extends StatelessWidget {
                             ),
 
                             // Photo attachment if available
-                            if (hasPhoto && photoUrl != null) ...[
+                            if (photoUrl != null) ...[
                               SizedBox(height: 1.h),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8),

@@ -1,9 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../repositories/plant_repository.dart';
+import '../../repositories/plant_repository_impl.dart';
+import '../../services/firebase_service.dart';
+import '../../models/plant.dart';
 import './widgets/care_schedule_setup.dart';
 import './widgets/entry_method_card.dart';
 import './widgets/manual_entry_form.dart';
@@ -31,6 +36,8 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   List<XFile> _plantPhotos = [];
   Map<String, dynamic> _selectedPlantFromDatabase = {};
 
+  late PlantRepository _plantRepository;
+
   final List<String> _stepTitles = [
     'Choose Method',
     'Plant Details',
@@ -38,6 +45,12 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
     'Care Schedule',
     'Review & Save'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _plantRepository = PlantRepositoryImpl(FirebaseService());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -596,24 +609,26 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
     });
 
     try {
-      // Simulate saving to database
-      await Future.delayed(const Duration(seconds: 2));
+      // Create plant object
+      final plant = Plant(
+        id: DateTime.now().millisecondsSinceEpoch.toString(), // In production, use Firebase auto-generated ID
+        name: _plantFormData['plantName'] ?? '',
+        species: _plantFormData['species'] ?? '',
+        imageUrl: _plantPhotos.isNotEmpty 
+            ? _plantPhotos[0].path 
+            : 'https://via.placeholder.com/400x300', // Default image
+        status: 'healthy',
+        lastWatered: null,
+        nextWatering: null,
+        careNotes: _plantFormData['careNotes'],
+        location: _plantFormData['location'],
+        dateAdded: DateTime.now(),
+        careSchedule: _careScheduleData,
+        photos: _plantPhotos.map((photo) => photo.path).toList(),
+      );
 
-      // Create plant data object
-      final plantData = {
-        'id': DateTime.now().millisecondsSinceEpoch,
-        'name': _plantFormData['plantName'],
-        'species': _plantFormData['species'] ?? '',
-        'location': _plantFormData['location'] ?? '',
-        'photos': _plantPhotos.map((photo) => photo.path).toList(),
-        'careSchedule': _careScheduleData,
-        'entryMethod': _selectedEntryMethod,
-        'dateAdded': DateTime.now().toIso8601String(),
-        'lastWatered': null,
-        'nextWateringDate': DateTime.now()
-            .add(Duration(days: _careScheduleData['wateringFrequency'] ?? 7))
-            .toIso8601String(),
-      };
+      // Save to Firebase
+      await _plantRepository.addPlant(plant);
 
       // Show success dialog
       if (mounted) {
@@ -663,7 +678,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save plant. Please try again.'),
+            content: Text('Failed to save plant: ${e.toString()}'),
             backgroundColor: AppTheme.lightTheme.colorScheme.error,
           ),
         );

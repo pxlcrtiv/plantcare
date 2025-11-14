@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/app_export.dart';
 
@@ -193,8 +194,20 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                   itemCount: widget.notes.length,
                   itemBuilder: (context, index) {
                     final note = widget.notes[index];
-                    final date = note['date'] as DateTime;
-                    final content = note['content'] as String;
+                    
+                    // Handle date properly - could be Timestamp from Firestore or DateTime
+                    DateTime date;
+                    if (note['date'] is Timestamp) {
+                      date = (note['date'] as Timestamp).toDate();
+                    } else if (note['date'] is String) {
+                      date = DateTime.parse(note['date'] as String);
+                    } else if (note['date'] is DateTime) {
+                      date = note['date'] as DateTime;
+                    } else {
+                      date = DateTime.now(); // fallback
+                    }
+                    
+                    final content = note['content'] as String? ?? note['description'] as String? ?? '';
                     final isImportant = note['isImportant'] as bool? ?? false;
 
                     return Container(

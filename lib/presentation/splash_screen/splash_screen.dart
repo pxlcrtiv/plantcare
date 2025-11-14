@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../core/app_export.dart';
+import '../../services/notification_service.dart';
+import '../../services/firebase_service.dart';
 import './widgets/animated_logo_widget.dart';
 import './widgets/gradient_background_widget.dart';
 import './widgets/loading_indicator_widget.dart';
@@ -18,21 +22,26 @@ class _SplashScreenState extends State<SplashScreen> {
   bool _isInitializing = true;
   String _loadingText = "Preparing your garden...";
 
-  // Mock user data for navigation logic
-  final Map<String, dynamic> _mockUserData = {
-    "isFirstTime": false,
-    "hasPlants": true,
-    "plantsCount": 5,
-    "lastLogin": "2025-07-27",
-    "notificationPermission": true,
-    "weatherSyncEnabled": true,
-  };
+  final FirebaseService _firebaseService = FirebaseService();
 
   @override
   void initState() {
     super.initState();
     _initializeApp();
     _setSystemUIOverlay();
+  }
+  
+  Future<void> _initializeNotificationService() async {
+    setState(() {
+      _loadingText = "Setting up notifications...";
+    });
+    
+    try {
+      await NotificationService().initialize();
+      print("Notification service initialized successfully");
+    } catch (e) {
+      print("Failed to initialize notification service: $e");
+    }
   }
 
   void _setSystemUIOverlay() {
@@ -49,6 +58,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     try {
+      // Initialize notification service
+      await _initializeNotificationService();
+
       // Simulate loading plant database
       await _loadPlantDatabase();
 
@@ -81,8 +93,23 @@ class _SplashScreenState extends State<SplashScreen> {
       _loadingText = "Loading plant database...";
     });
 
-    // Simulate database loading with realistic delay
-    await Future.delayed(const Duration(milliseconds: 800));
+    // In a real implementation, this would fetch user's plants
+    // For now, we just ensure Firebase is ready
+    try {
+      final user = _firebaseService.currentUser;
+      if (user != null) {
+        // Preload user's plant data to make subsequent screens faster
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('plants')
+            .limit(10) // Limit to prevent loading too much at once
+            .get();
+      }
+    } catch (e) {
+      print("Error loading plant database: $e");
+      // Continue with app initialization even if this fails
+    }
   }
 
   Future<void> _checkNotificationPermissions() async {
@@ -90,8 +117,13 @@ class _SplashScreenState extends State<SplashScreen> {
       _loadingText = "Checking notifications...";
     });
 
-    // Simulate permission check
-    await Future.delayed(const Duration(milliseconds: 600));
+    // Check notification permissions
+    try {
+      await _firebaseService.currentUser;
+      // Notification permissions were already handled in initialization
+    } catch (e) {
+      print("Error checking notification permissions: $e");
+    }
   }
 
   Future<void> _prepareCachedData() async {
@@ -99,8 +131,8 @@ class _SplashScreenState extends State<SplashScreen> {
       _loadingText = "Preparing your plants...";
     });
 
-    // Simulate cache preparation
-    await Future.delayed(const Duration(milliseconds: 700));
+    // Prepare any cached data needed for the app
+    // This might include common plant care guides, etc.
   }
 
   Future<void> _syncWeatherData() async {
@@ -108,10 +140,12 @@ class _SplashScreenState extends State<SplashScreen> {
       _loadingText = "Syncing weather data...";
     });
 
-    // Simulate weather sync with timeout handling
+    // In a real implementation, this would get weather data
+    // based on user's location and plant needs
     try {
-      await Future.delayed(const Duration(milliseconds: 900));
+      // Placeholder for future weather sync implementation
     } catch (e) {
+      print("Error syncing weather data: $e");
       // Continue without weather data if sync fails
     }
   }
@@ -127,25 +161,41 @@ class _SplashScreenState extends State<SplashScreen> {
     });
   }
 
-  void _navigateToNextScreen() {
+  Future<void> _navigateToNextScreen() async {
     if (!mounted) return;
 
-    // Navigation logic based on user state
-    String nextRoute;
+    try {
+      // Check if user is authenticated
+      final user = _firebaseService.currentUser;
+      
+      String nextRoute;
+      if (user == null) {
+        // If not authenticated, show login screen
+        nextRoute = '/login-screen';
+      } else {
+        // User is authenticated, check if they have plants
+        final userPlants = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('plants')
+            .limit(1)
+            .get();
 
-    if (_mockUserData["isFirstTime"] == true) {
-      // First-time users see onboarding
-      nextRoute = '/onboarding-flow';
-    } else if (_mockUserData["hasPlants"] == false ||
-        _mockUserData["plantsCount"] == 0) {
-      // Users without plants go to add first plant
-      nextRoute = '/add-plant-screen';
-    } else {
-      // Existing users with plants go to dashboard
-      nextRoute = '/my-plants-dashboard';
+        if (userPlants.docs.isEmpty) {
+          // User has no plants, go to onboarding flow or add plant screen
+          nextRoute = '/onboarding-flow';
+        } else {
+          // User has plants, go to dashboard
+          nextRoute = '/my-plants-dashboard';
+        }
+      }
+
+      Navigator.pushReplacementNamed(context, nextRoute);
+    } catch (e) {
+      print("Error determining navigation route: $e");
+      // Default to login screen if there's an error
+      Navigator.pushReplacementNamed(context, '/login-screen');
     }
-
-    Navigator.pushReplacementNamed(context, nextRoute);
   }
 
   @override

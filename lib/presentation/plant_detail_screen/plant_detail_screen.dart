@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'dart:async';
 
 import '../../core/app_export.dart';
-import './widgets/bottom_action_bar_widget.dart';
-import './widgets/care_schedule_tab_widget.dart';
-import './widgets/health_log_tab_widget.dart';
-import './widgets/notes_tab_widget.dart';
-import './widgets/photos_tab_widget.dart';
-import './widgets/plant_hero_image_widget.dart';
-import './widgets/plant_info_widget.dart';
+import '../../repositories/plant_repository.dart';
+import '../../repositories/plant_repository_impl.dart';
+import '../../services/firebase_service.dart';
+import '../../services/plant_care_service.dart';
+import '../../services/notification_service.dart';
+import '../../models/plant.dart';
 
 class PlantDetailScreen extends StatefulWidget {
   const PlantDetailScreen({Key? key}) : super(key: key);
@@ -21,165 +21,64 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   bool _careRemindersEnabled = true;
-
-  // Mock plant data
-  final Map<String, dynamic> plantData = {
-    "id": 1,
-    "name": "Monstera Deliciosa",
-    "species": "Monstera deliciosa",
-    "difficulty": "Medium",
-    "imageUrl":
-        "https://images.unsplash.com/photo-1545239705-1564e58b9e4a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-    "nextWateringDate": DateTime.now().add(Duration(days: 2)),
-    "lastWatered": DateTime.now().subtract(Duration(days: 5)),
-    "acquired": DateTime.now().subtract(Duration(days: 120)),
-  };
-
-  final List<Map<String, dynamic>> careHistory = [
-    {
-      "date": DateTime.now().subtract(Duration(days: 1)),
-      "type": "Watering",
-      "notes": "Soil was quite dry, gave thorough watering",
-    },
-    {
-      "date": DateTime.now().subtract(Duration(days: 5)),
-      "type": "Fertilizing",
-      "notes": "Applied liquid fertilizer diluted to half strength",
-    },
-    {
-      "date": DateTime.now().subtract(Duration(days: 8)),
-      "type": "Pruning",
-      "notes": "Removed yellowing leaf and cleaned dust from leaves",
-    },
-    {
-      "date": DateTime.now().subtract(Duration(days: 12)),
-      "type": "Watering",
-      "notes": "Regular watering schedule",
-    },
-    {
-      "date": DateTime.now().subtract(Duration(days: 18)),
-      "type": "Repotting",
-      "notes": "Moved to larger pot with fresh potting mix",
-    },
-  ];
-
-  final List<Map<String, dynamic>> healthLogs = [
-    {
-      "date": DateTime.now().subtract(Duration(days: 2)),
-      "type": "Growth",
-      "title": "New Leaf Unfurling",
-      "description":
-          "A beautiful new leaf is starting to unfurl! The fenestrations are already visible and it looks healthy.",
-      "hasPhoto": true,
-      "photoUrl":
-          "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-    },
-    {
-      "date": DateTime.now().subtract(Duration(days: 7)),
-      "type": "Care",
-      "title": "Weekly Maintenance",
-      "description":
-          "Cleaned all leaves with damp cloth and checked for pests. Everything looks healthy and vibrant.",
-      "hasPhoto": false,
-    },
-    {
-      "date": DateTime.now().subtract(Duration(days: 14)),
-      "type": "Issue",
-      "title": "Minor Brown Spots",
-      "description":
-          "Noticed small brown spots on one leaf. Likely from overwatering. Adjusted watering schedule and improved drainage.",
-      "hasPhoto": true,
-      "photoUrl":
-          "https://images.unsplash.com/photo-1463320726281-696a485928c7?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-    },
-    {
-      "date": DateTime.now().subtract(Duration(days: 30)),
-      "type": "Milestone",
-      "title": "First Fenestrated Leaf",
-      "description":
-          "Celebrated the first leaf with natural splits! The plant is maturing beautifully.",
-      "hasPhoto": true,
-      "photoUrl":
-          "https://images.unsplash.com/photo-1586093248292-4e6636b4e3b8?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-    },
-  ];
-
-  final List<Map<String, dynamic>> photos = [
-    {
-      "url":
-          "https://images.unsplash.com/photo-1545239705-1564e58b9e4a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "date": DateTime.now().subtract(Duration(days: 1)),
-      "caption": "New growth looking amazing!",
-    },
-    {
-      "url":
-          "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "date": DateTime.now().subtract(Duration(days: 7)),
-      "caption": "Weekly progress shot",
-    },
-    {
-      "url":
-          "https://images.unsplash.com/photo-1586093248292-4e6636b4e3b8?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "date": DateTime.now().subtract(Duration(days: 14)),
-      "caption": "First fenestrated leaf!",
-    },
-    {
-      "url":
-          "https://images.unsplash.com/photo-1463320726281-696a485928c7?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "date": DateTime.now().subtract(Duration(days: 21)),
-      "caption": "Before repotting",
-    },
-    {
-      "url":
-          "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "date": DateTime.now().subtract(Duration(days: 30)),
-      "caption": "When I first got it",
-    },
-    {
-      "url":
-          "https://images.unsplash.com/photo-1509423350716-97f2360af2e4?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "date": DateTime.now().subtract(Duration(days: 45)),
-      "caption": "Baby plant stage",
-    },
-  ];
-
-  final List<Map<String, dynamic>> notes = [
-    {
-      "date": DateTime.now().subtract(Duration(days: 1)),
-      "content":
-          "The new leaf is unfurling beautifully! I can already see the fenestrations forming. This plant has really taken off since I moved it to the bright corner by the window.",
-      "isImportant": true,
-    },
-    {
-      "date": DateTime.now().subtract(Duration(days: 5)),
-      "content":
-          "Noticed the soil is drying out faster now that it's getting more light. Will need to adjust watering schedule for summer.",
-      "isImportant": false,
-    },
-    {
-      "date": DateTime.now().subtract(Duration(days: 12)),
-      "content":
-          "Applied diluted liquid fertilizer today. The plant has been growing so fast lately, it definitely needs the extra nutrients.",
-      "isImportant": false,
-    },
-    {
-      "date": DateTime.now().subtract(Duration(days: 20)),
-      "content":
-          "Repotted into a larger terracotta pot with better drainage. Added perlite to the potting mix for better aeration. The roots were getting quite bound.",
-      "isImportant": true,
-    },
-    {
-      "date": DateTime.now().subtract(Duration(days: 35)),
-      "content":
-          "First time seeing pest issues - found a few spider mites. Treated with neem oil spray and increased humidity around the plant.",
-      "isImportant": true,
-    },
-  ];
+  late PlantRepository _plantRepository;
+  late PlantCareService _plantCareService;
+  
+  Plant? _plant;
+  List<Map<String, dynamic>> _careHistory = [];
+  List<Map<String, dynamic>> _healthLogs = [];
+  List<Map<String, dynamic>> _photos = [];
+  List<Map<String, dynamic>> _notes = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _plantRepository = PlantRepositoryImpl(FirebaseService());
+    _plantCareService = PlantCareService(_plantRepository, NotificationService());
+    
+    // Load plant data from arguments
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadPlantData();
+    });
+  }
+
+  Future<void> _loadPlantData() async {
+    try {
+      // Get the plant data from arguments passed from the previous screen
+      final plantData = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      
+      if (plantData != null) {
+        // Convert the map back to a Plant object
+        setState(() {
+          _plant = Plant(
+            id: plantData['id'] ?? '',
+            name: plantData['name'] ?? '',
+            species: plantData['species'] ?? '',
+            imageUrl: plantData['imageUrl'] ?? '',
+            status: plantData['status'] ?? 'healthy',
+            lastWatered: plantData['lastWatered'],
+            nextWatering: plantData['nextWatering'],
+            careNotes: plantData['careNotes'],
+            location: plantData['location'],
+            dateAdded: DateTime.parse(plantData['dateAdded'] ?? DateTime.now().toIso8601String()),
+            careSchedule: Map<String, dynamic>.from(plantData['careSchedule'] ?? {}),
+            photos: List<String>.from(plantData['photos'] ?? []),
+          );
+          
+          _isLoading = false;
+        });
+      } else {
+        // If no data was passed, go back to previous screen
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      print("Error loading plant data: $e");
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
   }
 
   @override
@@ -209,14 +108,63 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     );
   }
 
-  void _handleWaterNow() {
-    // Log watering event
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Plant watered! Next watering scheduled.'),
-        backgroundColor: AppTheme.getSuccessColor(true),
-      ),
-    );
+  Future<void> _handleWaterNow() async {
+    if (_plant == null) return;
+    
+    try {
+      // Log watering event in Firebase
+      await _plantRepository.addCareEvent(_plant!.id, {
+        'type': 'watering',
+        'date': DateTime.now().toIso8601String(),
+        'notes': 'Watered via app',
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+
+      // Update plant status
+      await _plantRepository.updatePlant(_plant!.id, {
+        'status': 'healthy',
+        'lastWatered': DateTime.now().toIso8601String(),
+        'nextWatering': DateTime.now()
+            .add(Duration(days: _plant!.careSchedule['wateringFrequency'] ?? 7))
+            .toIso8601String(),
+      });
+
+      // Schedule next reminder
+      await _plantCareService.scheduleCareReminders(_plant!);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Plant watered! Next watering scheduled.'),
+            backgroundColor: AppTheme.getSuccessColor(true),
+          ),
+        );
+        
+        // Refresh local plant data
+        setState(() {
+          _plant = Plant(
+            id: _plant!.id,
+            name: _plant!.name,
+            species: _plant!.species,
+            imageUrl: _plant!.imageUrl,
+            status: 'healthy',
+            lastWatered: DateTime.now().toIso8601String(),
+            nextWatering: DateTime.now()
+                .add(Duration(days: _plant!.careSchedule['wateringFrequency'] ?? 7))
+                .toIso8601String(),
+            careNotes: _plant!.careNotes,
+            location: _plant!.location,
+            dateAdded: _plant!.dateAdded,
+            careSchedule: _plant!.careSchedule,
+            photos: _plant!.photos,
+          );
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update watering: ${e.toString()}')),
+      );
+    }
   }
 
   void _handleAddPhoto() {
@@ -229,13 +177,25 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   }
 
   void _handleAddNote(String note) {
+    // Save note to Firebase
+    if (_plant != null) {
+      _plantRepository.addHealthLog(_plant!.id, {
+        'type': 'note',
+        'title': 'Personal Note',
+        'description': note,
+        'date': DateTime.now().toIso8601String(),
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+    }
+    
     setState(() {
-      notes.insert(0, {
+      _notes.insert(0, {
         "date": DateTime.now(),
         "content": note,
         "isImportant": false,
       });
     });
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Note added successfully')),
     );
@@ -291,37 +251,37 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                       'Watering',
                       'water_drop',
                       Colors.blue,
-                      () => _logCareEvent('Watering'),
+                      () => _logCareEvent('watering'),
                     ),
                     _buildCareEventOption(
                       'Fertilizing',
                       'eco',
                       Colors.green,
-                      () => _logCareEvent('Fertilizing'),
+                      () => _logCareEvent('fertilizing'),
                     ),
                     _buildCareEventOption(
                       'Pruning',
                       'content_cut',
                       Colors.orange,
-                      () => _logCareEvent('Pruning'),
+                      () => _logCareEvent('pruning'),
                     ),
                     _buildCareEventOption(
                       'Repotting',
                       'home_work',
                       Colors.brown,
-                      () => _logCareEvent('Repotting'),
+                      () => _logCareEvent('repotting'),
                     ),
                     _buildCareEventOption(
                       'Pest Treatment',
                       'bug_report',
                       Colors.red,
-                      () => _logCareEvent('Pest Treatment'),
+                      () => _logCareEvent('pest_treatment'),
                     ),
                     _buildCareEventOption(
                       'Other',
                       'more_horiz',
                       AppTheme.lightTheme.colorScheme.primary,
-                      () => _logCareEvent('Other'),
+                      () => _logCareEvent('other'),
                     ),
                   ],
                 ),
@@ -368,21 +328,34 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     );
   }
 
-  void _logCareEvent(String eventType) {
+  Future<void> _logCareEvent(String eventType) async {
     Navigator.pop(context);
-    setState(() {
-      careHistory.insert(0, {
-        "date": DateTime.now(),
-        "type": eventType,
-        "notes": "Care event logged via app",
-      });
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$eventType event logged successfully'),
-        backgroundColor: AppTheme.getSuccessColor(true),
-      ),
-    );
+    
+    if (_plant != null) {
+      try {
+        await _plantRepository.addCareEvent(_plant!.id, {
+          'type': eventType,
+          'date': DateTime.now().toIso8601String(),
+          'notes': 'Logged via app',
+          'createdAt': DateTime.now().toIso8601String(),
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('$eventType event logged successfully'),
+              backgroundColor: AppTheme.getSuccessColor(true),
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to log care event: ${e.toString()}'),
+          ),
+        );
+      }
+    }
   }
 
   void _showReminderSettings() {
@@ -432,10 +405,19 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                   ),
                   Switch(
                     value: _careRemindersEnabled,
-                    onChanged: (value) {
+                    onChanged: (value) async {
                       setState(() {
                         _careRemindersEnabled = value;
                       });
+                      
+                      if (_plant != null) {
+                        if (value) {
+                          await _plantCareService.scheduleCareReminders(_plant!);
+                        } else {
+                          await NotificationService().cancelPlantReminders(_plant!.id);
+                        }
+                      }
+                      
                       Navigator.pop(context);
                     },
                   ),
@@ -477,23 +459,34 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading || _plant == null) {
+      return Scaffold(
+        backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: AppTheme.lightTheme.colorScheme.primary,
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       body: Column(
         children: [
           // Hero image section
           PlantHeroImageWidget(
-            imageUrl: plantData['imageUrl'] as String,
-            plantName: plantData['name'] as String,
+            imageUrl: _plant!.imageUrl,
+            plantName: _plant!.name,
             onEditPhoto: _handleEditPhoto,
             onSharePlant: _handleSharePlant,
           ),
 
           // Plant info section
           PlantInfoWidget(
-            plantName: plantData['name'] as String,
-            species: plantData['species'] as String,
-            difficulty: plantData['difficulty'] as String,
+            plantName: _plant!.name,
+            species: _plant!.species,
+            difficulty: _plant!.careSchedule['difficulty'] ?? 'Medium',
             onNameEdit: _handleNameEdit,
           ),
 
@@ -525,19 +518,21 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
               controller: _tabController,
               children: [
                 CareScheduleTabWidget(
-                  nextWateringDate: plantData['nextWateringDate'] as DateTime,
+                  nextWateringDate: _plant!.nextWatering != null 
+                      ? DateTime.parse(_plant!.nextWatering!) 
+                      : DateTime.now().add(Duration(days: 7)),
                   onWaterNow: _handleWaterNow,
-                  careHistory: careHistory,
+                  careHistory: _careHistory,
                 ),
                 HealthLogTabWidget(
-                  healthLogs: healthLogs,
+                  healthLogs: _healthLogs,
                 ),
                 PhotosTabWidget(
-                  photos: photos,
+                  photos: _photos,
                   onAddPhoto: _handleAddPhoto,
                 ),
                 NotesTabWidget(
-                  notes: notes,
+                  notes: _notes,
                   onAddNote: _handleAddNote,
                 ),
               ],

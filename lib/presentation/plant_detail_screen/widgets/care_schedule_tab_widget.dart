@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/app_export.dart';
 
 class CareScheduleTabWidget extends StatefulWidget {
-  final DateTime nextWateringDate;
+  final DateTime? nextWateringDate;
   final VoidCallback onWaterNow;
   final List<Map<String, dynamic>> careHistory;
 
   const CareScheduleTabWidget({
     Key? key,
-    required this.nextWateringDate,
+    this.nextWateringDate,
     required this.onWaterNow,
     required this.careHistory,
   }) : super(key: key);
@@ -21,8 +22,12 @@ class CareScheduleTabWidget extends StatefulWidget {
 
 class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
   String _getCountdownText() {
+    if (widget.nextWateringDate == null) {
+      return 'Schedule not set';
+    }
+    
     final now = DateTime.now();
-    final difference = widget.nextWateringDate.difference(now);
+    final difference = widget.nextWateringDate!.difference(now);
 
     if (difference.isNegative) {
       return 'Overdue by ${difference.abs().inDays} days';
@@ -82,12 +87,20 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
                   style: AppTheme.lightTheme.textTheme.titleMedium,
                 ),
                 SizedBox(height: 0.5.h),
-                Text(
-                  '${widget.nextWateringDate.day}/${widget.nextWateringDate.month}/${widget.nextWateringDate.year}',
-                  style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                if (widget.nextWateringDate != null) 
+                  Text(
+                    '${widget.nextWateringDate!.day}/${widget.nextWateringDate!.month}/${widget.nextWateringDate!.year}',
+                    style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                else
+                  Text(
+                    'Not scheduled',
+                    style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
                 SizedBox(height: 0.5.h),
                 Text(
                   _getCountdownText(),
