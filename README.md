@@ -104,6 +104,29 @@ flutter build apk --release
 flutter build ios --release
 ```
 
+## Setup / Firebase
+
+This app requires Firebase to be configured before it will run.
+
+1. **Generate Firebase config** (one-time setup):
+   ```bash
+   flutterfire configure
+   ```
+   This creates/overwrites `lib/firebase_options.dart` with your project's
+   real values. **Do not hand-edit** `firebase_options.dart` — it is managed
+   by FlutterFire CLI.
+
+2. **Pass the PlantNet API key** via `--dart-define` every time you build or
+   run the app:
+   ```bash
+   flutter run --dart-define=PLANTNET_API_KEY=your_actual_key_here
+   flutter build apk --dart-define=PLANTNET_API_KEY=your_actual_key_here
+   ```
+
+3. The app will **not launch** until valid Firebase configuration exists.
+   If you see errors from `Firebase.initializeApp()`, make sure you have
+   run `flutterfire configure` first.
+
 ## 🙏 Acknowledgments
 - Built with [Rocket.new](https://rocket.new)
 - Powered by [Flutter](https://flutter.dev) & [Dart](https://dart.dev)
