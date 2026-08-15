@@ -114,7 +114,7 @@ class _PlantInfoWidgetState extends State<PlantInfoWidget> {
 
           // Species information
           Text(
-            'Species: $widget.species}',
+            'Species: ${widget.species}',
             style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
               color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
             ),
