@@ -27,7 +27,9 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
   @override
   void initState() {
     super.initState();
-    _updateSchedule();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateSchedule();
+    });
   }
 
   void _updateSchedule() {
