@@ -43,24 +43,23 @@ class NotificationService {
     // Get the next watering date from the plant's care schedule
     final wateringFrequency = plant.careSchedule['wateringFrequency'] ?? 7;
     final nextWatering = DateTime.now().add(Duration(days: wateringFrequency));
-    
-    await _localNotifications.zonedSchedule(
+
+    final androidImpl = _localNotifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    await androidImpl?.zonedSchedule(
       plant.id.hashCode, // Unique ID based on plant ID
       'Water ${plant.name}',
       'Time to water your ${plant.name}!',
       tz.TZDateTime.from(nextWatering, tz.local),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'plant_care_channel',
-          'Plant Care Reminders',
-          channelDescription: 'Reminders for plant care tasks',
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
+      const AndroidNotificationDetails(
+        'plant_care_channel',
+        'Plant Care Reminders',
+        channelDescription: 'Reminders for plant care tasks',
+        importance: Importance.high,
+        priority: Priority.high,
       ),
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      scheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.dateAndTime,
     );
   }
@@ -68,27 +67,26 @@ class NotificationService {
   Future<void> scheduleFertilizingReminder(Plant plant) async {
     final fertilizingEnabled = plant.careSchedule['fertilizingEnabled'] ?? false;
     if (!fertilizingEnabled) return;
-    
+
     final fertilizingFrequency = plant.careSchedule['fertilizingFrequency'] ?? 30;
     final nextFertilizing = DateTime.now().add(Duration(days: fertilizingFrequency));
-    
-    await _localNotifications.zonedSchedule(
+
+    final androidImpl = _localNotifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    await androidImpl?.zonedSchedule(
       plant.id.hashCode + 1000, // Unique ID
       'Fertilize ${plant.name}',
       'Time to fertilize your ${plant.name}!',
       tz.TZDateTime.from(nextFertilizing, tz.local),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'plant_care_channel',
-          'Plant Care Reminders',
-          channelDescription: 'Reminders for plant care tasks',
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
+      const AndroidNotificationDetails(
+        'plant_care_channel',
+        'Plant Care Reminders',
+        channelDescription: 'Reminders for plant care tasks',
+        importance: Importance.high,
+        priority: Priority.high,
       ),
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      scheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.dateAndTime,
     );
   }
