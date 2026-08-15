@@ -16,7 +16,7 @@ class EmptyStateWidget extends StatelessWidget {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: EdgeInsets.all(8.w),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -85,8 +85,9 @@ class EmptyStateWidget extends StatelessWidget {
             ),
             SizedBox(height: 2.h),
             // Secondary Actions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 2.w,
               children: [
                 TextButton.icon(
                   onPressed: () {
