@@ -16,8 +16,8 @@ class FakePlantNetAdapter implements HttpClientAdapter {
   });
 
   final String responseBody;
-  final int statusCode;
-  final bool throwOnFetch;
+  int statusCode;
+  bool throwOnFetch;
 
   RequestOptions? lastRequest;
   Object? lastData;
