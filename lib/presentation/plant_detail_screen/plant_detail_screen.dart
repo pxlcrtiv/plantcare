@@ -9,6 +9,13 @@ import '../../services/firebase_service.dart';
 import '../../services/plant_care_service.dart';
 import '../../services/notification_service.dart';
 import '../../models/plant.dart';
+import './widgets/bottom_action_bar_widget.dart';
+import './widgets/care_schedule_tab_widget.dart';
+import './widgets/health_log_tab_widget.dart';
+import './widgets/notes_tab_widget.dart';
+import './widgets/photos_tab_widget.dart';
+import './widgets/plant_hero_image_widget.dart';
+import './widgets/plant_info_widget.dart';
 
 class PlantDetailScreen extends StatefulWidget {
   const PlantDetailScreen({Key? key}) : super(key: key);

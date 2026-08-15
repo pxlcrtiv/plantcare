@@ -19,7 +19,6 @@ class PhotosTabWidget extends StatefulWidget {
 }
 
 class _PhotosTabWidgetState extends State<PhotosTabWidget> {
-  int? _selectedPhotoIndex;
 
   void _showPhotoViewer(int index) {
     showDialog(

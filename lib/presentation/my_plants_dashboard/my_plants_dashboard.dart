@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sizer/sizer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 
 import '../../core/app_export.dart';
@@ -28,7 +29,6 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
 
   int _currentBottomNavIndex = 0;
   String _searchQuery = '';
-  bool _isRefreshing = false;
 
   late PlantRepository _plantRepository;
   StreamSubscription<List<Plant>>? _plantsSubscription;
@@ -88,17 +88,9 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
   }
 
   Future<void> _handleRefresh() async {
-    setState(() {
-      _isRefreshing = true;
-    });
-
     // In a real implementation, we could force refresh from server if needed
     // For Firestore, the real-time listener already keeps data updated
     await Future.delayed(Duration(milliseconds: 500));
-
-    setState(() {
-      _isRefreshing = false;
-    });
 
     Fluttertoast.showToast(
       msg: "Plants data refreshed",
@@ -359,7 +351,6 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final DateTime now = DateTime.now();
     final String currentDate = "${now.month}/${now.day}/${now.year}";
 

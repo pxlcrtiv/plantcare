@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/app_export.dart';
 

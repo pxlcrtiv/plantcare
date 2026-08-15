@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/app_export.dart';
 import '../services/sync_service.dart';
 import '../services/firebase_service.dart';
+import '../repositories/plant_repository_impl.dart';
 import '../providers/sync_provider.dart';
 import '../widgets/custom_error_widget.dart';
 
@@ -38,12 +39,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firebaseService = FirebaseService();
-    final syncService = SyncService(firebaseService, FirebaseFirestore.instance);
+    final syncService = SyncService(
+      PlantRepositoryImpl(firebaseService),
+      FirebaseFirestore.instance,
+    );
     
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<SyncProvider>(
-          create: (_) => SyncProvider(syncService, firebaseService),
+          create: (_) => SyncProvider(syncService),
         ),
       ],
       child: Sizer(builder: (context, orientation, screenType) {
@@ -69,5 +73,4 @@ class MyApp extends StatelessWidget {
       }),
     );
   }
-}
 }

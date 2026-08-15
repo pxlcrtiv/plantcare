@@ -32,13 +32,6 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
     'Tropical'
   ];
   final List<String> _careLevels = ['All', 'Easy', 'Moderate', 'Advanced'];
-  final List<String> _lightRequirements = [
-    'All',
-    'Low Light',
-    'Medium Light',
-    'Bright Light',
-    'Direct Sun'
-  ];
 
   final List<Map<String, dynamic>> _plantDatabase = [
     {

@@ -3,10 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../repositories/plant_repository.dart';
 
 class SyncService {
-  final PlantRepository _repository;
   final FirebaseFirestore _firestore;
 
-  SyncService(this._repository, this._firestore);
+  SyncService(PlantRepository repository, this._firestore);
 
   /// Check if device has internet connection
   Future<bool> isConnected() async {
@@ -46,6 +45,6 @@ class SyncService {
   }
 
   /// Monitor connection status
-  Stream<ConnectivityResult> get connectionStream => 
+  Stream<List<ConnectivityResult>> get connectionStream =>
       Connectivity().onConnectivityChanged;
 }

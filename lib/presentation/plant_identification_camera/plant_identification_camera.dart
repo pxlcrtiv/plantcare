@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
+import '../../models/plant_identification_result.dart';
 import '../../services/plantnet_service.dart';
 import './widgets/camera_controls_widget.dart';
 import './widgets/identification_results_widget.dart';
@@ -55,13 +56,6 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
       'PLANTNET_API_KEY',
       defaultValue: '',
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _initializeCamera();
   }
 
   @override
@@ -299,21 +293,22 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
         );
         // Fallback to simple mock results
         setState(() {
-          _mockResults.clear();
-          _mockResults = [
-            {
-              "id": 1,
-              "name": "Unknown Plant",
-              "scientificName": "Unknown",
-              "confidence": 0.0,
-              "careDifficulty": "Easy",
-              "wateringFrequency": "Weekly",
-              "image": imagePath,
-              "description": "Could not identify plant. Please try another image or search manually.",
-              "lightRequirement": "Varies",
-              "humidity": "Varies",
-            }
-          ];
+          _mockResults
+            ..clear()
+            ..addAll([
+              {
+                "id": 1,
+                "name": "Unknown Plant",
+                "scientificName": "Unknown",
+                "confidence": 0.0,
+                "careDifficulty": "Easy",
+                "wateringFrequency": "Weekly",
+                "image": imagePath,
+                "description": "Could not identify plant. Please try another image or search manually.",
+                "lightRequirement": "Varies",
+                "humidity": "Varies",
+              }
+            ]);
         });
       }
     }

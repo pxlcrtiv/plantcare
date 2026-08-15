@@ -98,8 +98,9 @@ class NotificationService {
     await _localNotifications.cancel(plantId.hashCode + 1000); // fertilizing reminder
   }
 
-  Stream<RemoteMessage> get onMessage => _firebaseMessaging.onMessage;
-  Stream<RemoteMessage> get onBackgroundMessage => FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
+  Stream<RemoteMessage> get onMessage => FirebaseMessaging.onMessage;
+  void get onBackgroundMessage =>
+      FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
 }
 
 // Background message handler

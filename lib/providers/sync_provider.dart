@@ -1,17 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../services/sync_service.dart';
-import '../services/firebase_service.dart';
 
 class SyncProvider extends ChangeNotifier {
   final SyncService _syncService;
-  final FirebaseService _firebaseService;
   
   bool _isConnected = true;
   bool _isSyncing = false;
   String _syncStatus = "Synced";
 
-  SyncProvider(this._syncService, this._firebaseService) {
+  SyncProvider(this._syncService) {
     _initConnectivityListener();
   }
 
@@ -20,9 +18,9 @@ class SyncProvider extends ChangeNotifier {
   String get syncStatus => _syncStatus;
 
   void _initConnectivityListener() {
-    _syncService.connectionStream.listen((ConnectivityResult result) {
+    _syncService.connectionStream.listen((List<ConnectivityResult> results) {
       final wasConnected = _isConnected;
-      _isConnected = result != ConnectivityResult.none;
+      _isConnected = !results.contains(ConnectivityResult.none);
       
       if (wasConnected != _isConnected) {
         if (_isConnected) {

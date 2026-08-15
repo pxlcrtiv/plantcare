@@ -128,9 +128,6 @@ class _PhotoCaptureSectionState extends State<PhotoCaptureSection> {
 
   void _reorderImages(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
       final XFile item = _capturedImages.removeAt(oldIndex);
       _capturedImages.insert(newIndex, item);
     });
@@ -308,7 +305,7 @@ class _PhotoCaptureSectionState extends State<PhotoCaptureSection> {
           child: ReorderableListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: _capturedImages.length,
-            onReorder: _reorderImages,
+            onReorderItem: _reorderImages,
             itemBuilder: (context, index) {
               return Container(
                 key: ValueKey(_capturedImages[index].path),
