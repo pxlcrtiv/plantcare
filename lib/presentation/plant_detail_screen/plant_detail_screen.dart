@@ -18,7 +18,20 @@ import './widgets/plant_hero_image_widget.dart';
 import './widgets/plant_info_widget.dart';
 
 class PlantDetailScreen extends StatefulWidget {
-  const PlantDetailScreen({Key? key}) : super(key: key);
+  const PlantDetailScreen({
+    Key? key,
+    this.plantRepository,
+    this.notificationService,
+  }) : super(key: key);
+
+  /// Optional repository override; defaults to the Firestore-backed
+  /// implementation. Injectable so the screen can be built in tests without
+  /// booting Firebase.
+  final PlantRepository? plantRepository;
+
+  /// Optional notification service override; defaults to the shared
+  /// NotificationService.
+  final NotificationService? notificationService;
 
   @override
   State<PlantDetailScreen> createState() => _PlantDetailScreenState();
@@ -42,8 +55,12 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _plantRepository = PlantRepositoryImpl(FirebaseService());
-    _plantCareService = PlantCareService(_plantRepository, NotificationService());
+    _plantRepository =
+        widget.plantRepository ?? PlantRepositoryImpl(FirebaseService());
+    _plantCareService = PlantCareService(
+      _plantRepository,
+      widget.notificationService ?? NotificationService(),
+    );
     
     // Load plant data from arguments
     WidgetsBinding.instance.addPostFrameCallback((_) {

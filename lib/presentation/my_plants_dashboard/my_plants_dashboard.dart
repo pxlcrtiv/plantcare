@@ -17,7 +17,12 @@ import './widgets/quick_actions_sheet_widget.dart';
 import './widgets/search_bar_widget.dart';
 
 class MyPlantsDashboard extends StatefulWidget {
-  const MyPlantsDashboard({Key? key}) : super(key: key);
+  const MyPlantsDashboard({Key? key, this.plantRepository}) : super(key: key);
+
+  /// Optional repository override; defaults to the Firestore-backed
+  /// implementation. Injectable so screens can be driven in tests without
+  /// booting Firebase.
+  final PlantRepository? plantRepository;
 
   @override
   State<MyPlantsDashboard> createState() => _MyPlantsDashboardState();
@@ -48,7 +53,8 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
     super.initState();
     
     // Initialize the repository
-    _plantRepository = PlantRepositoryImpl(FirebaseService());
+    _plantRepository =
+        widget.plantRepository ?? PlantRepositoryImpl(FirebaseService());
     
     // Listen to plant changes
     _plantsSubscription = _plantRepository.getPlants().listen((plants) {

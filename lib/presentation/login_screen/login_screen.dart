@@ -5,7 +5,12 @@ import '../../core/app_export.dart';
 import '../../services/firebase_service.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({Key? key, this.firebaseService}) : super(key: key);
+
+  /// Optional service override; defaults to the shared FirebaseService.
+  /// Injectable so the screen can be built and validated in tests without
+  /// booting Firebase.
+  final FirebaseService? firebaseService;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -15,8 +20,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final FirebaseService _firebaseService = FirebaseService();
   bool _isLoading = false;
+
+  FirebaseService get _firebaseService =>
+      widget.firebaseService ?? FirebaseService();
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {

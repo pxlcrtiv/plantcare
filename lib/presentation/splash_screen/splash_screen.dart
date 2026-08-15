@@ -11,7 +11,12 @@ import './widgets/gradient_background_widget.dart';
 import './widgets/loading_indicator_widget.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({Key? key, this.firebaseService}) : super(key: key);
+
+  /// Optional service override; defaults to the shared FirebaseService.
+  /// Injectable so the screen can be built and its init flow exercised in
+  /// tests without booting Firebase.
+  final FirebaseService? firebaseService;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -21,7 +26,8 @@ class _SplashScreenState extends State<SplashScreen> {
   bool _isInitializing = true;
   String _loadingText = "Preparing your garden...";
 
-  final FirebaseService _firebaseService = FirebaseService();
+  FirebaseService get _firebaseService =>
+      widget.firebaseService ?? FirebaseService();
 
   @override
   void initState() {
