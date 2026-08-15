@@ -22,6 +22,7 @@ class PlantNetService {
           'include-related-images': 'false',
           'lang': 'en',
         },
+        options: Options(validateStatus: (_) => true),
       );
 
       if (response.statusCode == 200) {
@@ -50,6 +51,7 @@ class PlantNetService {
         '$_baseUrl/identify/all',
         data: formData,
         options: Options(
+          validateStatus: (_) => true,
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -90,6 +92,7 @@ class PlantNetService {
         '$_baseUrl/identify/all',
         data: formData,
         options: Options(
+          validateStatus: (_) => true,
           headers: {
             'Content-Type': 'multipart/form-data',
           },
