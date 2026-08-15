@@ -51,9 +51,10 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
   }
 
   String _getPlantNetApiKey() {
-    // In a real implementation, you would load the API key securely
-    // This is just a placeholder - you should never hardcode API keys
-    return "your_plantnet_api_key_here";
+    return const String.fromEnvironment(
+      'PLANTNET_API_KEY',
+      defaultValue: '',
+    );
   }
 
   @override
