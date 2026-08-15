@@ -3,14 +3,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../repositories/plant_repository.dart';
 
 class SyncService {
-  final FirebaseFirestore _firestore;
+  FirebaseFirestore? _firestore;
 
-  SyncService(PlantRepository repository, this._firestore);
+  SyncService(PlantRepository repository, [FirebaseFirestore? firestore])
+      : _firestore = firestore;
+
+  FirebaseFirestore get _firestoreInstance =>
+      _firestore ??= FirebaseFirestore.instance;
 
   /// Check if device has internet connection
   Future<bool> isConnected() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
-    return connectivityResult != ConnectivityResult.none;
+    return !connectivityResult.contains(ConnectivityResult.none);
   }
 
   /// Force sync data from server
@@ -35,13 +39,13 @@ class SyncService {
   /// Handle offline mode
   Future<void> handleOfflineMode() async {
     // Configure Firestore to work offline
-    await _firestore.disableNetwork();
+    await _firestoreInstance.disableNetwork();
   }
 
   /// Handle online mode
   Future<void> handleOnlineMode() async {
     // Re-enable network for Firestore
-    await _firestore.enableNetwork();
+    await _firestoreInstance.enableNetwork();
   }
 
   /// Monitor connection status
