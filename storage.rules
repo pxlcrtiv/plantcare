@@ -1,0 +1,10 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Dev default: authenticated users can read/write. Restrict before release.
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

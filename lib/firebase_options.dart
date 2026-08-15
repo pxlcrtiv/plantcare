@@ -8,7 +8,9 @@ import 'package:flutter/foundation.dart'
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
-/// To regenerate, run `flutterfire configure`.
+/// Values below were filled from the native configs for project
+/// `plantcareai-0` (Android: android/app/google-services.json,
+/// iOS: ios/Runner/GoogleService-Info.plist) on 2026-08-15.
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) return web;
@@ -24,32 +26,34 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // ── Placeholder values — replace with your project's Firebase config. ──
+  // ── Real values for plantcareai-0. ──
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_ANDROID_API_KEY',
-    appId: 'YOUR_ANDROID_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyDGHfEwkuycr6vdwO4jjfUiUxB_FauHdaw',
+    appId: '1:242968093308:android:e010e679f47eae25ac1ff9',
+    messagingSenderId: '242968093308',
+    projectId: 'plantcareai-0',
+    storageBucket: 'plantcareai-0.firebasestorage.app',
+    androidClientId:
+        '242968093308-0q26q6nq2o0tr335ddkguhj8o56374do.apps.googleusercontent.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'YOUR_IOS_API_KEY',
-    appId: 'YOUR_IOS_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
-    androidClientId: 'YOUR_ANDROID_CLIENT_ID',
-    iosClientId: 'YOUR_IOS_CLIENT_ID',
-    iosBundleId: 'com.example.plantcare',
+    apiKey: 'AIzaSyACVU1VRrfSyioJ-eOrIxnJ5uk3ZmFfyMI',
+    appId: '1:242968093308:ios:8fd9a0c45c4bab82ac1ff9',
+    messagingSenderId: '242968093308',
+    projectId: 'plantcareai-0',
+    storageBucket: 'plantcareai-0.firebasestorage.app',
+    iosClientId:
+        '242968093308-ae4tlvfhqm1ldm0jnekhogo3plpi12mp.apps.googleusercontent.com',
+    iosBundleId: 'com.plantcare.app',
   );
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'YOUR_WEB_API_KEY',
     appId: 'YOUR_WEB_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    messagingSenderId: '242968093308',
+    projectId: 'plantcareai-0',
+    storageBucket: 'plantcareai-0.firebasestorage.app',
   );
 }
