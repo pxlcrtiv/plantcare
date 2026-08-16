@@ -122,6 +122,55 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _forgotPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty ||
+        !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter your email address')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password reset email sent. Check your inbox.'),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = 'Could not send reset email. Please try again.';
+      if (e.code == 'user-not-found') {
+        message = 'No account found for that email.';
+      } else if (e.code == 'invalid-email') {
+        message = 'Enter a valid email address.';
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not send reset email. Please try again.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -317,9 +366,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 // Forgot password
                 TextButton(
-                  onPressed: () {
-                    // Implement forgot password functionality
-                  },
+                  onPressed: _isLoading ? null : _forgotPassword,
                   child: Text(
                     'Forgot Password?',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
