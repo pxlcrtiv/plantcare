@@ -6,54 +6,62 @@ class AppTheme {
   AppTheme._();
 
   // Living Palette - Earth-toned foundation with vibrant accents
-  static const Color primaryLight = Color(0xFF2D5A3D); // Deep forest green
-  static const Color primaryVariantLight = Color(0xFF1A3D28);
-  static const Color secondaryLight = Color(0xFF7FB069); // Fresh sage
-  static const Color secondaryVariantLight = Color(0xFF6A9B56);
+  static const Color primaryLight = Color(0xFF8CB23E); // Olive accent
+  static const Color primaryVariantLight = Color(0xFF6E8F2F);
+  static const Color secondaryLight = Color(0xFF3C5A29); // Deep moss
+  static const Color secondaryVariantLight = Color(0xFF2D4A1E);
   static const Color accentLight = Color(0xFFF4A261); // Warm terracotta
-  static const Color backgroundLight = Color(0xFFFEFEFE); // Pure white
-  static const Color surfaceLight = Color(0xFFF8F9FA); // Subtle warm gray
+  static const Color backgroundLight = Color(0xFFF5F5F0); // Warm off-white
+  static const Color surfaceLight = Color(0xFFFFFFFF); // White cards
   static const Color successLight = Color(0xFF52B788); // Vibrant green
-  static const Color warningLight = Color(0xFFF9C74F); // Gentle yellow
+  static const Color warningLight = Color(0xFFF5C842); // Sun yellow
   static const Color errorLight = Color(0xFFF8961E); // Soft orange
-  static const Color textPrimaryLight = Color(0xFF1A1A1A); // Near-black
-  static const Color textSecondaryLight = Color(0xFF6B7280); // Medium gray
-  static const Color onPrimaryLight = Color(0xFFFFFFFF);
-  static const Color onSecondaryLight = Color(0xFF000000);
+  static const Color textPrimaryLight = Color(0xFF2D2D2D);
+  static const Color textSecondaryLight = Color(0xFF888888);
+  static const Color onPrimaryLight = Color(0xFF1C240C); // Dark text on olive
+  static const Color onSecondaryLight = Color(0xFFFFFFFF);
   static const Color onBackgroundLight = Color(0xFF1A1A1A);
   static const Color onSurfaceLight = Color(0xFF1A1A1A);
   static const Color onErrorLight = Color(0xFFFFFFFF);
 
   // Dark theme colors - adapted for low light plant care environments
   static const Color primaryDark =
-      Color(0xFF7FB069); // Fresh sage as primary in dark
-  static const Color primaryVariantDark = Color(0xFF6A9B56);
+      Color(0xFFA8CC5B); // Bright olive as primary in dark
+  static const Color primaryVariantDark = Color(0xFF8CB23E);
   static const Color secondaryDark =
-      Color(0xFF2D5A3D); // Deep forest as secondary
-  static const Color secondaryVariantDark = Color(0xFF1A3D28);
+      Color(0xFF4C6B2F); // Moss as secondary
+  static const Color secondaryVariantDark = Color(0xFF3A5224);
   static const Color accentDark = Color(0xFFF4A261); // Warm terracotta
-  static const Color backgroundDark = Color(0xFF0F1419); // Deep natural dark
-  static const Color surfaceDark = Color(0xFF1A1F24); // Subtle dark surface
+  static const Color backgroundDark = Color(0xFF131610); // Olive-tinted dark
+  static const Color surfaceDark = Color(0xFF1C211A);
   static const Color successDark = Color(0xFF52B788); // Vibrant green
   static const Color warningDark = Color(0xFFF9C74F); // Gentle yellow
   static const Color errorDark = Color(0xFFF8961E); // Soft orange
   static const Color textPrimaryDark = Color(0xFFFEFEFE); // Pure white
-  static const Color textSecondaryDark = Color(0xFFB0B8C1); // Light gray
-  static const Color onPrimaryDark = Color(0xFF000000);
+  static const Color textSecondaryDark = Color(0xFFA8A89A);
+  static const Color onPrimaryDark = Color(0xFF1C240C);
   static const Color onSecondaryDark = Color(0xFFFFFFFF);
   static const Color onBackgroundDark = Color(0xFFFEFEFE);
   static const Color onSurfaceDark = Color(0xFFFEFEFE);
   static const Color onErrorDark = Color(0xFF000000);
 
   // Card and dialog colors
-  static const Color cardLight = Color(0xFFF8F9FA);
-  static const Color cardDark = Color(0xFF1A1F24);
+  static const Color cardLight = Color(0xFFFFFFFF);
+  static const Color cardDark = Color(0xFF1E231C);
   static const Color dialogLight = Color(0xFFFEFEFE);
   static const Color dialogDark = Color(0xFF1A1F24);
 
+  // Metric icon colors (mockup: thermometer orange, sun yellow, droplet blue)
+  static const Color thermometerLight = Color(0xFFF5A25C);
+  static const Color thermometerDark = Color(0xFFF5B27C);
+  static const Color sunLight = Color(0xFFF5C842);
+  static const Color sunDark = Color(0xFFF2C94C);
+  static const Color dropletLight = Color(0xFF5BA4CF);
+  static const Color dropletDark = Color(0xFF7CBCE0);
+
   // Shadow colors - using primary color at 8% opacity for organic feel
-  static const Color shadowLight = Color(0x142D5A3D);
-  static const Color shadowDark = Color(0x147FB069);
+  static const Color shadowLight = Color(0x1A8CB23E);
+  static const Color shadowDark = Color(0x1FA8CC5B);
 
   // Divider colors
   static const Color dividerLight = Color(0x1F6B7280);
@@ -107,7 +115,7 @@ class AppTheme {
           elevation: 2.0,
           shadowColor: shadowLight,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
           backgroundColor: surfaceLight,
@@ -127,7 +135,7 @@ class AppTheme {
           hoverElevation: 6,
           highlightElevation: 8,
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.0))),
+              borderRadius: BorderRadius.circular(28.0))),
       elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
               foregroundColor: onPrimaryLight,
@@ -136,7 +144,7 @@ class AppTheme {
               elevation: 2,
               shadowColor: shadowLight,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0)),
+                  borderRadius: BorderRadius.circular(28.0)),
               textStyle: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -147,7 +155,7 @@ class AppTheme {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               side: BorderSide(color: primaryLight, width: 1),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0)),
+                  borderRadius: BorderRadius.circular(28.0)),
               textStyle: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -157,7 +165,7 @@ class AppTheme {
               foregroundColor: primaryLight,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0)),
+                  borderRadius: BorderRadius.circular(20.0)),
               textStyle: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -262,7 +270,7 @@ class AppTheme {
           elevation: 2.0,
           shadowColor: shadowDark,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
           backgroundColor: surfaceDark,
@@ -282,7 +290,7 @@ class AppTheme {
           hoverElevation: 6,
           highlightElevation: 8,
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.0))),
+              borderRadius: BorderRadius.circular(28.0))),
       elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
               foregroundColor: onPrimaryDark,
@@ -291,7 +299,7 @@ class AppTheme {
               elevation: 2,
               shadowColor: shadowDark,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0)),
+                  borderRadius: BorderRadius.circular(28.0)),
               textStyle: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -302,7 +310,7 @@ class AppTheme {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               side: BorderSide(color: primaryDark, width: 1),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0)),
+                  borderRadius: BorderRadius.circular(28.0)),
               textStyle: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -312,7 +320,7 @@ class AppTheme {
               foregroundColor: primaryDark,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0)),
+                  borderRadius: BorderRadius.circular(20.0)),
               textStyle: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,

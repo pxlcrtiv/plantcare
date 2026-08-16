@@ -49,12 +49,41 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   void initState() {
     super.initState();
     _plantRepository = PlantRepositoryImpl(FirebaseService());
+
+    // Prefill from the Search tab: a database plant lands directly on
+    // Review & Save with everything set.
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map && args['database'] is Map) {
+      final db = Map<String, dynamic>.from(args['database'] as Map);
+      _selectedEntryMethod = 'database';
+      _selectedPlantFromDatabase = db;
+      _plantFormData = {
+        'plantName': db['commonName'],
+        'species': db['name'],
+        'location': '',
+        'imageUrl': db['image'],
+        'light': db['lightRequirement'],
+      };
+      _careScheduleData = {
+        'wateringFrequency': db['wateringFrequency'],
+        'fertilizingEnabled': false,
+        'fertilizingFrequency': 30,
+        'mistingEnabled': false,
+        'mistingFrequency': 3,
+        'rotatingEnabled': false,
+        'rotatingFrequency': 7,
+      };
+      _currentStep = _stepTitles.length - 1;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _pageController.jumpToPage(_stepTitles.length - 1);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(),
       body: Column(
         children: [
@@ -613,14 +642,18 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
         id: DateTime.now().millisecondsSinceEpoch.toString(), // In production, use Firebase auto-generated ID
         name: _plantFormData['plantName'] ?? '',
         species: _plantFormData['species'] ?? '',
-        imageUrl: _plantPhotos.isNotEmpty 
-            ? _plantPhotos[0].path 
-            : 'https://via.placeholder.com/400x300', // Default image
+        imageUrl: _plantPhotos.isNotEmpty
+            ? _plantPhotos[0].path
+            : (_plantFormData['imageUrl']?.isNotEmpty == true
+                ? _plantFormData['imageUrl'] as String
+                : 'https://via.placeholder.com/400x300'),
         status: 'healthy',
         lastWatered: null,
         nextWatering: null,
         careNotes: _plantFormData['careNotes'],
         location: _plantFormData['location'],
+        humidity: (_plantFormData['humidity'] as num?)?.toInt(),
+        light: _plantFormData['light'] as String?,
         dateAdded: DateTime.now(),
         careSchedule: _careScheduleData,
         photos: _plantPhotos.map((photo) => photo.path).toList(),

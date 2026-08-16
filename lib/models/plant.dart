@@ -10,6 +10,8 @@ class Plant {
   final String? nextWatering;
   final String? careNotes;
   final String? location;
+  final int? humidity; // Percent, 0-100
+  final String? light; // e.g. 'Sunny', 'Partial shade', 'Low light'
   final DateTime dateAdded;
   final Map<String, dynamic> careSchedule;
   final List<String> photos;
@@ -24,6 +26,8 @@ class Plant {
     this.nextWatering,
     this.careNotes,
     this.location,
+    this.humidity,
+    this.light,
     required this.dateAdded,
     required this.careSchedule,
     required this.photos,
@@ -41,6 +45,8 @@ class Plant {
       nextWatering: data['nextWatering'],
       careNotes: data['careNotes'],
       location: data['location'],
+      humidity: (data['humidity'] as num?)?.toInt(),
+      light: data['light'],
       dateAdded: (data['dateAdded'] as Timestamp?)?.toDate() ?? DateTime.now(),
       careSchedule: Map<String, dynamic>.from(data['careSchedule'] ?? {}),
       photos: List<String>.from(data['photos'] ?? []),
@@ -59,6 +65,8 @@ class Plant {
       'nextWatering': nextWatering,
       'careNotes': careNotes,
       'location': location,
+      'humidity': humidity,
+      'light': light,
       'dateAdded': Timestamp.fromDate(dateAdded),
       'careSchedule': careSchedule,
       'photos': photos,

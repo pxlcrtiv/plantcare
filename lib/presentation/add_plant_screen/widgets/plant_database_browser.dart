@@ -11,29 +11,9 @@ class PlantDatabaseBrowser extends StatefulWidget {
     required this.onPlantSelected,
   });
 
-  @override
-  State<PlantDatabaseBrowser> createState() => _PlantDatabaseBrowserState();
-}
-
-class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
-  final TextEditingController _searchController = TextEditingController();
-  String _selectedType = 'All';
-  String _selectedCareLevel = 'All';
-  String _selectedLightRequirement = 'All';
-  List<Map<String, dynamic>> _filteredPlants = [];
-
-  final List<String> _plantTypes = [
-    'All',
-    'Houseplant',
-    'Succulent',
-    'Herb',
-    'Flowering',
-    'Fern',
-    'Tropical'
-  ];
-  final List<String> _careLevels = ['All', 'Easy', 'Moderate', 'Advanced'];
-
-  final List<Map<String, dynamic>> _plantDatabase = [
+  /// Curated species database powering both the wizard's "database" entry
+  /// method and the Search tab / Popular plants lists.
+  static final List<Map<String, dynamic>> plantDatabase = [
     {
       'id': 1,
       'name': 'Monstera Deliciosa',
@@ -141,15 +121,37 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
   ];
 
   @override
+  State<PlantDatabaseBrowser> createState() => _PlantDatabaseBrowserState();
+}
+
+class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedType = 'All';
+  String _selectedCareLevel = 'All';
+  String _selectedLightRequirement = 'All';
+  List<Map<String, dynamic>> _filteredPlants = [];
+
+  final List<String> _plantTypes = [
+    'All',
+    'Houseplant',
+    'Succulent',
+    'Herb',
+    'Flowering',
+    'Fern',
+    'Tropical'
+  ];
+  final List<String> _careLevels = ['All', 'Easy', 'Moderate', 'Advanced'];
+
+  @override
   void initState() {
     super.initState();
-    _filteredPlants = List.from(_plantDatabase);
+    _filteredPlants = List.from(PlantDatabaseBrowser.plantDatabase);
     _searchController.addListener(_filterPlants);
   }
 
   void _filterPlants() {
     setState(() {
-      _filteredPlants = _plantDatabase.where((plant) {
+      _filteredPlants = PlantDatabaseBrowser.plantDatabase.where((plant) {
         final matchesSearch = _searchController.text.isEmpty ||
             (plant['name'] as String)
                 .toLowerCase()
