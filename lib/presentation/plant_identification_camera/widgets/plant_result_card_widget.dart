@@ -35,7 +35,7 @@ class PlantResultCardWidget extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
@@ -56,7 +56,7 @@ class PlantResultCardWidget extends StatelessWidget {
                 height: 20.w,
                 margin: EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.1),
@@ -66,7 +66,7 @@ class PlantResultCardWidget extends StatelessWidget {
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(20),
                   child: CustomImageWidget(
                     imageUrl: plantData['image'] as String,
                     width: 20.w,
@@ -95,7 +95,7 @@ class PlantResultCardWidget extends StatelessWidget {
                                       .withValues(alpha: 0.1)
                                   : Theme.of(context).colorScheme.error
                                       .withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           '${confidence.toInt()}% match',
@@ -153,7 +153,7 @@ class PlantResultCardWidget extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
                   decoration: BoxDecoration(
                     color: getDifficultyColor().withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -210,7 +210,7 @@ class PlantResultCardWidget extends StatelessWidget {
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   padding: EdgeInsets.symmetric(vertical: 2.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                 ),
                 child: Text(

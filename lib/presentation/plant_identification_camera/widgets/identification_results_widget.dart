@@ -38,7 +38,7 @@ class IdentificationResultsWidget extends StatelessWidget {
                       padding: EdgeInsets.all(2.w),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(28),
                       ),
                       child: CustomIconWidget(
                         iconName: 'arrow_back',
@@ -50,7 +50,7 @@ class IdentificationResultsWidget extends StatelessWidget {
                   SizedBox(width: 4.w),
                   Expanded(
                     child: Text(
-                      'Plant Identification Results',
+                      'Scan your plants',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 16.sp,
@@ -109,24 +109,27 @@ class IdentificationResultsWidget extends StatelessWidget {
                   // Retry Photo Button
                   SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton.icon(
+                    child: ElevatedButton.icon(
                       onPressed: onRetryPhoto,
-                      icon: CustomIconWidget(
-                        iconName: 'camera_alt',
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 5.w,
+                      icon: Icon(
+                        Icons.camera_alt,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        size: 20,
                       ),
                       label: Text(
                         'Take Another Photo',
                         style:
                             Theme.of(context).textTheme.labelLarge?.copyWith(
                           fontSize: 14.sp,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      style: OutlinedButton.styleFrom(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         padding: EdgeInsets.symmetric(vertical: 2.h),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(28),
                         ),
                       ),
                     ),
