@@ -1,5 +1,7 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sizer/sizer.dart';
 import 'dart:async';
 
@@ -51,6 +53,8 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   List<Map<String, dynamic>> _photos = [];
   List<Map<String, dynamic>> _notes = [];
   bool _isLoading = true;
+  final ImagePicker _imagePicker = ImagePicker();
+  bool _isUploadingPhoto = false;
 
   @override
   void initState() {
@@ -112,10 +116,201 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     super.dispose();
   }
 
-  void _handleEditPhoto() {
-    // Navigate to photo editing or camera
+  Future<void> _handleEditPhoto() async {
+    if (_plant == null || _isUploadingPhoto) return;
+
+    // Let the user choose where the new photo comes from.
+    final ImageSource? source = await _showPhotoSourceSheet();
+    if (source == null || !mounted) return;
+
+    final XFile? image;
+    try {
+      image = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
+    } catch (e) {
+      if (mounted) {
+        _showPhotoError('Failed to pick photo: ${e.toString()}');
+      }
+      return;
+    }
+
+    if (image == null || !mounted) return;
+
+    setState(() {
+      _isUploadingPhoto = true;
+    });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Edit photo functionality')),
+      SnackBar(
+        duration: const Duration(seconds: 30),
+        content: Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Theme.of(context).colorScheme.onInverseSurface,
+              ),
+            ),
+            SizedBox(width: 3.w),
+            Text('Uploading photo…'),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      // Upload the picked image to Firebase Storage, then persist the
+      // resulting download URL on the plant via the repository.
+      final String downloadUrl = await _uploadPhotoToStorage(image);
+      await _plantRepository.updatePlant(_plant!.id, {
+        'imageUrl': downloadUrl,
+      });
+
+      if (!mounted) return;
+
+      // Refresh the local plant data with the new image.
+      setState(() {
+        _plant = Plant(
+          id: _plant!.id,
+          name: _plant!.name,
+          species: _plant!.species,
+          imageUrl: downloadUrl,
+          status: _plant!.status,
+          lastWatered: _plant!.lastWatered,
+          nextWatering: _plant!.nextWatering,
+          careNotes: _plant!.careNotes,
+          location: _plant!.location,
+          humidity: _plant!.humidity,
+          light: _plant!.light,
+          dateAdded: _plant!.dateAdded,
+          careSchedule: _plant!.careSchedule,
+          photos: _plant!.photos,
+        );
+      });
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Photo updated successfully'),
+          backgroundColor: AppTheme.getSuccessColor(
+            Theme.of(context).brightness == Brightness.dark,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        _showPhotoError('Failed to update photo: ${e.toString()}');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploadingPhoto = false;
+        });
+      }
+    }
+  }
+
+  /// Bottom sheet offering the photo sources; pops with the chosen
+  /// [ImageSource], or null when dismissed.
+  Future<ImageSource?> _showPhotoSourceSheet() {
+    return showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.all(4.w),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Handle bar
+                Center(
+                  child: Container(
+                    width: 12.w,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  'Edit Photo',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                SizedBox(height: 2.h),
+                ListTile(
+                  leading: CustomIconWidget(
+                    iconName: 'camera_alt',
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 24,
+                  ),
+                  title: Text('Take Photo'),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+                ListTile(
+                  leading: CustomIconWidget(
+                    iconName: 'photo_library',
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 24,
+                  ),
+                  title: Text('Choose from Gallery'),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Uploads the picked image to Firebase Storage under
+  /// `plant-photos/{userId}/{plantId}/{timestamp}.jpg` (mirrors the
+  /// Firestore `users/{userId}/plants/{plantId}` layout) and returns the
+  /// download URL. Uses [putData] so it works on both mobile and web.
+  Future<String> _uploadPhotoToStorage(XFile image) async {
+    final String? userId = FirebaseService().currentUser?.uid;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final Reference ref = FirebaseStorage.instance.ref(
+      'plant-photos/$userId/${_plant!.id}/'
+      '${DateTime.now().millisecondsSinceEpoch}.jpg',
+    );
+
+    await ref.putData(
+      await image.readAsBytes(),
+      SettableMetadata(contentType: 'image/jpeg'),
+    );
+    return ref.getDownloadURL();
+  }
+
+  void _showPhotoError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
     );
   }
 
