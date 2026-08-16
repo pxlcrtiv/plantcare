@@ -35,3 +35,15 @@ Work:
 7. Plant model: `humidity` / `light` fields (+ toMap/fromMap + add/edit forms); greeting from `FirebaseAuth` display name + `Intl`/locale for city.
 
 Evidence required: `flutter analyze` clean, full test suite green (fix tests that assert old colors/text as needed), emulator screenshots of Home / Plant detail / scan results.
+## On-device verification (2026-08-16, emulator-5554, debug APK)
+
+All 5 dock tabs + detail + sheets verified via screenshots (mimo review), see `evidence/ui-redesign/`:
+
+- Home: greeting "Hi Plant Parent !", "United States" (locale-derived), Indoor/Outdoor/Both pills, My Plants card with wired metrics (65% / Sunny / 100), Popular plants from database, empty state w/ CTA.
+- Plant: search bar, grid card w/ watered stamp, olive FAB.
+- Search: "Browse plants" — filters (Plant Type / Care Level), 8 plants, cards w/ images + chips.
+- Flask: diagnostics placeholder. Target: scan CTA panel.
+- Detail: hero, name + difficulty chip, stat tiles (Humidity/Light/Watering wired from model), Schedule/Health/Photos/Notes tabs, pill bottom bar (Water Plant / How to water / Photo / Log Care), olive bell FAB. How-to-water sheet: italic tip + Add details pill.
+- Nits fixed during verify: tab label clipping, search hint truncation, Log Care sheet safe-area clip (commit c7bd4e2).
+
+Status: implementation complete on `feat/ui-redesign` (5 commits: 1741b4f shell, 42b3035 theme sweep, 138baac detail, c86bdf9 scan results, 3809b49 onboarding/login, c7bd4e2 nits). `flutter analyze` clean, 44/44 tests green. Remaining: restyle check of profile screen on device, PR later.
