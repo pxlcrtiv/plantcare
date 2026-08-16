@@ -140,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 25.w,
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Icon(
                     Icons.local_florist,
@@ -177,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: 'Email',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(28),
                     ),
                     prefixIcon: CustomIconWidget(
                       iconName: 'email',
@@ -204,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: 'Password',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(28),
                     ),
                     prefixIcon: CustomIconWidget(
                       iconName: 'lock',

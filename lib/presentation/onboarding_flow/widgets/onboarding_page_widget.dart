@@ -90,7 +90,7 @@ class OnboardingPageWidget extends StatelessWidget {
                           foregroundColor:
                               Theme.of(context).colorScheme.onPrimary,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(28),
                           ),
                         ),
                         child: Text(
