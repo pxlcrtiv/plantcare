@@ -11,6 +11,7 @@ import '../../repositories/plant_repository_impl.dart';
 import '../../services/firebase_service.dart';
 import '../../models/plant.dart';
 import '../../widgets/floating_dock.dart';
+import '../calendar/calendar_screen.dart';
 import '../add_plant_screen/widgets/plant_database_browser.dart';
 import './widgets/home_tab.dart';
 import './widgets/plant_list_tab.dart';
@@ -379,10 +380,11 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
   }
 
   void _handleCalendar() {
-    Fluttertoast.showToast(
-      msg: "Calendar feature coming soon!",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CalendarScreen(plants: _allPlants),
+      ),
     );
   }
 
