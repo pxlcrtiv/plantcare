@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sizer/sizer.dart';
 import '../../core/app_export.dart';
 import '../../services/firebase_service.dart';
+import 'notification_settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -120,7 +121,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     title: Text('Notification Settings'),
                     trailing: Icon(Icons.chevron_right),
                     onTap: () {
-                      // Navigate to notification settings
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationSettingsScreen(),
+                        ),
+                      );
                     },
                   ),
                   Divider(height: 1),
