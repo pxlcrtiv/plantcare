@@ -1,53 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
-/// "Flask" dock tab: diagnostics placeholder.
-class DiagnosticsTab extends StatelessWidget {
-  const DiagnosticsTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(8.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.all(6.w),
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.science,
-                  size: 12.w, color: colorScheme.primary),
-            ),
-            SizedBox(height: 3.h),
-            Text(
-              'Plant diagnostics',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            SizedBox(height: 1.h),
-            Text(
-              'Soil moisture tracking, light meters and care analytics are coming soon.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white70
-                    : const Color(0xFF888888),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 /// "Target" dock tab: scan CTA that opens the identification camera.
 class IdentifyTab extends StatelessWidget {
   final VoidCallback onScan;
