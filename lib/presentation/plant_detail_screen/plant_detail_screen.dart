@@ -487,6 +487,12 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   }
 
   void _showReminderSettings() {
+    final savedReminderTime = _plant?.careSchedule['reminderTime'];
+    final reminderTime =
+        savedReminderTime is String && savedReminderTime.trim().isNotEmpty
+            ? savedReminderTime
+            : null;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -566,16 +572,18 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                     color: Theme.of(context).colorScheme.primary,
                     size: 24,
                   ),
-                  title: Text('9:00 AM'),
-                  subtitle: Text('Daily reminder time'),
+                  title: Text(_formatReminderTime(reminderTime ?? '09:00')),
+                  subtitle: Text(
+                    reminderTime != null
+                        ? 'Daily reminder at $reminderTime'
+                        : 'Daily reminder time',
+                  ),
                   trailing: CustomIconWidget(
                     iconName: 'edit',
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
-                  onTap: () {
-                    // Show time picker
-                  },
+                  onTap: _handleReminderTime,
                 ),
               ],
             ],
@@ -583,6 +591,84 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
         ),
       ),
     );
+  }
+
+  Future<void> _handleReminderTime() async {
+    if (_plant == null) return;
+
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _initialReminderTime(),
+    );
+
+    if (picked == null || !mounted) return;
+
+    final reminderTime =
+        '${picked.hour.toString().padLeft(2, '0')}:'
+        '${picked.minute.toString().padLeft(2, '0')}';
+
+    try {
+      await _plantRepository.updatePlant(_plant!.id, {
+        'careSchedule.reminderTime': reminderTime,
+      });
+
+      if (!mounted) return;
+
+      final updatedSchedule = Map<String, dynamic>.from(_plant!.careSchedule)
+        ..['reminderTime'] = reminderTime;
+
+      setState(() {
+        _plant = Plant(
+          id: _plant!.id,
+          name: _plant!.name,
+          species: _plant!.species,
+          imageUrl: _plant!.imageUrl,
+          status: _plant!.status,
+          lastWatered: _plant!.lastWatered,
+          nextWatering: _plant!.nextWatering,
+          careNotes: _plant!.careNotes,
+          location: _plant!.location,
+          dateAdded: _plant!.dateAdded,
+          careSchedule: updatedSchedule,
+          photos: _plant!.photos,
+        );
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update reminder time: ${e.toString()}')),
+      );
+    }
+  }
+
+  TimeOfDay _initialReminderTime() {
+    final saved = _plant?.careSchedule['reminderTime'];
+    if (saved is String) {
+      final parts = saved.split(':');
+      if (parts.length == 2) {
+        final hour = int.tryParse(parts[0]);
+        final minute = int.tryParse(parts[1]);
+        if (hour != null &&
+            minute != null &&
+            hour >= 0 &&
+            hour <= 23 &&
+            minute >= 0 &&
+            minute <= 59) {
+          return TimeOfDay(hour: hour, minute: minute);
+        }
+      }
+    }
+    return const TimeOfDay(hour: 9, minute: 0);
+  }
+
+  String _formatReminderTime(String hhmm) {
+    final parts = hhmm.split(':');
+    if (parts.length != 2) return hhmm;
+    final hour = int.tryParse(parts[0]) ?? 9;
+    final minute = parts[1].padLeft(2, '0');
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour % 12 == 0 ? 12 : hour % 12;
+    return '$displayHour:$minute $period';
   }
 
   @override
