@@ -225,6 +225,34 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     );
   }
 
+  void _handleEditNote(int index, String newContent) {
+    if (index < 0 || index >= _notes.length) return;
+    setState(() {
+      _notes[index]['content'] = newContent;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Note updated successfully')),
+    );
+  }
+
+  void _handleToggleImportant(int index) {
+    if (index < 0 || index >= _notes.length) return;
+    setState(() {
+      _notes[index]['isImportant'] =
+          !(_notes[index]['isImportant'] as bool? ?? false);
+    });
+  }
+
+  void _handleDeleteNote(int index) {
+    if (index < 0 || index >= _notes.length) return;
+    setState(() {
+      _notes.removeAt(index);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Note deleted successfully')),
+    );
+  }
+
   void _showCareEventBottomSheet() {
     showModalBottomSheet(
       context: context,
@@ -667,6 +695,9 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                 NotesTabWidget(
                   notes: _notes,
                   onAddNote: _handleAddNote,
+                  onEditNote: _handleEditNote,
+                  onToggleImportant: _handleToggleImportant,
+                  onDeleteNote: _handleDeleteNote,
                 ),
               ],
             ),
