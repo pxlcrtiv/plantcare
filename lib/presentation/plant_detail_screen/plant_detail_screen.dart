@@ -125,11 +125,58 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     );
   }
 
-  void _handleNameEdit() {
-    // Handle plant name editing
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Plant name updated')),
+  Future<void> _handleNameEdit() async {
+    if (_plant == null) return;
+
+    final String? newName = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => _NameEditDialog(
+        initialName: _plant!.name,
+      ),
     );
+
+    if (newName == null || !mounted) return;
+
+    try {
+      // Persist the rename through the same repository used by other
+      // updates (e.g. _handleWaterNow).
+      await _plantRepository.updatePlant(_plant!.id, {'name': newName});
+
+      if (!mounted) return;
+
+      // Reload the local plant data so the UI reflects the new name.
+      setState(() {
+        _plant = Plant(
+          id: _plant!.id,
+          name: newName,
+          species: _plant!.species,
+          imageUrl: _plant!.imageUrl,
+          status: _plant!.status,
+          lastWatered: _plant!.lastWatered,
+          nextWatering: _plant!.nextWatering,
+          careNotes: _plant!.careNotes,
+          location: _plant!.location,
+          dateAdded: _plant!.dateAdded,
+          careSchedule: _plant!.careSchedule,
+          photos: _plant!.photos,
+        );
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Plant name updated'),
+          backgroundColor: AppTheme.getSuccessColor(
+            Theme.of(context).brightness == Brightness.dark,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update plant name: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   Future<void> _handleWaterNow() async {
@@ -688,6 +735,89 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
         child: const Icon(Icons.notifications, color: Colors.white, size: 24),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
+    );
+  }
+}
+
+/// Dialog used by [_PlantDetailScreenState._handleNameEdit] to collect a new
+/// plant name. Owns its [TextEditingController] so the controller lifecycle
+/// stays clean while the dialog route is being dismissed.
+class _NameEditDialog extends StatefulWidget {
+  const _NameEditDialog({required this.initialName});
+
+  final String initialName;
+
+  @override
+  State<_NameEditDialog> createState() => _NameEditDialogState();
+}
+
+class _NameEditDialogState extends State<_NameEditDialog> {
+  late final TextEditingController _controller;
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialName);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleSave() {
+    final newName = _controller.text.trim();
+    if (newName.isEmpty) {
+      setState(() {
+        _errorText = 'Plant name cannot be empty';
+      });
+      return;
+    }
+    Navigator.of(context).pop(newName);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      title: Text(
+        'Edit Plant Name',
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (_) => _handleSave(),
+        onChanged: (_) {
+          if (_errorText != null) {
+            setState(() {
+              _errorText = null;
+            });
+          }
+        },
+        decoration: InputDecoration(
+          labelText: 'Plant name',
+          errorText: _errorText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _handleSave,
+          child: Text('Save'),
+        ),
+      ],
     );
   }
 }
