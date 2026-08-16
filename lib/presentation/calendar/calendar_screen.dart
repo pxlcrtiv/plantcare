@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sizer/flutter_sizer.dart';
+import 'package:sizer/sizer.dart';
 
+import '../../core/app_export.dart';
 import '../../models/plant.dart';
-import '../../theme/app_theme.dart';
 
 class CalendarScreen extends StatelessWidget {
   final List<Plant> plants;
