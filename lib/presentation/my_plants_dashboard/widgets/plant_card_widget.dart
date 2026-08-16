@@ -28,7 +28,7 @@ class PlantCardWidget extends StatelessWidget {
         statusColor = AppTheme.getWarningColor(isDarkMode);
         break;
       case 'overdue':
-        statusColor = AppTheme.lightTheme.colorScheme.error;
+        statusColor = Theme.of(context).colorScheme.error;
         break;
       default:
         statusColor = AppTheme.getSuccessColor(isDarkMode);

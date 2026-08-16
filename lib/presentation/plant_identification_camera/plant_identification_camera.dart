@@ -250,11 +250,11 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
       builder: (context) => AlertDialog(
         title: Text(
           'Camera Permission Required',
-          style: AppTheme.lightTheme.textTheme.titleMedium,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
         content: Text(
           'PlantCare needs camera access to identify your plants. This helps us provide accurate care recommendations.',
-          style: AppTheme.lightTheme.textTheme.bodyMedium,
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
         actions: [
           TextButton(
@@ -387,11 +387,11 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
       builder: (context) => AlertDialog(
         title: Text(
           'Error',
-          style: AppTheme.lightTheme.textTheme.titleMedium,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
         content: Text(
           message,
-          style: AppTheme.lightTheme.textTheme.bodyMedium,
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
         actions: [
           ElevatedButton(
@@ -436,13 +436,13 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       CircularProgressIndicator(
-                        color: AppTheme.lightTheme.colorScheme.tertiary,
+                        color: Theme.of(context).colorScheme.tertiary,
                       ),
                       SizedBox(height: 4.h),
                       Text(
                         'Initializing camera...',
                         style:
-                            AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.white,
                           fontSize: 14.sp,
                         ),

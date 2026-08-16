@@ -12,24 +12,24 @@ class HealthLogTabWidget extends StatelessWidget {
     required this.healthLogs,
   }) : super(key: key);
 
-  Color _getLogTypeColor(String type) {
+  Color _getLogTypeColor(BuildContext context, String type) {
     switch (type.toLowerCase()) {
       case 'growth':
-        return AppTheme.getSuccessColor(true);
+        return AppTheme.getSuccessColor(Theme.of(context).brightness == Brightness.dark);
       case 'issue':
-        return AppTheme.lightTheme.colorScheme.error;
+        return Theme.of(context).colorScheme.error;
       case 'care':
         return Colors.blue;
       case 'milestone':
-        return AppTheme.getAccentColor(true);
+        return AppTheme.getAccentColor(Theme.of(context).brightness == Brightness.dark);
       case 'note':
         return Colors.grey; // For personal notes
       default:
-        return AppTheme.lightTheme.colorScheme.primary;
+        return Theme.of(context).colorScheme.primary;
     }
   }
 
-  IconData _getLogTypeIcon(String type) {
+  IconData _getLogTypeIcon(BuildContext context, String type) {
     switch (type.toLowerCase()) {
       case 'growth':
         return Icons.trending_up;
@@ -59,7 +59,7 @@ class HealthLogTabWidget extends StatelessWidget {
             children: [
               Text(
                 'Health Timeline',
-                style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -69,7 +69,7 @@ class HealthLogTabWidget extends StatelessWidget {
                 },
                 icon: CustomIconWidget(
                   iconName: 'add',
-                  color: AppTheme.lightTheme.colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 16,
                 ),
                 label: Text('Add Log'),
@@ -116,16 +116,16 @@ class HealthLogTabWidget extends StatelessWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: _getLogTypeColor(type).withValues(alpha: 0.1),
+                            color: _getLogTypeColor(context, type).withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: _getLogTypeColor(type),
+                              color: _getLogTypeColor(context, type),
                               width: 2,
                             ),
                           ),
                           child: Icon(
-                            _getLogTypeIcon(type),
-                            color: _getLogTypeColor(type),
+                            _getLogTypeIcon(context, type),
+                            color: _getLogTypeColor(context, type),
                             size: 20,
                           ),
                         ),
@@ -133,7 +133,7 @@ class HealthLogTabWidget extends StatelessWidget {
                           Container(
                             width: 2,
                             height: 4.h,
-                            color: AppTheme.lightTheme.colorScheme.outline
+                            color: Theme.of(context).colorScheme.outline
                                 .withValues(alpha: 0.3),
                           ),
                       ],
@@ -146,10 +146,10 @@ class HealthLogTabWidget extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.all(3.w),
                         decoration: BoxDecoration(
-                          color: AppTheme.lightTheme.colorScheme.surface,
+                          color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppTheme.lightTheme.colorScheme.outline
+                            color: Theme.of(context).colorScheme.outline
                                 .withValues(alpha: 0.2),
                           ),
                         ),
@@ -166,7 +166,7 @@ class HealthLogTabWidget extends StatelessWidget {
                                     vertical: 0.5.h,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: _getLogTypeColor(type)
+                                    color: _getLogTypeColor(context, type)
                                         .withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
@@ -175,7 +175,7 @@ class HealthLogTabWidget extends StatelessWidget {
                                     style: AppTheme
                                         .lightTheme.textTheme.labelSmall
                                         ?.copyWith(
-                                      color: _getLogTypeColor(type),
+                                      color: _getLogTypeColor(context, type),
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -197,7 +197,7 @@ class HealthLogTabWidget extends StatelessWidget {
                             // Title
                             Text(
                               title,
-                              style: AppTheme.lightTheme.textTheme.titleMedium
+                              style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -208,7 +208,7 @@ class HealthLogTabWidget extends StatelessWidget {
                             // Description
                             Text(
                               description,
-                              style: AppTheme.lightTheme.textTheme.bodyMedium,
+                              style: Theme.of(context).textTheme.bodyMedium,
                             ),
 
                             // Photo attachment if available

@@ -51,7 +51,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
             children: [
               Text(
                 'Care Notes',
-                style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -63,7 +63,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                 },
                 icon: CustomIconWidget(
                   iconName: _isAddingNote ? 'close' : 'add',
-                  color: AppTheme.lightTheme.colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 16,
                 ),
                 label: Text(_isAddingNote ? 'Cancel' : 'Add Note'),
@@ -78,10 +78,10 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
             Container(
               padding: EdgeInsets.all(4.w),
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppTheme.lightTheme.colorScheme.outline
+                  color: Theme.of(context).colorScheme.outline
                       .withValues(alpha: 0.2),
                 ),
               ),
@@ -90,7 +90,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                 children: [
                   Text(
                     'New Note',
-                    style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -142,10 +142,10 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                   height: 30.h,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.surface,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppTheme.lightTheme.colorScheme.outline
+                      color: Theme.of(context).colorScheme.outline
                           .withValues(alpha: 0.2),
                     ),
                   ),
@@ -154,25 +154,25 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                     children: [
                       CustomIconWidget(
                         iconName: 'note',
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         size: 48,
                       ),
                       SizedBox(height: 2.h),
                       Text(
                         'No notes yet',
                         style:
-                            AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
                           color:
-                              AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                              Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       SizedBox(height: 1.h),
                       Text(
                         'Start documenting your plant care journey',
                         style:
-                            AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color:
-                              AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                              Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -215,15 +215,15 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                       padding: EdgeInsets.all(4.w),
                       decoration: BoxDecoration(
                         color: isImportant
-                            ? AppTheme.getWarningColor(true)
+                            ? AppTheme.getWarningColor(Theme.of(context).brightness == Brightness.dark)
                                 .withValues(alpha: 0.05)
-                            : AppTheme.lightTheme.colorScheme.surface,
+                            : Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isImportant
-                              ? AppTheme.getWarningColor(true)
+                              ? AppTheme.getWarningColor(Theme.of(context).brightness == Brightness.dark)
                                   .withValues(alpha: 0.3)
-                              : AppTheme.lightTheme.colorScheme.outline
+                              : Theme.of(context).colorScheme.outline
                                   .withValues(alpha: 0.2),
                         ),
                       ),
@@ -239,7 +239,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                                   if (isImportant) ...[
                                     CustomIconWidget(
                                       iconName: 'star',
-                                      color: AppTheme.getWarningColor(true),
+                                      color: AppTheme.getWarningColor(Theme.of(context).brightness == Brightness.dark),
                                       size: 16,
                                     ),
                                     SizedBox(width: 1.w),
@@ -284,7 +284,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                                           iconName: isImportant
                                               ? 'star_border'
                                               : 'star',
-                                          color: AppTheme.getWarningColor(true),
+                                          color: AppTheme.getWarningColor(Theme.of(context).brightness == Brightness.dark),
                                           size: 16,
                                         ),
                                         SizedBox(width: 2.w),
@@ -325,7 +325,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                           // Note content
                           Text(
                             content,
-                            style: AppTheme.lightTheme.textTheme.bodyMedium,
+                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
                       ),

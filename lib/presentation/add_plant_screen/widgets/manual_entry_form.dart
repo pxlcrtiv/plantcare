@@ -70,7 +70,7 @@ class _ManualEntryFormState extends State<ManualEntryForm> {
             'Plant Information',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
           ),
           SizedBox(height: 3.h),
@@ -85,7 +85,7 @@ class _ManualEntryFormState extends State<ManualEntryForm> {
                 padding: EdgeInsets.all(3.w),
                 child: CustomIconWidget(
                   iconName: 'local_florist',
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   size: 5.w,
                 ),
               ),
@@ -124,7 +124,7 @@ class _ManualEntryFormState extends State<ManualEntryForm> {
                     padding: EdgeInsets.all(3.w),
                     child: CustomIconWidget(
                       iconName: 'search',
-                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       size: 5.w,
                     ),
                   ),
@@ -144,7 +144,7 @@ class _ManualEntryFormState extends State<ManualEntryForm> {
             'Location in Home',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
           ),
           SizedBox(height: 1.h),
@@ -165,13 +165,13 @@ class _ManualEntryFormState extends State<ManualEntryForm> {
                   padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AppTheme.lightTheme.colorScheme.primary
-                        : AppTheme.lightTheme.colorScheme.surface,
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected
-                          ? AppTheme.lightTheme.colorScheme.primary
-                          : AppTheme.lightTheme.colorScheme.outline
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outline
                               .withValues(alpha: 0.3),
                     ),
                   ),
@@ -179,8 +179,8 @@ class _ManualEntryFormState extends State<ManualEntryForm> {
                     location,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: isSelected
-                              ? AppTheme.lightTheme.colorScheme.onPrimary
-                              : AppTheme.lightTheme.colorScheme.onSurface,
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurface,
                           fontWeight:
                               isSelected ? FontWeight.w500 : FontWeight.w400,
                         ),

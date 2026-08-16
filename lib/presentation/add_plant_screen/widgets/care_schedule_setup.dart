@@ -63,14 +63,14 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
             'Care Schedule',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
           ),
           SizedBox(height: 1.h),
           Text(
             'Set up automated reminders for plant care tasks',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
           SizedBox(height: 3.h),
@@ -156,10 +156,10 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
     return Container(
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.05),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.2),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -170,12 +170,12 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
               Container(
                 padding: EdgeInsets.all(2.w),
                 decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: CustomIconWidget(
                   iconName: 'water_drop',
-                  color: AppTheme.lightTheme.colorScheme.onPrimary,
+                  color: Theme.of(context).colorScheme.onPrimary,
                   size: 5.w,
                 ),
               ),
@@ -188,7 +188,7 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
                       'Watering Schedule',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.lightTheme.colorScheme.onSurface,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                     ),
                     Text(
@@ -208,17 +208,17 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
             'Frequency: ${_getFrequencyText(_wateringFrequency)}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
           ),
           SizedBox(height: 1.h),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              activeTrackColor: AppTheme.lightTheme.colorScheme.primary,
-              thumbColor: AppTheme.lightTheme.colorScheme.primary,
-              overlayColor: AppTheme.lightTheme.colorScheme.primary
+              activeTrackColor: Theme.of(context).colorScheme.primary,
+              thumbColor: Theme.of(context).colorScheme.primary,
+              overlayColor: Theme.of(context).colorScheme.primary
                   .withValues(alpha: 0.2),
-              inactiveTrackColor: AppTheme.lightTheme.colorScheme.primary
+              inactiveTrackColor: Theme.of(context).colorScheme.primary
                   .withValues(alpha: 0.3),
             ),
             child: Slider(
@@ -240,13 +240,13 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
               Text(
                 'Daily',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
               ),
               Text(
                 'Monthly',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
               ),
             ],
@@ -270,10 +270,10 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
     return Container(
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -284,17 +284,17 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
                 padding: EdgeInsets.all(2.w),
                 decoration: BoxDecoration(
                   color: isEnabled
-                      ? AppTheme.lightTheme.colorScheme.primary
+                      ? Theme.of(context).colorScheme.primary
                           .withValues(alpha: 0.1)
-                      : AppTheme.lightTheme.colorScheme.onSurfaceVariant
+                      : Theme.of(context).colorScheme.onSurfaceVariant
                           .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: CustomIconWidget(
                   iconName: iconName,
                   color: isEnabled
-                      ? AppTheme.lightTheme.colorScheme.primary
-                      : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                   size: 5.w,
                 ),
               ),
@@ -307,7 +307,7 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w500,
-                            color: AppTheme.lightTheme.colorScheme.onSurface,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                     ),
                     Text(
@@ -332,7 +332,7 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
               'Frequency: ${_getFrequencyText(frequency)}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
-                    color: AppTheme.lightTheme.colorScheme.onSurface,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
             ),
             SizedBox(height: 1.h),

@@ -117,7 +117,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
         onPressed: () => Navigator.pop(context),
         icon: CustomIconWidget(
           iconName: 'close',
-          color: AppTheme.lightTheme.colorScheme.onSurface,
+          color: Theme.of(context).colorScheme.onSurface,
           size: 6.w,
         ),
       ),
@@ -129,8 +129,8 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
               'Save',
               style: TextStyle(
                 color: _canSave()
-                    ? AppTheme.lightTheme.colorScheme.primary
-                    : AppTheme.lightTheme.colorScheme.onSurfaceVariant
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant
                         .withValues(alpha: 0.5),
                 fontWeight: FontWeight.w600,
               ),
@@ -156,8 +156,8 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                   margin: EdgeInsets.symmetric(horizontal: 1.w),
                   decoration: BoxDecoration(
                     color: isCompleted || isActive
-                        ? AppTheme.lightTheme.colorScheme.primary
-                        : AppTheme.lightTheme.colorScheme.outline
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.outline
                             .withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
@@ -169,7 +169,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
           Text(
             '${_currentStep + 1} of ${_stepTitles.length}: ${_stepTitles[_currentStep]}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
           ),
@@ -193,14 +193,14 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                   'How would you like to add your plant?',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: AppTheme.lightTheme.colorScheme.onSurface,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                 ),
                 SizedBox(height: 1.h),
                 Text(
                   'Choose the method that works best for you',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
               ],
@@ -319,14 +319,14 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
             'Review Your Plant',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
           ),
           SizedBox(height: 1.h),
           Text(
             'Make sure everything looks correct before saving',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
           SizedBox(height: 3.h),
@@ -342,7 +342,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                     children: [
                       CustomIconWidget(
                         iconName: 'local_florist',
-                        color: AppTheme.lightTheme.colorScheme.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 6.w,
                       ),
                       SizedBox(width: 3.w),
@@ -353,7 +353,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                             .titleMedium
                             ?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: AppTheme.lightTheme.colorScheme.onSurface,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                       ),
                     ],
@@ -389,7 +389,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                       children: [
                         CustomIconWidget(
                           iconName: 'photo_library',
-                          color: AppTheme.lightTheme.colorScheme.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           size: 6.w,
                         ),
                         SizedBox(width: 3.w),
@@ -401,7 +401,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                               ?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color:
-                                    AppTheme.lightTheme.colorScheme.onSurface,
+                                    Theme.of(context).colorScheme.onSurface,
                               ),
                         ),
                       ],
@@ -418,7 +418,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                             margin: EdgeInsets.only(right: 2.w),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              color: AppTheme.lightTheme.colorScheme.surface,
+                              color: Theme.of(context).colorScheme.surface,
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
@@ -471,7 +471,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                     children: [
                       CustomIconWidget(
                         iconName: 'schedule',
-                        color: AppTheme.lightTheme.colorScheme.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 6.w,
                       ),
                       SizedBox(width: 3.w),
@@ -482,7 +482,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                             .titleMedium
                             ?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: AppTheme.lightTheme.colorScheme.onSurface,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                       ),
                     ],
@@ -519,7 +519,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
             child: Text(
               '$label:',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
             ),
@@ -528,7 +528,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
             child: Text(
               value,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.lightTheme.colorScheme.onSurface,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
             ),
           ),
@@ -541,11 +541,11 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
     return Container(
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.scaffoldBackgroundColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
           top: BorderSide(
             color:
-                AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+                Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
       ),
@@ -574,7 +574,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            AppTheme.lightTheme.colorScheme.onPrimary,
+                            Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                       )
@@ -672,7 +672,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
               children: [
                 CustomIconWidget(
                   iconName: 'check_circle',
-                  color: AppTheme.getSuccessColor(true),
+                  color: AppTheme.getSuccessColor(Theme.of(context).brightness == Brightness.dark),
                   size: 6.w,
                 ),
                 SizedBox(width: 3.w),
@@ -711,7 +711,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to save plant: ${e.toString()}'),
-            backgroundColor: AppTheme.lightTheme.colorScheme.error,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }

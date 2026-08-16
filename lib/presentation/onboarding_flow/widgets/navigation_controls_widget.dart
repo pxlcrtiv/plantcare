@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
-import '../../../core/app_export.dart';
-import '../../../theme/app_theme.dart';
 
 class NavigationControlsWidget extends StatelessWidget {
   final int currentPage;
@@ -35,13 +33,13 @@ class NavigationControlsWidget extends StatelessWidget {
               onPressed: onSkip,
               style: TextButton.styleFrom(
                 foregroundColor:
-                    AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    Theme.of(context).colorScheme.onSurfaceVariant,
                 padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
               ),
               child: Text(
                 'Skip',
-                style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             )
@@ -56,17 +54,17 @@ class NavigationControlsWidget extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onNext,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.lightTheme.colorScheme.primary,
-                  foregroundColor: AppTheme.lightTheme.colorScheme.onPrimary,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: Text(
                   'Next',
-                  style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: AppTheme.lightTheme.colorScheme.onPrimary,
+                    color: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
               ),

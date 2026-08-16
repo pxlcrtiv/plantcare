@@ -20,7 +20,7 @@ class BottomActionBarWidget extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
@@ -44,7 +44,7 @@ class BottomActionBarWidget extends StatelessWidget {
                 ),
                 label: Text(
                   'Water Plant',
-                  style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
@@ -72,7 +72,7 @@ class BottomActionBarWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   side: BorderSide(
-                    color: AppTheme.lightTheme.colorScheme.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 child: Column(
@@ -80,14 +80,14 @@ class BottomActionBarWidget extends StatelessWidget {
                   children: [
                     CustomIconWidget(
                       iconName: 'camera_alt',
-                      color: AppTheme.lightTheme.colorScheme.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 20,
                     ),
                     SizedBox(height: 0.5.h),
                     Text(
                       'Photo',
-                      style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-                        color: AppTheme.lightTheme.colorScheme.primary,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -108,7 +108,7 @@ class BottomActionBarWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   side: BorderSide(
-                    color: AppTheme.lightTheme.colorScheme.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 child: Column(
@@ -116,14 +116,14 @@ class BottomActionBarWidget extends StatelessWidget {
                   children: [
                     CustomIconWidget(
                       iconName: 'add_circle_outline',
-                      color: AppTheme.lightTheme.colorScheme.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 20,
                     ),
                     SizedBox(height: 0.5.h),
                     Text(
                       'Log Care',
-                      style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-                        color: AppTheme.lightTheme.colorScheme.primary,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

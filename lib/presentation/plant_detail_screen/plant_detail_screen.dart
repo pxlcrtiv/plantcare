@@ -160,7 +160,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Plant watered! Next watering scheduled.'),
-            backgroundColor: AppTheme.getSuccessColor(true),
+            backgroundColor: AppTheme.getSuccessColor(Theme.of(context).brightness == Brightness.dark),
           ),
         );
         
@@ -233,7 +233,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
       builder: (context) => Container(
         height: 50.h,
         decoration: BoxDecoration(
-          color: AppTheme.lightTheme.colorScheme.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Padding(
@@ -247,7 +247,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                   width: 12.w,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.outline
+                    color: Theme.of(context).colorScheme.outline
                         .withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
@@ -257,7 +257,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
 
               Text(
                 'Log Care Event',
-                style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -304,7 +304,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                     _buildCareEventOption(
                       'Other',
                       'more_horiz',
-                      AppTheme.lightTheme.colorScheme.primary,
+                      Theme.of(context).colorScheme.primary,
                       () => _logCareEvent('other'),
                     ),
                   ],
@@ -340,7 +340,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
             SizedBox(height: 1.h),
             Text(
               title,
-              style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 color: color,
                 fontWeight: FontWeight.bold,
               ),
@@ -368,7 +368,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('$eventType event logged successfully'),
-              backgroundColor: AppTheme.getSuccessColor(true),
+              backgroundColor: AppTheme.getSuccessColor(Theme.of(context).brightness == Brightness.dark),
             ),
           );
         }
@@ -389,7 +389,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
       builder: (context) => Container(
         height: 35.h,
         decoration: BoxDecoration(
-          color: AppTheme.lightTheme.colorScheme.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Padding(
@@ -403,7 +403,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                   width: 12.w,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.outline
+                    color: Theme.of(context).colorScheme.outline
                         .withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
@@ -413,7 +413,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
 
               Text(
                 'Care Reminders',
-                style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -425,7 +425,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                 children: [
                   Text(
                     'Enable Reminders',
-                    style: AppTheme.lightTheme.textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Switch(
                     value: _careRemindersEnabled,
@@ -453,20 +453,20 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
               if (_careRemindersEnabled) ...[
                 Text(
                   'Reminder Time',
-                  style: AppTheme.lightTheme.textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 SizedBox(height: 1.h),
                 ListTile(
                   leading: CustomIconWidget(
                     iconName: 'schedule',
-                    color: AppTheme.lightTheme.colorScheme.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     size: 24,
                   ),
                   title: Text('9:00 AM'),
                   subtitle: Text('Daily reminder time'),
                   trailing: CustomIconWidget(
                     iconName: 'edit',
-                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
                   onTap: () {
@@ -485,17 +485,17 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   Widget build(BuildContext context) {
     if (_isLoading || _plant == null) {
       return Scaffold(
-        backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: Center(
           child: CircularProgressIndicator(
-            color: AppTheme.lightTheme.colorScheme.primary,
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // Hero image section
@@ -517,10 +517,10 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
           // Tab bar
           Container(
             decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.surface,
+              color: Theme.of(context).colorScheme.surface,
               border: Border(
                 bottom: BorderSide(
-                  color: AppTheme.lightTheme.colorScheme.outline
+                  color: Theme.of(context).colorScheme.outline
                       .withValues(alpha: 0.2),
                 ),
               ),
@@ -580,7 +580,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
           color: Colors.black,
           size: 24,
         ),
-        backgroundColor: AppTheme.getAccentColor(true),
+        backgroundColor: AppTheme.getAccentColor(Theme.of(context).brightness == Brightness.dark),
       ),
     );
   }

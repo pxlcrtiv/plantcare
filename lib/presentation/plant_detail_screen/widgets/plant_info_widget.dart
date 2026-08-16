@@ -40,13 +40,13 @@ class _PlantInfoWidgetState extends State<PlantInfoWidget> {
   Color _getDifficultyColor() {
     switch (widget.difficulty.toLowerCase()) {
       case 'easy':
-        return AppTheme.getSuccessColor(true);
+        return AppTheme.getSuccessColor(Theme.of(context).brightness == Brightness.dark);
       case 'medium':
-        return AppTheme.getWarningColor(true);
+        return AppTheme.getWarningColor(Theme.of(context).brightness == Brightness.dark);
       case 'hard':
-        return AppTheme.lightTheme.colorScheme.error;
+        return Theme.of(context).colorScheme.error;
       default:
-        return AppTheme.lightTheme.colorScheme.primary;
+        return Theme.of(context).colorScheme.primary;
     }
   }
 
@@ -64,7 +64,7 @@ class _PlantInfoWidgetState extends State<PlantInfoWidget> {
                 child: _isEditing
                     ? TextField(
                         controller: _nameController,
-                        style: AppTheme.lightTheme.textTheme.headlineSmall,
+                        style: Theme.of(context).textTheme.headlineSmall,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -83,7 +83,7 @@ class _PlantInfoWidgetState extends State<PlantInfoWidget> {
                       )
                     : Text(
                         widget.plantName,
-                        style: AppTheme.lightTheme.textTheme.headlineSmall
+                        style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -103,7 +103,7 @@ class _PlantInfoWidgetState extends State<PlantInfoWidget> {
                 },
                 icon: CustomIconWidget(
                   iconName: _isEditing ? 'check' : 'edit',
-                  color: AppTheme.lightTheme.colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 20,
                 ),
               ),
@@ -115,8 +115,8 @@ class _PlantInfoWidgetState extends State<PlantInfoWidget> {
           // Species information
           Text(
             'Species: ${widget.species}',
-            style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
-              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -129,8 +129,8 @@ class _PlantInfoWidgetState extends State<PlantInfoWidget> {
             children: [
               Text(
                 'Care Difficulty: ',
-                style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               Container(
@@ -145,7 +145,7 @@ class _PlantInfoWidgetState extends State<PlantInfoWidget> {
                 ),
                 child: Text(
                   widget.difficulty.toUpperCase(),
-                  style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: _getDifficultyColor(),
                     fontWeight: FontWeight.bold,
                   ),
