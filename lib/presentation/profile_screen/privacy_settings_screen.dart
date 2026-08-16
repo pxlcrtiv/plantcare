@@ -48,9 +48,11 @@ class PrivacySettingsScreen extends StatelessWidget {
               context,
               title: 'Photo usage',
               description:
-                  'Photos you upload for plant identification are sent to our '
-                  'identification service so we can recognize the species. '
-                  'Your photos are never shared publicly.',
+                  'Photos you upload for plant identification are sent to '
+                  'PlantNet so we can recognize the species. When you use the '
+                  'AI assistant for health diagnosis, your photos may also be '
+                  'sent to Google\'s Gemini API. Your photos are never shared '
+                  'publicly.',
             ),
           ],
         ),
