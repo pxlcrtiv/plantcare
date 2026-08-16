@@ -79,7 +79,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Hi Plant Parent !'), findsOneWidget);
+      expect(find.text('Hi Plant Parent!'), findsOneWidget);
       expect(find.text('No plants here yet'), findsOneWidget);
       expect(find.text('My Plants'), findsOneWidget);
       expect(find.byType(FloatingActionButton), findsNothing);

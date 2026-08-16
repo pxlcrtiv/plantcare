@@ -137,7 +137,7 @@ class _HomeTabState extends State<HomeTab> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hi ${widget.userName} !',
+                'Hi ${widget.userName}!',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.5,
