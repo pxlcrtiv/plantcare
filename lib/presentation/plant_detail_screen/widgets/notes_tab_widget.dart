@@ -7,11 +7,17 @@ import '../../../../core/app_export.dart';
 class NotesTabWidget extends StatefulWidget {
   final List<Map<String, dynamic>> notes;
   final Function(String) onAddNote;
+  final void Function(int index, String newContent) onEditNote;
+  final void Function(int index) onToggleImportant;
+  final void Function(int index) onDeleteNote;
 
   const NotesTabWidget({
     Key? key,
     required this.notes,
     required this.onAddNote,
+    required this.onEditNote,
+    required this.onToggleImportant,
+    required this.onDeleteNote,
   }) : super(key: key);
 
   @override
@@ -35,6 +41,84 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
       setState(() {
         _isAddingNote = false;
       });
+    }
+  }
+
+  Future<void> _showEditNoteDialog(int index, String initialContent) async {
+    final controller = TextEditingController(text: initialContent);
+    final newContent = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Theme.of(dialogContext).colorScheme.surface,
+        title: Text(
+          'Edit Note',
+          style: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLines: 5,
+          decoration: InputDecoration(
+            hintText:
+                'Write your observations, care tips, or reminders...',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            contentPadding: EdgeInsets.all(3.w),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () =>
+                Navigator.pop(dialogContext, controller.text.trim()),
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (newContent != null && newContent.isNotEmpty) {
+      widget.onEditNote(index, newContent);
+    }
+  }
+
+  Future<void> _showDeleteNoteDialog(int index) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Theme.of(dialogContext).colorScheme.surface,
+        title: Text(
+          'Delete Note',
+          style: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text('Are you sure you want to delete this note?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              'Delete',
+              style: TextStyle(
+                color: Theme.of(dialogContext).colorScheme.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      widget.onDeleteNote(index);
     }
   }
 
@@ -256,7 +340,17 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                               ),
                               PopupMenuButton<String>(
                                 onSelected: (value) {
-                                  // Handle note actions (edit, delete, mark important)
+                                  switch (value) {
+                                    case 'edit':
+                                      _showEditNoteDialog(index, content);
+                                      break;
+                                    case 'important':
+                                      widget.onToggleImportant(index);
+                                      break;
+                                    case 'delete':
+                                      _showDeleteNoteDialog(index);
+                                      break;
+                                  }
                                 },
                                 itemBuilder: (context) => [
                                   PopupMenuItem(

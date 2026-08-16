@@ -503,7 +503,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     );
   }
 
-  Future<void> _handleAddLog(
+Future<void> _handleAddLog(
       String type, String notes, DateTime date) async {
     if (_plant == null) return;
 
@@ -549,6 +549,34 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
   String _capitalizeLogType(String type) {
     if (type.isEmpty) return type;
     return type[0].toUpperCase() + type.substring(1);
+  }
+
+  void _handleEditNote(int index, String newContent) {
+    if (index < 0 || index >= _notes.length) return;
+    setState(() {
+      _notes[index]['content'] = newContent;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Note updated successfully')),
+    );
+  }
+
+  void _handleToggleImportant(int index) {
+    if (index < 0 || index >= _notes.length) return;
+    setState(() {
+      _notes[index]['isImportant'] =
+          !(_notes[index]['isImportant'] as bool? ?? false);
+    });
+  }
+
+  void _handleDeleteNote(int index) {
+    if (index < 0 || index >= _notes.length) return;
+    setState(() {
+      _notes.removeAt(index);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Note deleted successfully')),
+    );
   }
 
   void _showCareEventBottomSheet() {
@@ -994,6 +1022,9 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                 NotesTabWidget(
                   notes: _notes,
                   onAddNote: _handleAddNote,
+                  onEditNote: _handleEditNote,
+                  onToggleImportant: _handleToggleImportant,
+                  onDeleteNote: _handleDeleteNote,
                 ),
               ],
             ),
