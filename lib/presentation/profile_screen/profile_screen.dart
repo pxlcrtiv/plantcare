@@ -6,7 +6,6 @@ import '../../services/firebase_service.dart';
 import 'notification_settings_screen.dart';
 import 'privacy_settings_screen.dart';
 import 'help_support_screen.dart';
-import 'help_support_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
