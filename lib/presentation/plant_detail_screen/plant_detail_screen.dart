@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:sizer/sizer.dart';
 import 'dart:async';
 
@@ -118,11 +119,46 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     );
   }
 
-  void _handleSharePlant() {
-    // Share plant details
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Share plant functionality')),
-    );
+  Future<void> _handleSharePlant() async {
+    final plant = _plant;
+    if (plant == null) return;
+
+    final buffer = StringBuffer()
+      ..writeln('🌿 ${plant.name}'
+          '${plant.species.isNotEmpty ? ' (${plant.species})' : ''}')
+      ..writeln();
+
+    final light = plant.light;
+    if (light != null && light.isNotEmpty) {
+      buffer.writeln('💡 Light: $light');
+    }
+
+    final humidity = plant.humidity;
+    if (humidity != null) {
+      buffer.writeln('💧 Humidity: $humidity%');
+    }
+
+    final wateringFrequency =
+        (plant.careSchedule['wateringFrequency'] as num?)?.toInt();
+    if (wateringFrequency != null) {
+      buffer.writeln(
+        '🚿 Water: '
+        '${wateringFrequency == 1 ? 'daily' : 'every $wateringFrequency days'}',
+      );
+    }
+
+    try {
+      await SharePlus.instance.share(ShareParams(text: buffer.toString()));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to share plant: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 
   void _handleNameEdit() {
