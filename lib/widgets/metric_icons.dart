@@ -40,6 +40,14 @@ class MetricIcon extends StatelessWidget {
         label: label,
       );
 
+  factory MetricIcon.water(BuildContext context, String label) => MetricIcon(
+        icon: Icons.water_drop_outlined,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppTheme.dropletDark
+            : AppTheme.dropletLight,
+        label: label,
+      );
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

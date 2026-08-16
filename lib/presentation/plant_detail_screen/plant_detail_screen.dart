@@ -382,6 +382,107 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     }
   }
 
+  void _showHowToWater() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(6.w, 2.h, 6.w, 4.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 12.w,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.outline
+                        .withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              SizedBox(height: 2.h),
+
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(2.w),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.water_drop,
+                      size: 24,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  SizedBox(width: 3.w),
+                  Text(
+                    'How to water',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 1.5.h),
+
+              Text(
+                'Water when the top 2–3 cm of soil feels dry to the '
+                'touch. Pour slowly until water drains from the bottom, '
+                'then empty the saucer so the roots never sit in water.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontStyle: FontStyle.italic,
+                  height: 1.5,
+                ),
+              ),
+
+              SizedBox(height: 3.h),
+
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _handleLogCareEvent();
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    padding: EdgeInsets.symmetric(vertical: 1.8.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                  ),
+                  child: Text(
+                    'Add details',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showReminderSettings() {
     showModalBottomSheet(
       context: context,
@@ -511,6 +612,10 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
             plantName: _plant!.name,
             species: _plant!.species,
             difficulty: _plant!.careSchedule['difficulty'] ?? 'Medium',
+            humidity: _plant!.humidity,
+            light: _plant!.light,
+            wateringFrequency:
+                (_plant!.careSchedule['wateringFrequency'] as num?)?.toInt(),
             onNameEdit: _handleNameEdit,
           ),
 
@@ -570,17 +675,14 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
         onWaterPlant: _handleWaterNow,
         onAddPhoto: _handleAddPhoto,
         onLogCareEvent: _handleLogCareEvent,
+        onHowToWater: _showHowToWater,
       ),
 
       // Floating action button for reminder settings
       floatingActionButton: FloatingActionButton(
         onPressed: _showReminderSettings,
-        child: CustomIconWidget(
-          iconName: 'notifications',
-          color: Colors.black,
-          size: 24,
-        ),
-        backgroundColor: AppTheme.getAccentColor(Theme.of(context).brightness == Brightness.dark),
+        child: const Icon(Icons.notifications, color: Colors.white, size: 24),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
     );
   }
