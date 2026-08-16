@@ -172,8 +172,7 @@ class HealthLogTabWidget extends StatelessWidget {
                                   ),
                                   child: Text(
                                     type.toUpperCase(),
-                                    style: AppTheme
-                                        .lightTheme.textTheme.labelSmall
+                                    style: Theme.of(context).textTheme.labelSmall
                                         ?.copyWith(
                                       color: _getLogTypeColor(context, type),
                                       fontWeight: FontWeight.bold,
@@ -182,11 +181,9 @@ class HealthLogTabWidget extends StatelessWidget {
                                 ),
                                 Text(
                                   '${date.day}/${date.month}/${date.year}',
-                                  style: AppTheme
-                                      .lightTheme.textTheme.labelSmall
+                                  style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
-                                    color: AppTheme.lightTheme.colorScheme
-                                        .onSurfaceVariant,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],

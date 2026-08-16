@@ -429,13 +429,11 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                                       errorBuilder:
                                           (context, error, stackTrace) {
                                         return Container(
-                                          color: AppTheme
-                                              .lightTheme.colorScheme.surface,
+                                          color: Theme.of(context).colorScheme.surface,
                                           child: Center(
                                             child: CustomIconWidget(
                                               iconName: 'image',
-                                              color: AppTheme.lightTheme
-                                                  .colorScheme.onSurfaceVariant,
+                                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                                               size: 8.w,
                                             ),
                                           ),

@@ -93,7 +93,7 @@ class PlantCardWidget extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.all(2.w),
                         decoration: BoxDecoration(
-                          color: AppTheme.lightTheme.primaryColor
+                          color: Theme.of(context).colorScheme.primary
                               .withValues(alpha: 0.9),
                           shape: BoxShape.circle,
                         ),

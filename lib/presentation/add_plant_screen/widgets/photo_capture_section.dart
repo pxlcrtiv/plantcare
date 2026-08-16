@@ -332,8 +332,7 @@ class _PhotoCaptureSectionState extends State<PhotoCaptureSection> {
                                     child: Center(
                                       child: CustomIconWidget(
                                         iconName: 'image',
-                                        color: AppTheme.lightTheme.colorScheme
-                                            .onSurfaceVariant,
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                                         size: 8.w,
                                       ),
                                     ),

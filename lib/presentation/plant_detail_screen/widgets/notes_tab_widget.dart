@@ -246,11 +246,9 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                                   ],
                                   Text(
                                     '${date.day}/${date.month}/${date.year}',
-                                    style: AppTheme
-                                        .lightTheme.textTheme.labelMedium
+                                    style: Theme.of(context).textTheme.labelMedium
                                         ?.copyWith(
-                                      color: AppTheme.lightTheme.colorScheme
-                                          .onSurfaceVariant,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -267,8 +265,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                                       children: [
                                         CustomIconWidget(
                                           iconName: 'edit',
-                                          color: AppTheme
-                                              .lightTheme.colorScheme.onSurface,
+                                          color: Theme.of(context).colorScheme.onSurface,
                                           size: 16,
                                         ),
                                         SizedBox(width: 2.w),
@@ -300,8 +297,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                                       children: [
                                         CustomIconWidget(
                                           iconName: 'delete',
-                                          color: AppTheme
-                                              .lightTheme.colorScheme.error,
+                                          color: Theme.of(context).colorScheme.error,
                                           size: 16,
                                         ),
                                         SizedBox(width: 2.w),
@@ -312,8 +308,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                                 ],
                                 child: CustomIconWidget(
                                   iconName: 'more_vert',
-                                  color: AppTheme
-                                      .lightTheme.colorScheme.onSurfaceVariant,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   size: 20,
                                 ),
                               ),

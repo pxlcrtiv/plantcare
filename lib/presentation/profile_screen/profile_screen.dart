@@ -44,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: Text(
           'Profile',
-          style: AppTheme.lightTheme.appBarTheme.titleTextStyle,
+          style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -94,8 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _currentUser?.email ?? 'No email',
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
-                              color: AppTheme.lightTheme.colorScheme
-                                  .onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
