@@ -6,9 +6,13 @@ import '../../../../core/app_export.dart';
 class CareScheduleSetup extends StatefulWidget {
   final Function(Map<String, dynamic>) onScheduleChanged;
 
+  /// Values used to prefill the schedule (e.g. when editing an existing plant).
+  final Map<String, dynamic>? initialData;
+
   const CareScheduleSetup({
     super.key,
     required this.onScheduleChanged,
+    this.initialData,
   });
 
   @override
@@ -27,6 +31,22 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
   @override
   void initState() {
     super.initState();
+    final initial = widget.initialData;
+    if (initial != null) {
+      double clamped(num? value, double min, double max) =>
+          (value ?? 0).toDouble().clamp(min, max);
+      _wateringFrequency = clamped(
+          initial['wateringFrequency'] as num?, 1, 30);
+      _fertilizingEnabled = initial['fertilizingEnabled'] == true;
+      _mistingEnabled = initial['mistingEnabled'] == true;
+      _rotatingEnabled = initial['rotatingEnabled'] == true;
+      _fertilizingFrequency =
+          clamped(initial['fertilizingFrequency'] as num?, 7, 90);
+      _mistingFrequency =
+          clamped(initial['mistingFrequency'] as num?, 1, 14);
+      _rotatingFrequency =
+          clamped(initial['rotatingFrequency'] as num?, 3, 30);
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateSchedule();
     });
