@@ -231,12 +231,14 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        height: 50.h,
+        height: 54.h,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
-        child: Padding(
+        child: SafeArea(
+          top: false,
+          child: Padding(
           padding: EdgeInsets.all(4.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,6 +313,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),
@@ -632,6 +635,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
             ),
             child: TabBar(
               controller: _tabController,
+              labelPadding: EdgeInsets.symmetric(horizontal: 2.w),
               tabs: [
                 Tab(text: 'Schedule'),
                 Tab(text: 'Health'),
