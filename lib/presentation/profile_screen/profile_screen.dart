@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sizer/sizer.dart';
 import '../../core/app_export.dart';
 import '../../services/firebase_service.dart';
+import 'privacy_settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -133,7 +134,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     title: Text('Privacy Settings'),
                     trailing: Icon(Icons.chevron_right),
                     onTap: () {
-                      // Navigate to privacy settings
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PrivacySettingsScreen(),
+                        ),
+                      );
                     },
                   ),
                   Divider(height: 1),
