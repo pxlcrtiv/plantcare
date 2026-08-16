@@ -225,6 +225,54 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
     );
   }
 
+  Future<void> _handleAddLog(
+      String type, String notes, DateTime date) async {
+    if (_plant == null) return;
+
+    final log = {
+      'type': type,
+      'title': _capitalizeLogType(type),
+      'description': notes,
+      'date': date.toIso8601String(),
+      'createdAt': DateTime.now().toIso8601String(),
+    };
+
+    try {
+      // Persist through the same health-log mechanism the timeline uses
+      // (the healthLogs subcollection is created on first write).
+      await _plantRepository.addHealthLog(_plant!.id, log);
+
+      if (mounted) {
+        // Reload the timeline with the new entry.
+        setState(() {
+          _healthLogs.insert(0, log);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Health log added successfully'),
+            backgroundColor: AppTheme.getSuccessColor(
+              Theme.of(context).brightness == Brightness.dark,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add health log: ${e.toString()}'),
+          ),
+        );
+      }
+    }
+  }
+
+  String _capitalizeLogType(String type) {
+    if (type.isEmpty) return type;
+    return type[0].toUpperCase() + type.substring(1);
+  }
+
   void _showCareEventBottomSheet() {
     showModalBottomSheet(
       context: context,
@@ -659,6 +707,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen>
                 ),
                 HealthLogTabWidget(
                   healthLogs: _healthLogs,
+                  onAddLog: _handleAddLog,
                 ),
                 PhotosTabWidget(
                   photos: _photos,
