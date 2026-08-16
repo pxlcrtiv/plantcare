@@ -6,9 +6,13 @@ import '../../../../core/app_export.dart';
 class ManualEntryForm extends StatefulWidget {
   final Function(Map<String, dynamic>) onFormChanged;
 
+  /// Values used to prefill the form (e.g. when editing an existing plant).
+  final Map<String, dynamic>? initialData;
+
   const ManualEntryForm({
     super.key,
     required this.onFormChanged,
+    this.initialData,
   });
 
   @override
@@ -19,6 +23,7 @@ class _ManualEntryFormState extends State<ManualEntryForm> {
   final TextEditingController _plantNameController = TextEditingController();
   final TextEditingController _speciesController = TextEditingController();
   String _selectedLocation = '';
+  bool _speciesSeedScheduled = false;
 
   final List<String> _commonLocations = [
     'Living Room',
@@ -47,6 +52,12 @@ class _ManualEntryFormState extends State<ManualEntryForm> {
   @override
   void initState() {
     super.initState();
+    final initial = widget.initialData;
+    if (initial != null) {
+      _plantNameController.text = initial['plantName']?.toString() ?? '';
+      _speciesController.text = initial['species']?.toString() ?? '';
+      _selectedLocation = initial['location']?.toString() ?? '';
+    }
     _plantNameController.addListener(_updateForm);
     _speciesController.addListener(_updateForm);
   }
@@ -112,7 +123,23 @@ class _ManualEntryFormState extends State<ManualEntryForm> {
             },
             fieldViewBuilder:
                 (context, controller, focusNode, onEditingComplete) {
-              _speciesController.text = controller.text;
+              if (!_speciesSeedScheduled) {
+                _speciesSeedScheduled = true;
+                final initialSpecies =
+                    widget.initialData?['species']?.toString() ?? '';
+                if (initialSpecies.isNotEmpty) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted && controller.text.isEmpty) {
+                      controller.text = initialSpecies;
+                    }
+                  });
+                }
+              }
+              // Keep the listener value in sync without clobbering a prefilled
+              // value (which would fire the change listener mid-build).
+              if (_speciesController.text.isEmpty) {
+                _speciesController.text = controller.text;
+              }
               return TextFormField(
                 controller: controller,
                 focusNode: focusNode,

@@ -35,6 +35,10 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   List<XFile> _plantPhotos = [];
   Map<String, dynamic> _selectedPlantFromDatabase = {};
 
+  // Edit mode (when the screen is opened from a plant card)
+  bool _isEditing = false;
+  String? _editingPlantId;
+
   late PlantRepository _plantRepository;
 
   final List<String> _stepTitles = [
@@ -77,6 +81,36 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _pageController.jumpToPage(_stepTitles.length - 1);
       });
+    } else if (args is Map &&
+        args['id'] is String &&
+        (args['id'] as String).isNotEmpty) {
+      // Edit mode: an existing plant map (from the plant card "Edit" action)
+      // was passed. Prefill every form field and save via updatePlant.
+      _isEditing = true;
+      _editingPlantId = args['id'] as String;
+      _selectedEntryMethod = 'manual';
+      _plantFormData = {
+        'plantName': args['name'] ?? '',
+        'species': args['species'] ?? '',
+        'location': args['location'] ?? '',
+        'imageUrl': args['imageUrl'] ?? '',
+        'light': args['light'],
+        'humidity': args['humidity'],
+        'careNotes': args['careNotes'],
+      };
+      final careSchedule = args['careSchedule'];
+      if (careSchedule is Map) {
+        final care = Map<String, dynamic>.from(careSchedule);
+        _careScheduleData = {
+          'wateringFrequency': care['wateringFrequency'] ?? 7,
+          'fertilizingEnabled': care['fertilizingEnabled'] == true,
+          'fertilizingFrequency': care['fertilizingFrequency'] ?? 30,
+          'mistingEnabled': care['mistingEnabled'] == true,
+          'mistingFrequency': care['mistingFrequency'] ?? 3,
+          'rotatingEnabled': care['rotatingEnabled'] == true,
+          'rotatingFrequency': care['rotatingFrequency'] ?? 7,
+        };
+      }
     }
   }
 
@@ -110,7 +144,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: Text(
-        'Add New Plant',
+        _isEditing ? 'Edit Plant' : 'Add New Plant',
         style: Theme.of(context).appBarTheme.titleTextStyle,
       ),
       leading: IconButton(
@@ -126,7 +160,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
           TextButton(
             onPressed: _canSave() ? _savePlant : null,
             child: Text(
-              'Save',
+              _isEditing ? 'Save Changes' : 'Save',
               style: TextStyle(
                 color: _canSave()
                     ? Theme.of(context).colorScheme.primary
@@ -275,6 +309,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
     } else {
       return SingleChildScrollView(
         child: ManualEntryForm(
+          initialData: _isEditing ? _plantFormData : null,
           onFormChanged: (formData) {
             setState(() {
               _plantFormData = formData;
@@ -300,6 +335,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   Widget _buildCareScheduleStep() {
     return SingleChildScrollView(
       child: CareScheduleSetup(
+        initialData: _isEditing ? _careScheduleData : null,
         onScheduleChanged: (scheduleData) {
           setState(() {
             _careScheduleData = scheduleData;
@@ -577,7 +613,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                         ),
                       )
                     : Text(_currentStep == _stepTitles.length - 1
-                        ? 'Save Plant'
+                        ? (_isEditing ? 'Save Changes' : 'Save Plant')
                         : 'Next'),
               ),
             ),
@@ -635,30 +671,52 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
     });
 
     try {
-      // Create plant object
-      final plant = Plant(
-        id: DateTime.now().millisecondsSinceEpoch.toString(), // In production, use Firebase auto-generated ID
-        name: _plantFormData['plantName'] ?? '',
-        species: _plantFormData['species'] ?? '',
-        imageUrl: _plantPhotos.isNotEmpty
-            ? _plantPhotos[0].path
-            : (_plantFormData['imageUrl']?.isNotEmpty == true
-                ? _plantFormData['imageUrl'] as String
-                : 'https://via.placeholder.com/400x300'),
-        status: 'healthy',
-        lastWatered: null,
-        nextWatering: null,
-        careNotes: _plantFormData['careNotes'],
-        location: _plantFormData['location'],
-        humidity: (_plantFormData['humidity'] as num?)?.toInt(),
-        light: _plantFormData['light'] as String?,
-        dateAdded: DateTime.now(),
-        careSchedule: _careScheduleData,
-        photos: _plantPhotos.map((photo) => photo.path).toList(),
-      );
+      final String imageUrl = _plantPhotos.isNotEmpty
+          ? _plantPhotos[0].path
+          : (_plantFormData['imageUrl']?.isNotEmpty == true
+              ? _plantFormData['imageUrl'] as String
+              : 'https://via.placeholder.com/400x300');
 
-      // Save to Firebase
-      await _plantRepository.addPlant(plant);
+      if (_isEditing) {
+        // Update path: only the fields the wizard edits are written back.
+        // Null optionals are dropped so existing values are preserved.
+        final data = <String, dynamic>{
+          'name': _plantFormData['plantName'] ?? '',
+          'species': _plantFormData['species'] ?? '',
+          'imageUrl': imageUrl,
+          'careNotes': _plantFormData['careNotes'],
+          'location': _plantFormData['location'],
+          'humidity': (_plantFormData['humidity'] as num?)?.toInt(),
+          'light': _plantFormData['light'],
+          'careSchedule': _careScheduleData,
+          if (_plantPhotos.isNotEmpty)
+            'photos': _plantPhotos.map((photo) => photo.path).toList(),
+        };
+        data.removeWhere((key, value) => value == null);
+
+        await _plantRepository.updatePlant(_editingPlantId!, data);
+      } else {
+        // Create plant object
+        final plant = Plant(
+          id: DateTime.now().millisecondsSinceEpoch.toString(), // In production, use Firebase auto-generated ID
+          name: _plantFormData['plantName'] ?? '',
+          species: _plantFormData['species'] ?? '',
+          imageUrl: imageUrl,
+          status: 'healthy',
+          lastWatered: null,
+          nextWatering: null,
+          careNotes: _plantFormData['careNotes'],
+          location: _plantFormData['location'],
+          humidity: (_plantFormData['humidity'] as num?)?.toInt(),
+          light: _plantFormData['light'] as String?,
+          dateAdded: DateTime.now(),
+          careSchedule: _careScheduleData,
+          photos: _plantPhotos.map((photo) => photo.path).toList(),
+        );
+
+        // Save to Firebase
+        await _plantRepository.addPlant(plant);
+      }
 
       // Show success dialog
       if (mounted) {
@@ -674,19 +732,24 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                   size: 6.w,
                 ),
                 SizedBox(width: 3.w),
-                Text('Plant Added!'),
+                Text(_isEditing ? 'Plant Updated!' : 'Plant Added!'),
               ],
             ),
-            content: Text(
-                '${_plantFormData['plantName']} has been successfully added to your collection.'),
+            content: Text(_isEditing
+                ? 'Plant updated successfully.'
+                : '${_plantFormData['plantName']} has been successfully added to your collection.'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context); // Close dialog
-                  Navigator.pushNamed(
-                      context, '/add-plant-screen'); // Add another plant
+                  if (_isEditing) {
+                    Navigator.pop(context); // Return to the dashboard
+                  } else {
+                    Navigator.pushNamed(context,
+                        '/add-plant-screen'); // Add another plant
+                  }
                 },
-                child: Text('Add Another'),
+                child: Text(_isEditing ? 'Done' : 'Add Another'),
               ),
               ElevatedButton(
                 onPressed: () {
