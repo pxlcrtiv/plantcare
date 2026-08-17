@@ -1,4 +1,5 @@
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart' hide FirebaseService;
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +20,10 @@ void main() async {
   // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  await FirebaseAppCheck.instance.activate(
+    providerAndroid: AndroidDebugProvider(),
   );
   
   // 🚨 CRITICAL: Custom error handling - DO NOT REMOVE

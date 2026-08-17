@@ -13,6 +13,7 @@ import '../../models/plant.dart';
 import '../../widgets/floating_dock.dart';
 import '../calendar/calendar_screen.dart';
 import '../add_plant_screen/widgets/plant_database_browser.dart';
+import '../care_assistant_hub/care_assistant_hub.dart';
 import './widgets/home_tab.dart';
 import './widgets/plant_list_tab.dart';
 import './widgets/placeholder_tabs.dart';
@@ -438,7 +439,7 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
               onRefresh: _handleRefresh,
             ),
             _buildSearchTab(),
-            const DiagnosticsTab(),
+            const CareAssistantHub(),
             IdentifyTab(
               onScan: () =>
                   Navigator.pushNamed(context, '/plant-identification-camera'),
