@@ -34,6 +34,9 @@ class FakePlantAiService implements PlantAiService {
   Future<bool> isAvailable() async => true;
 
   @override
+  Future<String> chatAboutPlant(ChatRequest request) async => 'Stub reply';
+
+  @override
   Future<DiagnosisResult> diagnosePlant(DiagnosisRequest request) async {
     callCount++;
     lastRequest = request;
