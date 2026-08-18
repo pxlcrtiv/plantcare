@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
@@ -58,6 +59,13 @@ GenerateContentResponse textResponse(String text) {
   );
 }
 
+GenerateContentResponse jsonResponse(String json) {
+  return GenerateContentResponse(
+    [Candidate(Content.text(json), null, null, FinishReason.stop, null)],
+    null,
+  );
+}
+
 GenerateContentResponse blockedResponse() {
   return GenerateContentResponse(
     const [],
@@ -103,6 +111,38 @@ ChatRequest buildChatRequest({int messageCount = 3}) {
         text: 'Message $index',
       );
     }),
+  );
+}
+
+ScheduleRequest buildScheduleRequest() {
+  return ScheduleRequest(
+    species: 'Monstera deliciosa',
+    light: 'Bright indirect',
+    humidity: 60,
+    location: 'Living room',
+    careSchedule: const {
+      'wateringFrequency': 7,
+      'fertilizingEnabled': true,
+      'fertilizingFrequency': 30,
+      'mistingEnabled': false,
+      'mistingFrequency': 3,
+      'rotatingEnabled': false,
+      'rotatingFrequency': 7,
+    },
+  );
+}
+
+ReminderTextRequest buildReminderRequest() {
+  return ReminderTextRequest(
+    careSchedule: const {
+      'wateringFrequency': 7,
+      'fertilizingEnabled': true,
+      'fertilizingFrequency': 30,
+      'mistingEnabled': false,
+      'mistingFrequency': 3,
+      'rotatingEnabled': false,
+      'rotatingFrequency': 7,
+    },
   );
 }
 
@@ -244,6 +284,132 @@ void main() {
     });
   });
 
+  group('suggestWateringSchedule prompt assembly', () {
+    test('sends the grounded schedule prompt with a JSON schema config',
+        () async {
+      recorder.responses.add(jsonResponse('{"wateringFrequency": 5}'));
+
+      await service.suggestWateringSchedule(buildScheduleRequest());
+
+      expect(recorder.callCount, 1);
+      final content = recorder.lastContent!;
+      expect(content, hasLength(1));
+      final prompt = (content.single.parts.single as TextPart).text;
+      expect(prompt, contains('Monstera deliciosa'));
+      expect(prompt, contains('Bright indirect'));
+      expect(prompt, contains('60'));
+      expect(prompt, contains('Living room'));
+      expect(prompt, contains('wateringFrequency'));
+      final config = recorder.lastConfig!;
+      expect(config.temperature, 0.5);
+      expect(config.maxOutputTokens, 1024);
+      expect(config.responseMimeType, 'application/json');
+      expect(config.responseSchema, isNotNull);
+    });
+
+    test('parses a valid JSON suggestion', () async {
+      recorder.responses.add(jsonResponse(jsonEncode({
+            'wateringFrequency': 10,
+            'fertilizingEnabled': true,
+            'fertilizingFrequency': 45,
+            'mistingEnabled': true,
+            'mistingFrequency': 2,
+            'rotatingEnabled': true,
+            'rotatingFrequency': 14,
+            'reason': 'Bright light dries the soil faster',
+          })));
+
+      final suggestion =
+          await service.suggestWateringSchedule(buildScheduleRequest());
+
+      expect(suggestion.wateringFrequency, 10);
+      expect(suggestion.fertilizingEnabled, isTrue);
+      expect(suggestion.fertilizingFrequency, 45);
+      expect(suggestion.mistingEnabled, isTrue);
+      expect(suggestion.mistingFrequency, 2);
+      expect(suggestion.rotatingEnabled, isTrue);
+      expect(suggestion.rotatingFrequency, 14);
+      expect(suggestion.reason, 'Bright light dries the soil faster');
+    });
+
+    test('applies tolerant defaults when optional fields are missing',
+        () async {
+      recorder.responses.add(jsonResponse('{"wateringFrequency": 4}'));
+
+      final suggestion =
+          await service.suggestWateringSchedule(buildScheduleRequest());
+
+      expect(suggestion.wateringFrequency, 4);
+      expect(suggestion.fertilizingEnabled, isFalse);
+      expect(suggestion.fertilizingFrequency, 30);
+      expect(suggestion.mistingEnabled, isFalse);
+      expect(suggestion.mistingFrequency, 3);
+      expect(suggestion.rotatingEnabled, isFalse);
+      expect(suggestion.rotatingFrequency, 7);
+      expect(suggestion.reason, isNull);
+    });
+
+    test('throws MalformedOutputError when the model returns non-JSON text',
+        () async {
+      recorder.responses.add(textResponse('sure, water it weekly'));
+
+      expect(
+        () => service.suggestWateringSchedule(buildScheduleRequest()),
+        throwsA(isA<MalformedOutputError>()),
+      );
+    });
+
+    test('throws MalformedOutputError when the JSON is not an object',
+        () async {
+      recorder.responses.add(jsonResponse('[1, 2, 3]'));
+
+      expect(
+        () => service.suggestWateringSchedule(buildScheduleRequest()),
+        throwsA(isA<MalformedOutputError>()),
+      );
+    });
+
+    test('throws MalformedOutputError when the watering frequency is invalid',
+        () async {
+      recorder.responses.add(jsonResponse('{"fertilizingEnabled": true}'));
+
+      expect(
+        () => service.suggestWateringSchedule(buildScheduleRequest()),
+        throwsA(isA<MalformedOutputError>()),
+      );
+    });
+
+    test('throws BlockedError when the response is blocked', () async {
+      recorder.errors
+          .add(FirebaseAIException('Response was blocked due to safety'));
+
+      expect(
+        () => service.suggestWateringSchedule(buildScheduleRequest()),
+        throwsA(isA<BlockedError>()),
+      );
+    });
+  });
+
+  group('reminderTextFor', () {
+    test('sends the reminder prompt with a plain text config', () async {
+      recorder.responses
+          .add(textResponse('Monstera is thirsty — water it today!'));
+
+      final text = await service.reminderTextFor(buildReminderRequest());
+
+      expect(text, 'Monstera is thirsty — water it today!');
+      final content = recorder.lastContent!;
+      final prompt = (content.single.parts.single as TextPart).text;
+      expect(prompt, contains('wateringFrequency'));
+      expect(prompt, contains('7'));
+      final config = recorder.lastConfig!;
+      expect(config.temperature, 0.8);
+      expect(config.maxOutputTokens, 256);
+      expect(config.responseMimeType, isNull);
+      expect(config.responseSchema, isNull);
+    });
+  });
+
   group('result parsing', () {
     test('parses a well-formed diagnosis JSON', () async {
       recorder.responses.add(textResponse(_validJson));
@@ -356,6 +522,24 @@ void main() {
       );
     });
 
+    test('maps a quota limited schedule call to QuotaExceededError', () async {
+      recorder.errors.add(QuotaExceeded('Quota exhausted for project'));
+
+      expect(
+        () => service.suggestWateringSchedule(buildScheduleRequest()),
+        throwsA(isA<QuotaExceededError>()),
+      );
+    });
+
+    test('maps a quota limited reminder call to QuotaExceededError', () async {
+      recorder.errors.add(QuotaExceeded('Quota exhausted for project'));
+
+      expect(
+        () => service.reminderTextFor(buildReminderRequest()),
+        throwsA(isA<QuotaExceededError>()),
+      );
+    });
+
     test('maps a blocked response to BlockedError', () async {
       recorder.responses.add(blockedResponse());
 
@@ -380,6 +564,15 @@ void main() {
 
       expect(
         () => service.diagnosePlant(buildRequest()),
+        throwsA(isA<TimeoutError>()),
+      );
+    });
+
+    test('maps a schedule timeout to TimeoutError', () async {
+      recorder.errors.add(TimeoutException('took too long'));
+
+      expect(
+        () => service.suggestWateringSchedule(buildScheduleRequest()),
         throwsA(isA<TimeoutError>()),
       );
     });
@@ -480,6 +673,15 @@ void main() {
       );
     });
 
+    test('maps an unclassified schedule failure to UnknownError', () async {
+      recorder.errors.add(StateError('boom'));
+
+      expect(
+        () => service.suggestWateringSchedule(buildScheduleRequest()),
+        throwsA(isA<UnknownError>()),
+      );
+    });
+
     test('trims whitespace from the chat reply text', () async {
       recorder = RecordingModelCall(
         responder: (content, config) =>
@@ -505,11 +707,57 @@ void main() {
       expect(recorder.callCount, 0);
     });
 
+    test('skips the schedule model call when offline', () async {
+      ConnectivityPlatform.instance =
+          FakeConnectivityPlatform(isOffline: true);
+
+      expect(
+        () => service.suggestWateringSchedule(buildScheduleRequest()),
+        throwsA(isA<OfflineError>()),
+      );
+      expect(recorder.callCount, 0);
+    });
+
+    test('skips the reminder model call when offline', () async {
+      ConnectivityPlatform.instance =
+          FakeConnectivityPlatform(isOffline: true);
+
+      expect(
+        () => service.reminderTextFor(buildReminderRequest()),
+        throwsA(isA<OfflineError>()),
+      );
+      expect(recorder.callCount, 0);
+    });
+
     test('reports unavailable when offline', () async {
       ConnectivityPlatform.instance =
           FakeConnectivityPlatform(isOffline: true);
 
       expect(await service.isAvailable(), isFalse);
+    });
+  });
+
+  group('ScheduleSuggestion', () {
+    test('toCareScheduleMap returns the schedule fields', () {
+      final suggestion = ScheduleSuggestion(
+        wateringFrequency: 9,
+        fertilizingEnabled: true,
+        fertilizingFrequency: 40,
+        mistingEnabled: true,
+        mistingFrequency: 4,
+        rotatingEnabled: false,
+        rotatingFrequency: 7,
+      );
+
+      final map = suggestion.toCareScheduleMap();
+
+      expect(map['wateringFrequency'], 9);
+      expect(map['fertilizingEnabled'], isTrue);
+      expect(map['fertilizingFrequency'], 40);
+      expect(map['mistingEnabled'], isTrue);
+      expect(map['mistingFrequency'], 4);
+      expect(map['rotatingEnabled'], isFalse);
+      expect(map['rotatingFrequency'], 7);
     });
   });
 
@@ -529,6 +777,24 @@ void main() {
       expect(
         () => stub.chatAboutPlant(const ChatRequest(plantName: 'Cactus')),
         throwsA(isA<UnknownError>()),
+      );
+    });
+
+    test('suggestWateringSchedule throws UnsupportedError', () async {
+      const stub = StubPlantAiService();
+
+      expect(
+        () => stub.suggestWateringSchedule(buildScheduleRequest()),
+        throwsA(isA<UnsupportedError>()),
+      );
+    });
+
+    test('reminderTextFor throws UnsupportedError', () async {
+      const stub = StubPlantAiService();
+
+      expect(
+        () => stub.reminderTextFor(buildReminderRequest()),
+        throwsA(isA<UnsupportedError>()),
       );
     });
 

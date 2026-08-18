@@ -51,6 +51,20 @@ class FakePlantAiService implements PlantAiService {
     }
     return outcome as DiagnosisResult;
   }
+
+  @override
+  Future<ScheduleSuggestion> suggestWateringSchedule(
+    ScheduleRequest request,
+  ) async {
+    throw UnsupportedError('FakePlantAiService does not generate schedules');
+  }
+
+  @override
+  Future<String> reminderTextFor(ReminderTextRequest request) async {
+    throw UnsupportedError(
+      'FakePlantAiService does not generate reminder text',
+    );
+  }
 }
 
 class FakeImagePickerPlatform extends ImagePickerPlatform {

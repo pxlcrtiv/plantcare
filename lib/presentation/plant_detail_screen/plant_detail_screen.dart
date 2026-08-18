@@ -6,9 +6,11 @@ import 'package:sizer/sizer.dart';
 import 'dart:async';
 
 import '../../core/app_export.dart';
+import '../../providers/plant_ai_service_provider.dart';
 import '../../repositories/plant_repository.dart';
 import '../../repositories/plant_repository_impl.dart';
 import '../../services/firebase_service.dart';
+import '../../services/plant_ai_service.dart';
 import '../../services/plant_care_service.dart';
 import '../../services/notification_service.dart';
 import '../../models/plant.dart';
@@ -19,6 +21,7 @@ import './widgets/notes_tab_widget.dart';
 import './widgets/photos_tab_widget.dart';
 import './widgets/plant_hero_image_widget.dart';
 import './widgets/plant_info_widget.dart';
+import './widgets/reminder_settings_sheet.dart';
 
 class PlantDetailScreen extends StatefulWidget {
   const PlantDetailScreen({
@@ -43,7 +46,6 @@ class PlantDetailScreen extends StatefulWidget {
 class _PlantDetailScreenState extends State<PlantDetailScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  bool _careRemindersEnabled = true;
   late PlantRepository _plantRepository;
   late PlantCareService _plantCareService;
   
@@ -841,110 +843,42 @@ Future<void> _handleAddLog(
   }
 
   void _showReminderSettings() {
-    final savedReminderTime = _plant?.careSchedule['reminderTime'];
-    final reminderTime =
-        savedReminderTime is String && savedReminderTime.trim().isNotEmpty
-            ? savedReminderTime
-            : null;
+    final plant = _plant;
+    if (plant == null) return;
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: 35.h,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(4.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 12.w,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.outline
-                        .withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              SizedBox(height: 2.h),
-
-              Text(
-                'Care Reminders',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 2.h),
-
-              // Reminder toggle
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Enable Reminders',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Switch(
-                    value: _careRemindersEnabled,
-                    onChanged: (value) async {
-                      setState(() {
-                        _careRemindersEnabled = value;
-                      });
-                      
-                      if (_plant != null) {
-                        if (value) {
-                          await _plantCareService.scheduleCareReminders(_plant!);
-                        } else {
-                          await NotificationService().cancelPlantReminders(_plant!.id);
-                        }
-                      }
-                      
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 2.h),
-
-              if (_careRemindersEnabled) ...[
-                Text(
-                  'Reminder Time',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                SizedBox(height: 1.h),
-                ListTile(
-                  leading: CustomIconWidget(
-                    iconName: 'schedule',
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 24,
-                  ),
-                  title: Text(_formatReminderTime(reminderTime ?? '09:00')),
-                  subtitle: Text(
-                    reminderTime != null
-                        ? 'Daily reminder at $reminderTime'
-                        : 'Daily reminder time',
-                  ),
-                  trailing: CustomIconWidget(
-                    iconName: 'edit',
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    size: 20,
-                  ),
-                  onTap: _handleReminderTime,
-                ),
-              ],
-            ],
-          ),
-        ),
+      builder: (context) => ReminderSettingsSheet(
+        plant: plant,
+        aiService: _aiService,
+        onCareScheduleUpdated: _persistCareScheduleUpdate,
+        onScheduleCareReminders: _plantCareService.scheduleCareReminders,
+        onCancelPlantReminders: _plantCareService.cancelReminders,
+        onReminderTimeTap: _handleReminderTime,
       ),
     );
+  }
+
+  Future<void> _persistCareScheduleUpdate(
+    String plantId,
+    Map<String, dynamic> updates,
+  ) async {
+    await _plantRepository.updatePlant(plantId, updates);
+    final plant = _plant;
+    if (plant == null || plant.id != plantId) return;
+    final updatedSchedule = Map<String, dynamic>.from(plant.careSchedule);
+    for (final entry in updates.entries) {
+      updatedSchedule[entry.key.split('.').last] = entry.value;
+    }
+    final updatedPlant = _copyPlantWithSchedule(updatedSchedule);
+    setState(() {
+      _plant = updatedPlant;
+    });
+    try {
+      await _plantCareService.scheduleCareReminders(updatedPlant);
+    } catch (_) {}
   }
 
   Future<void> _handleReminderTime() async {
@@ -1015,14 +949,26 @@ Future<void> _handleAddLog(
     return const TimeOfDay(hour: 9, minute: 0);
   }
 
-  String _formatReminderTime(String hhmm) {
-    final parts = hhmm.split(':');
-    if (parts.length != 2) return hhmm;
-    final hour = int.tryParse(parts[0]) ?? 9;
-    final minute = parts[1].padLeft(2, '0');
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final displayHour = hour % 12 == 0 ? 12 : hour % 12;
-    return '$displayHour:$minute $period';
+  PlantAiService get _aiService => PlantAiServiceProvider.of(context);
+
+  Plant _copyPlantWithSchedule(Map<String, dynamic> schedule) {
+    final plant = _plant!;
+    return Plant(
+      id: plant.id,
+      name: plant.name,
+      species: plant.species,
+      imageUrl: plant.imageUrl,
+      status: plant.status,
+      lastWatered: plant.lastWatered,
+      nextWatering: plant.nextWatering,
+      careNotes: plant.careNotes,
+      location: plant.location,
+      humidity: plant.humidity,
+      light: plant.light,
+      dateAdded: plant.dateAdded,
+      careSchedule: schedule,
+      photos: plant.photos,
+    );
   }
 
   @override

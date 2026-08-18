@@ -50,7 +50,7 @@ class NotificationService {
     await androidImpl?.zonedSchedule(
       plant.id.hashCode, // Unique ID based on plant ID
       'Water ${plant.name}',
-      'Time to water your ${plant.name}!',
+      _wateringReminderBody(plant),
       tz.TZDateTime.from(nextWatering, tz.local),
       const AndroidNotificationDetails(
         'plant_care_channel',
@@ -94,6 +94,14 @@ class NotificationService {
   Future<void> cancelPlantReminders(String plantId) async {
     await _localNotifications.cancel(plantId.hashCode);
     await _localNotifications.cancel(plantId.hashCode + 1000); // fertilizing reminder
+  }
+
+  String _wateringReminderBody(Plant plant) {
+    final reminderText = plant.careSchedule['reminderText'];
+    if (reminderText is String && reminderText.trim().isNotEmpty) {
+      return reminderText;
+    }
+    return 'Time to water your ${plant.name}!';
   }
 
   Stream<RemoteMessage> get onMessage => FirebaseMessaging.onMessage;
