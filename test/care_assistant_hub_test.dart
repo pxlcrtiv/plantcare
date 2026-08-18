@@ -17,6 +17,9 @@ class FakePlantAiService implements PlantAiService {
 
   @override
   Future<bool> isAvailable() async => available;
+
+  @override
+  Future<String> chatAboutPlant(ChatRequest request) async => 'Stub reply';
 }
 
 class FakeConnectivityPlatform extends ConnectivityPlatform {
@@ -97,7 +100,7 @@ void main() {
       expect(find.text('Coming soon'), findsOneWidget);
     });
 
-    testWidgets('tapping Care chat opens its stub screen', (tester) async {
+    testWidgets('tapping Care chat opens the chat screen', (tester) async {
       await usePhoneViewport(tester);
       await tester.pumpWidget(wrapHub(const CareAssistantHub()));
       await tester.pumpAndSettle();
@@ -106,7 +109,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(CareChatStubScreen), findsOneWidget);
-      expect(find.text('Coming soon'), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.byIcon(Icons.send), findsOneWidget);
     });
 
     testWidgets('shows a resting notice when the assistant is unavailable',
