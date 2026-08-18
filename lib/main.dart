@@ -10,8 +10,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/app_export.dart';
 import '../services/sync_service.dart';
 import '../services/firebase_service.dart';
+import '../services/plant_ai_service.dart';
 import '../repositories/plant_repository_impl.dart';
 import '../providers/sync_provider.dart';
+import '../providers/plant_ai_service_provider.dart';
 import '../widgets/custom_error_widget.dart';
 
 void main() async {
@@ -56,7 +58,9 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: Sizer(builder: (context, orientation, screenType) {
-        return MaterialApp(
+        return PlantAiServiceProvider(
+          service: const StubPlantAiService(),
+          child: MaterialApp(
           title: 'plantcare',
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
@@ -74,6 +78,7 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           routes: AppRoutes.routes,
           initialRoute: AppRoutes.initial,  // Back to splash screen as initial
+          ),
         );
       }),
     );
