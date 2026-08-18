@@ -335,6 +335,10 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   Widget _buildCareScheduleStep() {
     return SingleChildScrollView(
       child: CareScheduleSetup(
+        species: _plantFormData['species'] as String? ?? '',
+        light: _plantFormData['light'] as String?,
+        humidity: (_plantFormData['humidity'] as num?)?.toInt(),
+        location: _plantFormData['location'] as String?,
         initialData: _isEditing ? _careScheduleData : null,
         onScheduleChanged: (scheduleData) {
           setState(() {

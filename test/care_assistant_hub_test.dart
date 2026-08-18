@@ -17,6 +17,20 @@ class FakePlantAiService implements PlantAiService {
 
   @override
   Future<bool> isAvailable() async => available;
+
+  @override
+  Future<ScheduleSuggestion> suggestWateringSchedule(
+    ScheduleRequest request,
+  ) async {
+    throw UnsupportedError('FakePlantAiService does not generate schedules');
+  }
+
+  @override
+  Future<String> reminderTextFor(ReminderTextRequest request) async {
+    throw UnsupportedError(
+      'FakePlantAiService does not generate reminder text',
+    );
+  }
 }
 
 class FakeConnectivityPlatform extends ConnectivityPlatform {
