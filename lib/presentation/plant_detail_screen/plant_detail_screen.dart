@@ -1098,6 +1098,7 @@ Future<void> _handleAddLog(
                   careHistory: _careHistory,
                 ),
                 HealthLogTabWidget(
+                  plant: _plant!,
                   healthLogs: _healthLogs,
                   onAddLog: _handleAddLog,
                 ),

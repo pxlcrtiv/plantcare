@@ -17,6 +17,11 @@ class FakePlantAiService implements PlantAiService {
 
   @override
   Future<bool> isAvailable() async => available;
+
+  @override
+  Future<HealthLogSummary> summarizeHealthLogs(SummaryRequest request) {
+    throw UnimplementedError('Not used by the hub tests.');
+  }
 }
 
 class FakeConnectivityPlatform extends ConnectivityPlatform {
