@@ -17,6 +17,11 @@ class FakePlantAiService implements PlantAiService {
 
   @override
   Future<bool> isAvailable() async => available;
+
+  @override
+  Future<DiagnosisResult> diagnosePlant(DiagnosisRequest request) async {
+    return const DiagnosisResult(condition: 'Overwatering', severity: 'mild');
+  }
 }
 
 class FakeConnectivityPlatform extends ConnectivityPlatform {
@@ -94,7 +99,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(PlantDoctorStubScreen), findsOneWidget);
-      expect(find.text('Coming soon'), findsOneWidget);
+      expect(find.text('Diagnose'), findsOneWidget);
     });
 
     testWidgets('tapping Care chat opens its stub screen', (tester) async {
