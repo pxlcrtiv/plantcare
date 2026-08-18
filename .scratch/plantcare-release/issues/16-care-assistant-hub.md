@@ -1,14 +1,12 @@
 Type: prototype
-Status: open
+Status: resolved (2026-08-17)
 Blocked by:
 
-## Question
+## Decision
 
-What does the Flask tab look like as the "Care Assistant" hub? The destination pins it as the AI home; this ticket decides the concrete UX shell:
-
-- Hub layout: Plant Doctor entry card + Care chat entry card (and where schedule/reminder/summary actions surface, if at all).
-- How the dock's Flask destination changes from the current "coming soon" placeholder.
-- Contextual entry points and their routing: Home scan area, plant detail screen actions → do they land on the hub, or deep-link into doctor/chat?
-- Empty/offline states of the hub.
-
-HITL — build a cheap prototype via the `prototype` skill (stub UI, no backend calls yet) and react to it together. Skills: `prototype`, `grilling`. Unblocked (UX shell needs no backend).
+- **Hub layout**: header "Care Assistant" + subtitle "Your AI partner for keeping every plant thriving"; two entry cards — Plant Doctor ("Snap a photo and get an instant health diagnosis.") and Care chat ("Ask anything about watering, light and repotting.") — olive-tinted icon badges on `primary.withValues(alpha: 0.1)`.
+- **Flask dock tab**: index 3 of the IndexedStack swaps the DiagnosticsTab placeholder for the hub; DiagnosticsTab class removed, IdentifyTab stays.
+- **Navigation**: `Navigator.push` + `MaterialPageRoute` into stub screens ("Coming soon" + feature description) for not-yet-built destinations.
+- **Contextual entries**: the hub's two entry cards are the routing surface. Home scan area keeps its current behavior (PlantNet identify flow — spec 23 keeps PlantNet as the identification engine; routing it into the hub would regress it). Plant detail gets no AI action in this ticket — "ask about my plant" deep-links are feature work for 17/18.
+- **Empty/offline states**: hub always renders the entry cards (never dead-ends); offline banner via connectivity_plus (mirroring sync_service.dart); "assistant is resting / Try again in a moment." notice when the service reports unavailable (spec 23 language). Deep degradation UX is 21/07's job.
+- **Built by slice 01** (wf/01-care-assistant-hub, commit `e9b35a8`): hub turned into the real hub with `PlantAiService` seam (`isAvailable()`) + `PlantAiServiceProvider`; 5 widget tests (rendering, navigation ×2, resting, offline); baseline 52 → 54 tests.
