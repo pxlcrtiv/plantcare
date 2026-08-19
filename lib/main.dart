@@ -10,6 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/app_export.dart';
 import '../services/sync_service.dart';
 import '../services/firebase_service.dart';
+import '../services/plant_ai_model_call.dart';
 import '../services/plant_ai_service.dart';
 import '../repositories/plant_repository_impl.dart';
 import '../providers/sync_provider.dart';
@@ -59,7 +60,7 @@ class MyApp extends StatelessWidget {
       ],
       child: Sizer(builder: (context, orientation, screenType) {
         return PlantAiServiceProvider(
-          service: const StubPlantAiService(),
+          service: GeminiPlantAiService(modelCall: plantAiModelCall()),
           child: MaterialApp(
           title: 'plantcare',
           theme: AppTheme.lightTheme,
