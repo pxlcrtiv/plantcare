@@ -60,6 +60,11 @@ class FakePlantAiService implements PlantAiService {
 
   @override
   Future<String> chatAboutPlant(ChatRequest request) async => 'Stub reply';
+
+  @override
+  Future<HealthLogSummary> summarizeHealthLogs(SummaryRequest request) async {
+    throw UnsupportedError('FakePlantAiService does not generate summaries');
+  }
 }
 
 class RecordingPlantRepository extends Fake implements PlantRepository {

@@ -1,18 +1,89 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:plantcare/models/plant.dart';
 import 'package:plantcare/presentation/plant_detail_screen/widgets/health_log_tab_widget.dart';
+import 'package:plantcare/providers/plant_ai_service_provider.dart';
+import 'package:plantcare/services/plant_ai_service.dart';
 import 'package:plantcare/theme/app_theme.dart';
 import 'package:sizer/sizer.dart';
 
-Widget wrapApp(Widget home) {
+class FakePlantAiService implements PlantAiService {
+  FakePlantAiService({this.onSummarize});
+
+  final Future<HealthLogSummary> Function(SummaryRequest request)? onSummarize;
+
+  @override
+  Future<bool> isAvailable() async => true;
+
+  @override
+  Future<HealthLogSummary> summarizeHealthLogs(SummaryRequest request) {
+    final handler = onSummarize;
+    if (handler == null) {
+      throw UnimplementedError('No summarize handler registered.');
+    }
+    return handler(request);
+  }
+
+  @override
+  Future<DiagnosisResult> diagnosePlant(DiagnosisRequest request) async {
+    return const DiagnosisResult(condition: 'Overwatering', severity: 'mild');
+  }
+
+  @override
+  Future<String> chatAboutPlant(ChatRequest request) async => 'Stub reply';
+
+  @override
+  Future<ScheduleSuggestion> suggestWateringSchedule(
+    ScheduleRequest request,
+  ) async {
+    throw UnsupportedError('FakePlantAiService does not generate schedules');
+  }
+
+  @override
+  Future<String> reminderTextFor(ReminderTextRequest request) async {
+    throw UnsupportedError(
+      'FakePlantAiService does not generate reminder text',
+    );
+  }
+}
+
+Widget wrapApp(Widget home, {PlantAiService? service}) {
   return Sizer(
     builder: (context, orientation, screenType) {
       return MaterialApp(
         theme: AppTheme.lightTheme,
-        home: Scaffold(body: home),
+        home: PlantAiServiceProvider(
+          service: service ?? const StubPlantAiService(),
+          child: Scaffold(body: home),
+        ),
       );
     },
+  );
+}
+
+Plant buildPlant() {
+  return Plant(
+    id: 'plant-1',
+    name: 'Monstera',
+    species: 'Monstera deliciosa',
+    imageUrl: '',
+    status: 'healthy',
+    location: 'Living room',
+    dateAdded: DateTime(2026, 1, 1),
+    careSchedule: const {'wateringFrequency': 7},
+    photos: const [],
+  );
+}
+
+HealthLogSummary buildSummary() {
+  return const HealthLogSummary(
+    overallHealth: 'Healthy and growing steadily.',
+    notableChanges: ['New leaf unfurled'],
+    anomalies: ['Two yellowing lower leaves'],
+    suggestions: ['Water when the top two centimetres are dry'],
   );
 }
 
@@ -36,6 +107,7 @@ void main() {
       await usePhoneViewport(tester);
       await tester.pumpWidget(
         wrapApp(HealthLogTabWidget(
+          plant: buildPlant(),
           healthLogs: const [],
           onAddLog: (type, notes, date) async {},
         )),
@@ -63,6 +135,7 @@ void main() {
       await usePhoneViewport(tester);
       await tester.pumpWidget(
         wrapApp(HealthLogTabWidget(
+          plant: buildPlant(),
           healthLogs: const [],
           onAddLog: (type, notes, date) async {},
         )),
@@ -86,6 +159,7 @@ void main() {
       DateTime? savedDate;
       await tester.pumpWidget(
         wrapApp(HealthLogTabWidget(
+          plant: buildPlant(),
           healthLogs: const [],
           onAddLog: (type, notes, date) async {
             savedType = type;
@@ -121,6 +195,7 @@ void main() {
       var calls = 0;
       await tester.pumpWidget(
         wrapApp(HealthLogTabWidget(
+          plant: buildPlant(),
           healthLogs: const [],
           onAddLog: (type, notes, date) async {
             calls++;
@@ -151,6 +226,7 @@ void main() {
       ];
       await tester.pumpWidget(
         wrapApp(HealthLogTabWidget(
+          plant: buildPlant(),
           healthLogs: logs,
           onAddLog: (type, notes, date) async {},
         )),
@@ -161,5 +237,158 @@ void main() {
       expect(find.text('Soaked thoroughly until drainage'), findsOneWidget);
       expect(find.text('10/8/2026'), findsOneWidget);
     });
+  });
+
+  group('HealthLogTabWidget summary', () {
+    testWidgets('renders a generated summary card after summarizing',
+        (tester) async {
+      await usePhoneViewport(tester);
+      await tester.pumpWidget(
+        wrapApp(
+          HealthLogTabWidget(
+            plant: buildPlant(),
+            healthLogs: const [],
+            onAddLog: (type, notes, date) async {},
+          ),
+          service: FakePlantAiService(onSummarize: (_) async => buildSummary()),
+        ),
+      );
+
+      await tester.tap(find.text('Summarize'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Healthy and growing steadily.'), findsOneWidget);
+      expect(find.text('Notable changes'), findsOneWidget);
+      expect(find.text('New leaf unfurled'), findsOneWidget);
+      expect(find.text('Worth attention'), findsOneWidget);
+      expect(find.text('Two yellowing lower leaves'), findsOneWidget);
+      expect(find.text('Suggestions'), findsOneWidget);
+      expect(
+        find.text('Water when the top two centimetres are dry'),
+        findsOneWidget,
+      );
+      expect(find.text('Regenerate'), findsOneWidget);
+    });
+
+    testWidgets('shows a loading state while summarizing', (tester) async {
+      await usePhoneViewport(tester);
+      final completer = Completer<HealthLogSummary>();
+      await tester.pumpWidget(
+        wrapApp(
+          HealthLogTabWidget(
+            plant: buildPlant(),
+            healthLogs: const [],
+            onAddLog: (type, notes, date) async {},
+          ),
+          service: FakePlantAiService(
+            onSummarize: (_) => completer.future,
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Summarize'));
+      await tester.pump();
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(
+        find.text("Writing your plant's health story…"),
+        findsOneWidget,
+      );
+
+      completer.complete(buildSummary());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Healthy and growing steadily.'), findsOneWidget);
+    });
+
+    testWidgets('regenerating replaces the summary with an updated one',
+        (tester) async {
+      await usePhoneViewport(tester);
+      var calls = 0;
+      await tester.pumpWidget(
+        wrapApp(
+          HealthLogTabWidget(
+            plant: buildPlant(),
+            healthLogs: const [],
+            onAddLog: (type, notes, date) async {},
+          ),
+          service: FakePlantAiService(onSummarize: (_) async {
+            calls++;
+            return calls == 1
+                ? buildSummary()
+                : const HealthLogSummary(
+                    overallHealth: 'Updated summary text.',
+                  );
+          }),
+        ),
+      );
+
+      await tester.tap(find.text('Summarize'));
+      await tester.pumpAndSettle();
+      expect(find.text('Healthy and growing steadily.'), findsOneWidget);
+
+      await tester.tap(find.text('Regenerate'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Updated summary text.'), findsOneWidget);
+      expect(find.text('Healthy and growing steadily.'), findsNothing);
+    });
+
+    for (final (error, title, body) in [
+      (
+        const QuotaExceededError(),
+        'The assistant is resting',
+        'Try again in a moment.',
+      ),
+      (
+        const BlockedError(),
+        'The assistant could not answer',
+        'Try rephrasing or summarize again.',
+      ),
+      (
+        const TimeoutError(),
+        'The assistant took too long',
+        'Try again in a moment.',
+      ),
+      (
+        const MalformedOutputError(),
+        'The assistant is resting',
+        'Try again in a moment.',
+      ),
+      (
+        const OfflineError(),
+        "You're offline",
+        'Connect to the internet and try again.',
+      ),
+      (
+        const UnknownError(),
+        'Something went wrong',
+        'Try again in a moment.',
+      ),
+    ]) {
+      testWidgets('renders the $title error message with retry',
+          (tester) async {
+        await usePhoneViewport(tester);
+        await tester.pumpWidget(
+          wrapApp(
+            HealthLogTabWidget(
+              plant: buildPlant(),
+              healthLogs: const [],
+              onAddLog: (type, notes, date) async {},
+            ),
+            service: FakePlantAiService(
+              onSummarize: (_) async => throw error,
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('Summarize'));
+        await tester.pumpAndSettle();
+
+        expect(find.text(title), findsOneWidget);
+        expect(find.text(body), findsOneWidget);
+        expect(find.text('Try again'), findsOneWidget);
+      });
+    }
   });
 }

@@ -51,6 +51,11 @@ class FakeChatPlantAiService implements PlantAiService {
       'FakeChatPlantAiService does not generate reminder text',
     );
   }
+
+  @override
+  Future<HealthLogSummary> summarizeHealthLogs(SummaryRequest request) async {
+    throw UnsupportedError('FakeChatPlantAiService does not generate summaries');
+  }
 }
 
 class FakeConnectivityPlatform extends ConnectivityPlatform {

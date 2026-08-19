@@ -146,6 +146,26 @@ ReminderTextRequest buildReminderRequest() {
   );
 }
 
+SummaryRequest buildSummaryRequest() {
+  return SummaryRequest(
+    plantName: 'Monstera',
+    species: 'Monstera deliciosa',
+    humidity: 60,
+    light: 'Bright indirect',
+    location: 'Living room',
+    careNotes: 'Likes a moss pole.',
+    careSchedule: const {'wateringFrequency': 7},
+    healthLogs: [
+      HealthLogEntry(
+        type: 'watering',
+        title: 'Watering',
+        description: 'Soaked thoroughly until drainage',
+        date: DateTime(2026, 8, 10),
+      ),
+    ],
+  );
+}
+
 void main() {
   late ConnectivityPlatform originalPlatform;
   late RecordingModelCall recorder;
@@ -410,6 +430,62 @@ void main() {
     });
   });
 
+  group('summarizeHealthLogs prompt assembly', () {
+    test('assembles a grounded prompt with the profile and log entries',
+        () async {
+      recorder.responses.add(textResponse(_validSummaryJson));
+
+      final summary = await service.summarizeHealthLogs(buildSummaryRequest());
+
+      expect(summary.overallHealth, 'Healthy and growing steadily.');
+      final prompt =
+          (recorder.lastContent!.single.parts.single as TextPart).text;
+      expect(prompt, contains('Monstera'));
+      expect(prompt, contains('Monstera deliciosa'));
+      expect(prompt, contains('Living room'));
+      expect(prompt, contains('60%'));
+      expect(prompt, contains('Bright indirect'));
+      expect(prompt, contains('wateringFrequency: 7'));
+      expect(prompt, contains('Soaked thoroughly until drainage'));
+      expect(prompt, contains('2026-08-10'));
+    });
+
+    test('sends the summary model config with JSON schema', () async {
+      recorder.responses.add(textResponse(_validSummaryJson));
+
+      await service.summarizeHealthLogs(buildSummaryRequest());
+
+      final config = recorder.lastConfig!;
+      expect(config.temperature, 0.4);
+      expect(config.maxOutputTokens, 1024);
+      expect(config.responseMimeType, 'application/json');
+      expect(config.responseSchema, isNotNull);
+    });
+
+    test('limits long histories to the newest 40 entries', () async {
+      final entries = List.generate(
+        45,
+        (i) => HealthLogEntry(
+          type: 'watering',
+          title: 'Watering',
+          description: 'Entry $i',
+          date: DateTime(2026, 1, 1).add(Duration(days: i)),
+        ),
+      );
+      recorder.responses.add(textResponse(_validSummaryJson));
+
+      await service.summarizeHealthLogs(
+        SummaryRequest(plantName: 'Monstera', healthLogs: entries),
+      );
+
+      final prompt =
+          (recorder.lastContent!.single.parts.single as TextPart).text;
+      expect(prompt, contains('5 older entries omitted'));
+      expect(prompt, isNot(contains('Entry 0')));
+      expect(prompt, contains('Entry 44'));
+    });
+  });
+
   group('result parsing', () {
     test('parses a well-formed diagnosis JSON', () async {
       recorder.responses.add(textResponse(_validJson));
@@ -498,6 +574,124 @@ void main() {
         throwsA(isA<MalformedOutputError>()),
       );
     });
+
+    test('parses a well-formed summary response', () async {
+      recorder.responses.add(textResponse(_validSummaryJson));
+
+      final summary = await service.summarizeHealthLogs(buildSummaryRequest());
+
+      expect(summary.overallHealth, 'Healthy and growing steadily.');
+      expect(summary.notableChanges, [
+        'New leaf unfurled',
+        'Moved to a brighter spot',
+      ]);
+      expect(summary.anomalies, ['Two yellowing lower leaves']);
+      expect(summary.suggestions, [
+        'Water when the top two centimetres are dry',
+      ]);
+    });
+
+    test('tolerates missing optional summary fields', () async {
+      recorder.responses.add(textResponse('{"overallHealth":"Doing well."}'));
+
+      final summary = await service.summarizeHealthLogs(buildSummaryRequest());
+
+      expect(summary.overallHealth, 'Doing well.');
+      expect(summary.notableChanges, isEmpty);
+      expect(summary.anomalies, isEmpty);
+      expect(summary.suggestions, isEmpty);
+    });
+
+    test('throws MalformedOutputError when the summary is not valid JSON',
+        () async {
+      recorder.responses.add(textResponse('definitely not json'));
+
+      expect(
+        () => service.summarizeHealthLogs(buildSummaryRequest()),
+        throwsA(isA<MalformedOutputError>()),
+      );
+    });
+
+    test('throws MalformedOutputError when the summary is not an object',
+        () async {
+      recorder.responses.add(textResponse('["overallHealth"]'));
+
+      expect(
+        () => service.summarizeHealthLogs(buildSummaryRequest()),
+        throwsA(isA<MalformedOutputError>()),
+      );
+    });
+
+    test('throws MalformedOutputError when overallHealth is missing',
+        () async {
+      recorder.responses.add(textResponse('{"suggestions":["Water more."]}'));
+
+      expect(
+        () => service.summarizeHealthLogs(buildSummaryRequest()),
+        throwsA(isA<MalformedOutputError>()),
+      );
+    });
+
+    test('throws MalformedOutputError when the summary has no text', () async {
+      recorder.responses.add(GenerateContentResponse(const [], null));
+
+      expect(
+        () => service.summarizeHealthLogs(buildSummaryRequest()),
+        throwsA(isA<MalformedOutputError>()),
+      );
+    });
+  });
+
+  group('HealthLogSummary.fromJson', () {
+    test('parses a valid fixture', () {
+      final summary = HealthLogSummary.fromJson(
+        {
+          'overallHealth': 'Doing well.',
+          'notableChanges': ['New growth'],
+          'anomalies': ['Browning tips'],
+          'suggestions': ['Repot soon'],
+        },
+      );
+
+      expect(summary.overallHealth, 'Doing well.');
+      expect(summary.notableChanges, ['New growth']);
+      expect(summary.anomalies, ['Browning tips']);
+      expect(summary.suggestions, ['Repot soon']);
+    });
+
+    test('defaults missing optional lists to empty', () {
+      final summary = HealthLogSummary.fromJson({
+        'overallHealth': 'Doing well.',
+      });
+
+      expect(summary.notableChanges, isEmpty);
+      expect(summary.anomalies, isEmpty);
+      expect(summary.suggestions, isEmpty);
+    });
+
+    test('rejects a non-string overallHealth', () {
+      expect(
+        () => HealthLogSummary.fromJson({'overallHealth': 42}),
+        throwsFormatException,
+      );
+    });
+
+    test('rejects a missing overallHealth', () {
+      expect(
+        () => HealthLogSummary.fromJson({'anomalies': <String>[]}),
+        throwsFormatException,
+      );
+    });
+
+    test('rejects list items that are not strings', () {
+      expect(
+        () => HealthLogSummary.fromJson({
+          'overallHealth': 'Doing well.',
+          'anomalies': [1, 2],
+        }),
+        throwsFormatException,
+      );
+    });
   });
 
   group('error mapping', () {
@@ -540,6 +734,26 @@ void main() {
       );
     });
 
+    test('maps a quota limited summary call to QuotaExceededError', () async {
+      recorder.errors.add(QuotaExceeded('Quota exceeded'));
+
+      expect(
+        () => service.summarizeHealthLogs(buildSummaryRequest()),
+        throwsA(isA<QuotaExceededError>()),
+      );
+    });
+
+    test('maps a resource exhausted message to QuotaExceededError', () async {
+      recorder.errors.add(FirebaseAIException(
+        'RESOURCE_EXHAUSTED: monthly free-tier quota reached',
+      ));
+
+      expect(
+        () => service.summarizeHealthLogs(buildSummaryRequest()),
+        throwsA(isA<QuotaExceededError>()),
+      );
+    });
+
     test('maps a blocked response to BlockedError', () async {
       recorder.responses.add(blockedResponse());
 
@@ -559,6 +773,16 @@ void main() {
       );
     });
 
+    test('maps a blocked summary exception to BlockedError', () async {
+      recorder.errors
+          .add(FirebaseAIException('Response was blocked due to safety'));
+
+      expect(
+        () => service.summarizeHealthLogs(buildSummaryRequest()),
+        throwsA(isA<BlockedError>()),
+      );
+    });
+
     test('maps a TimeoutException to TimeoutError', () async {
       recorder.errors.add(TimeoutException('took too long'));
 
@@ -573,6 +797,15 @@ void main() {
 
       expect(
         () => service.suggestWateringSchedule(buildScheduleRequest()),
+        throwsA(isA<TimeoutError>()),
+      );
+    });
+
+    test('maps a summary timeout to TimeoutError', () async {
+      recorder.errors.add(TimeoutException('timed out'));
+
+      expect(
+        () => service.summarizeHealthLogs(buildSummaryRequest()),
         throwsA(isA<TimeoutError>()),
       );
     });
@@ -682,6 +915,25 @@ void main() {
       );
     });
 
+    test('maps an unknown summary failure to UnknownError', () async {
+      recorder.errors.add(StateError('boom'));
+
+      expect(
+        () => service.summarizeHealthLogs(buildSummaryRequest()),
+        throwsA(isA<UnknownError>()),
+      );
+    });
+
+    test('passes PlantAiException from the model call through unchanged',
+        () async {
+      recorder.errors.add(const MalformedOutputError());
+
+      expect(
+        () => service.summarizeHealthLogs(buildSummaryRequest()),
+        throwsA(isA<MalformedOutputError>()),
+      );
+    });
+
     test('trims whitespace from the chat reply text', () async {
       recorder = RecordingModelCall(
         responder: (content, config) =>
@@ -724,6 +976,17 @@ void main() {
 
       expect(
         () => service.reminderTextFor(buildReminderRequest()),
+        throwsA(isA<OfflineError>()),
+      );
+      expect(recorder.callCount, 0);
+    });
+
+    test('skips the summary model call when offline', () async {
+      ConnectivityPlatform.instance =
+          FakeConnectivityPlatform(isOffline: true);
+
+      expect(
+        () => service.summarizeHealthLogs(buildSummaryRequest()),
         throwsA(isA<OfflineError>()),
       );
       expect(recorder.callCount, 0);
@@ -798,6 +1061,15 @@ void main() {
       );
     });
 
+    test('summarizeHealthLogs throws UnsupportedError', () async {
+      const stub = StubPlantAiService();
+
+      expect(
+        () => stub.summarizeHealthLogs(buildSummaryRequest()),
+        throwsA(isA<UnsupportedError>()),
+      );
+    });
+
     test('isAvailable is false', () async {
       const stub = StubPlantAiService();
 
@@ -820,5 +1092,14 @@ const String _minimalJson = '''
 {
   "condition": "Underwatering",
   "severity": "mild"
+}
+''';
+
+const String _validSummaryJson = '''
+{
+  "overallHealth": "Healthy and growing steadily.",
+  "notableChanges": ["New leaf unfurled", "Moved to a brighter spot"],
+  "anomalies": ["Two yellowing lower leaves"],
+  "suggestions": ["Water when the top two centimetres are dry"]
 }
 ''';

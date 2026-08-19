@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:http/http.dart' as http;
@@ -16,6 +17,8 @@ abstract class PlantAiService {
   Future<ScheduleSuggestion> suggestWateringSchedule(ScheduleRequest request);
 
   Future<String> reminderTextFor(ReminderTextRequest request);
+
+  Future<HealthLogSummary> summarizeHealthLogs(SummaryRequest request);
 }
 
 class StubPlantAiService implements PlantAiService {
@@ -46,6 +49,11 @@ class StubPlantAiService implements PlantAiService {
     throw UnsupportedError(
       'StubPlantAiService does not generate reminder text',
     );
+  }
+
+  @override
+  Future<HealthLogSummary> summarizeHealthLogs(SummaryRequest request) {
+    throw UnsupportedError('StubPlantAiService does not generate summaries');
   }
 }
 
@@ -307,6 +315,105 @@ class ScheduleSuggestion {
   }
 }
 
+class HealthLogSummary {
+  const HealthLogSummary({
+    required this.overallHealth,
+    this.notableChanges = const [],
+    this.anomalies = const [],
+    this.suggestions = const [],
+  });
+
+  factory HealthLogSummary.fromJson(Map<String, dynamic> json) {
+    final overallHealth = json['overallHealth'];
+    if (overallHealth is! String || overallHealth.trim().isEmpty) {
+      throw const FormatException('overallHealth must be a non-empty string.');
+    }
+    return HealthLogSummary(
+      overallHealth: overallHealth,
+      notableChanges: _stringList(json['notableChanges'], 'notableChanges'),
+      anomalies: _stringList(json['anomalies'], 'anomalies'),
+      suggestions: _stringList(json['suggestions'], 'suggestions'),
+    );
+  }
+
+  static List<String> _stringList(Object? value, String field) {
+    if (value == null) return const [];
+    if (value is! List) {
+      throw FormatException('$field must be an array of strings.');
+    }
+    final items = <String>[];
+    for (final item in value) {
+      if (item is! String) {
+        throw FormatException('$field must contain only strings.');
+      }
+      items.add(item);
+    }
+    return items;
+  }
+
+  final String overallHealth;
+  final List<String> notableChanges;
+  final List<String> anomalies;
+  final List<String> suggestions;
+}
+
+class SummaryRequest {
+  const SummaryRequest({
+    required this.plantName,
+    this.species = '',
+    this.humidity,
+    this.light,
+    this.location,
+    this.careNotes,
+    this.careSchedule = const {},
+    this.healthLogs = const [],
+  });
+
+  final String plantName;
+  final String species;
+  final int? humidity;
+  final String? light;
+  final String? location;
+  final String? careNotes;
+  final Map<String, dynamic> careSchedule;
+  final List<HealthLogEntry> healthLogs;
+}
+
+class HealthLogEntry {
+  const HealthLogEntry({
+    required this.type,
+    required this.title,
+    required this.description,
+    required this.date,
+  });
+
+  factory HealthLogEntry.fromMap(Map<String, dynamic> map) {
+    final rawDate = map['date'];
+    final DateTime date;
+    if (rawDate is Timestamp) {
+      date = rawDate.toDate();
+    } else if (rawDate is String) {
+      date = DateTime.tryParse(rawDate) ?? DateTime.now();
+    } else if (rawDate is DateTime) {
+      date = rawDate;
+    } else {
+      date = DateTime.now();
+    }
+    final description = map['description'] ?? map['content'];
+    return HealthLogEntry(
+      type: map['type'] as String? ?? 'note',
+      title: map['title'] as String? ?? '',
+      description: description is String ? description : '',
+      date: date,
+    );
+  }
+
+  final String type;
+  final String title;
+  final String description;
+  final DateTime date;
+}
+
 const String _diagnosisPromptTemplate = '''
 You are a Plant Doctor assistant. Diagnose the plant shown in the photo and respond in JSON.
 
@@ -412,10 +519,56 @@ final Schema _scheduleResponseSchema = Schema.object(
   ],
 );
 
+const String _summaryPromptTemplate = '''
+You are a plant-care assistant writing a health summary for the plant owner. Base your summary ONLY on the plant profile and care log entries provided below. Never invent facts that are not present in the data.
+
+Plant profile:
+- Name: {plantName}
+- Species: {species}
+- Location: {location}
+- Humidity: {humidity}%
+- Light: {light}
+- Care schedule: {careSchedule}
+- Care notes: {careNotes}
+
+Care log entries (most recent first):
+{logEntries}
+
+Respond with a single JSON object using exactly these fields:
+- "overallHealth": a short string (1-2 sentences) describing the overall health of the plant over the logged period.
+- "notableChanges": an array of strings describing notable changes during the period.
+- "anomalies": an array of strings describing anything that needs attention.
+- "suggestions": an array of strings with concrete care suggestions.
+
+Return only the JSON object with no surrounding text.''';
+
+final Schema _summaryResponseSchema = Schema.object(
+  properties: {
+    'overallHealth': Schema.string(
+      description: 'Overall health of the plant over the logged period.',
+    ),
+    'notableChanges': Schema.array(
+      items: Schema.string(),
+      description: 'Notable changes during the period.',
+    ),
+    'anomalies': Schema.array(
+      items: Schema.string(),
+      description: 'Anything that needs attention.',
+    ),
+    'suggestions': Schema.array(
+      items: Schema.string(),
+      description: 'Concrete care suggestions.',
+    ),
+  },
+  optionalProperties: ['notableChanges', 'anomalies', 'suggestions'],
+);
+
 class GeminiPlantAiService implements PlantAiService {
   GeminiPlantAiService({required ModelCall modelCall, Connectivity? connectivity})
       : _modelCall = modelCall,
         _connectivity = connectivity ?? Connectivity();
+
+  static const int maxSummaryLogEntries = 40;
 
   final ModelCall _modelCall;
   final Connectivity _connectivity;
@@ -587,6 +740,51 @@ class GeminiPlantAiService implements PlantAiService {
     }
   }
 
+  @override
+  Future<HealthLogSummary> summarizeHealthLogs(SummaryRequest request) async {
+    if (await _isOffline()) {
+      throw const OfflineError();
+    }
+    final featureConfig = plantAiFeatureConfigs['summary']!;
+    try {
+      final response = await _modelCall(
+        [Content.text(_buildSummaryPrompt(request))],
+        GenerationConfig(
+          temperature: featureConfig.temperature,
+          maxOutputTokens: featureConfig.maxOutputTokens,
+          responseMimeType: 'application/json',
+          responseSchema: _summaryResponseSchema,
+        ),
+      );
+      if (response.promptFeedback?.blockReason != null) {
+        throw const BlockedError();
+      }
+      final text = response.text;
+      if (text == null) {
+        throw const MalformedOutputError();
+      }
+      final decoded = jsonDecode(text);
+      if (decoded is! Map<String, dynamic>) {
+        throw const MalformedOutputError();
+      }
+      return HealthLogSummary.fromJson(decoded);
+    } on QuotaExceeded {
+      throw const QuotaExceededError();
+    } on http.ClientException {
+      throw const OfflineError();
+    } on TimeoutException {
+      throw const TimeoutError();
+    } on PlantAiException {
+      rethrow;
+    } on FirebaseAIException catch (error) {
+      throw _mapFirebaseError(error);
+    } on FormatException {
+      throw const MalformedOutputError();
+    } catch (_) {
+      throw const UnknownError();
+    }
+  }
+
   Future<bool> _isOffline() async {
     try {
       final results = await _connectivity.checkConnectivity();
@@ -601,6 +799,11 @@ class GeminiPlantAiService implements PlantAiService {
       return const QuotaExceededError();
     }
     final message = error.message.toLowerCase();
+    if (message.contains('quota') ||
+        message.contains('resource_exhausted') ||
+        message.contains('429')) {
+      return const QuotaExceededError();
+    }
     if (message.contains('blocked') ||
         message.contains('safety') ||
         message.contains('recitation')) {
@@ -715,5 +918,46 @@ Current schedule: ${jsonEncode(request.careSchedule)}
     return '''
 Care schedule: ${jsonEncode(request.careSchedule)}
 ''';
+  }
+
+  String _buildSummaryPrompt(SummaryRequest request) {
+    final sorted = [...request.healthLogs]
+      ..sort((a, b) => a.date.compareTo(b.date));
+    final omitted = sorted.length > maxSummaryLogEntries
+        ? sorted.length - maxSummaryLogEntries
+        : 0;
+    final kept = omitted > 0
+        ? sorted.sublist(sorted.length - maxSummaryLogEntries)
+        : sorted;
+
+    final buffer = StringBuffer();
+    if (omitted > 0) {
+      buffer.writeln('($omitted older entries omitted for brevity)');
+    }
+    for (final entry in kept.reversed) {
+      final month = entry.date.month.toString().padLeft(2, '0');
+      final day = entry.date.day.toString().padLeft(2, '0');
+      buffer.writeln(
+        '- ${entry.date.year}-$month-$day [${entry.type}] '
+        '${entry.title}: ${entry.description}',
+      );
+    }
+
+    final schedule = request.careSchedule.entries
+        .map((e) => '${e.key}: ${e.value}')
+        .join(', ');
+
+    return _summaryPromptTemplate
+        .replaceAll('{plantName}', request.plantName)
+        .replaceAll('{species}', request.species)
+        .replaceAll('{location}', request.location ?? 'Unknown')
+        .replaceAll('{humidity}', request.humidity?.toString() ?? 'Unknown')
+        .replaceAll('{light}', request.light ?? 'Unknown')
+        .replaceAll(
+          '{careSchedule}',
+          schedule.isEmpty ? 'None' : schedule,
+        )
+        .replaceAll('{careNotes}', request.careNotes ?? 'None')
+        .replaceAll('{logEntries}', buffer.toString().trim());
   }
 }

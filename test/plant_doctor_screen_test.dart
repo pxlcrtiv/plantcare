@@ -65,6 +65,11 @@ class FakePlantAiService implements PlantAiService {
       'FakePlantAiService does not generate reminder text',
     );
   }
+
+  @override
+  Future<HealthLogSummary> summarizeHealthLogs(SummaryRequest request) async {
+    throw UnsupportedError('FakePlantAiService does not generate summaries');
+  }
 }
 
 class FakeImagePickerPlatform extends ImagePickerPlatform {
