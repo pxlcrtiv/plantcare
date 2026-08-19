@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -5,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
+import 'package:plantcare/models/plant.dart';
 import 'package:plantcare/presentation/care_assistant_hub/plant_doctor_stub_screen.dart';
 import 'package:plantcare/providers/plant_ai_service_provider.dart';
+import 'package:plantcare/repositories/plant_repository.dart';
 import 'package:plantcare/services/plant_ai_service.dart';
 import 'package:plantcare/theme/app_theme.dart';
 import 'package:sizer/sizer.dart';
@@ -90,14 +93,69 @@ class FakeImagePickerPlatform extends ImagePickerPlatform {
   }
 }
 
-Widget wrapDoctor(PlantAiService service, {String? initialSpecies}) {
+class FakePlantRepository implements PlantRepository {
+  final List<Map<String, dynamic>> addedLogs = [];
+  final List<Map<String, dynamic>> appliedUpdates = [];
+
+  @override
+  Stream<List<Plant>> getPlants() => Stream.value(const []);
+
+  @override
+  Future<void> addPlant(Plant plant) async {}
+
+  @override
+  Future<void> updatePlant(String plantId, Map<String, dynamic> data) async {
+    appliedUpdates.add(data);
+  }
+
+  @override
+  Future<void> deletePlant(String plantId) async {}
+
+  @override
+  Future<void> addCareEvent(String plantId, Map<String, dynamic> event) async {
+  }
+
+  @override
+  Future<void> addHealthLog(String plantId, Map<String, dynamic> log) async {
+    addedLogs.add(log);
+  }
+}
+
+Plant testPlant({String status = 'healthy'}) {
+  return Plant(
+    id: 'plant-1',
+    name: 'Monstera',
+    species: 'Monstera deliciosa',
+    imageUrl: '',
+    status: status,
+    location: 'Living room',
+    dateAdded: DateTime(2026, 1, 1),
+    careSchedule: const {
+      'wateringFrequency': 7,
+      'fertilizingEnabled': false,
+      'reminderTime': '09:00',
+    },
+    photos: const [],
+  );
+}
+
+Widget wrapDoctor(
+  PlantAiService service, {
+  String? initialSpecies,
+  Plant? plant,
+  PlantRepository? repository,
+}) {
   return Sizer(
     builder: (context, orientation, screenType) {
       return MaterialApp(
         theme: AppTheme.lightTheme,
         home: PlantAiServiceProvider(
           service: service,
-          child: PlantDoctorStubScreen(initialSpecies: initialSpecies),
+          child: PlantDoctorStubScreen(
+            initialSpecies: initialSpecies,
+            plant: plant,
+            plantRepository: repository,
+          ),
         ),
       );
     },
@@ -336,6 +394,181 @@ void main() {
 
       expect(find.text('Powdery mildew'), findsOneWidget);
       expect(service.callCount, 2);
+    });
+
+    testWidgets('hides save and apply actions when no plant is attached',
+        (tester) async {
+      await usePhoneViewport(tester);
+      final service = FakePlantAiService();
+      await tester.pumpWidget(wrapDoctor(service));
+      await pickGalleryPhoto(tester);
+
+      await tester.tap(find.text('Diagnose'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Powdery mildew'), findsOneWidget);
+      expect(find.text('Save to health log'), findsNothing);
+      expect(find.text('Suggested care adjustments'), findsNothing);
+    });
+
+    testWidgets('saves the diagnosis as a health-log entry', (tester) async {
+      await usePhoneViewport(tester);
+      final service = FakePlantAiService();
+      final repository = FakePlantRepository();
+      await tester.pumpWidget(
+        wrapDoctor(service, plant: testPlant(), repository: repository),
+      );
+      await pickGalleryPhoto(tester);
+
+      await tester.tap(find.text('Diagnose'));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Save to health log'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save to health log'));
+      await tester.pumpAndSettle();
+
+      expect(repository.addedLogs, hasLength(1));
+      final log = repository.addedLogs.single;
+      expect(log['type'], 'issue');
+      expect(log['title'], 'Powdery mildew');
+      expect(log['description'], contains('Moderate'));
+      expect(log['description'], contains('High humidity'));
+      expect(log['description'], contains('Poor air circulation'));
+      expect(log['date'], isA<String>());
+      expect(log['createdAt'], isA<String>());
+      expect(find.text('Saved to health log'), findsOneWidget);
+      expect(repository.appliedUpdates, isEmpty);
+    });
+
+    testWidgets('applies the suggested status adjustment on confirm',
+        (tester) async {
+      await usePhoneViewport(tester);
+      final service = FakePlantAiService();
+      final repository = FakePlantRepository();
+      await tester.pumpWidget(
+        wrapDoctor(service, plant: testPlant(), repository: repository),
+      );
+      await pickGalleryPhoto(tester);
+
+      await tester.tap(find.text('Diagnose'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Suggested care adjustments'), findsOneWidget);
+      expect(find.text('Plant status'), findsOneWidget);
+      expect(find.text('Needs attention'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Confirm'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Confirm'));
+      await tester.pumpAndSettle();
+
+      expect(repository.appliedUpdates, hasLength(1));
+      expect(repository.appliedUpdates.single, {'status': 'needs_attention'});
+      expect(repository.addedLogs, isEmpty);
+      expect(find.text('Suggested care adjustments'), findsNothing);
+    });
+
+    testWidgets('writes careSchedule adjustments with dot-notation paths',
+        (tester) async {
+      await usePhoneViewport(tester);
+      final service = FakePlantAiService(
+        outcomes: [
+          const DiagnosisResult(
+            condition: 'Overwatering',
+            severity: 'severe',
+            confidence: 0.9,
+            causes: ['Waterlogged soil'],
+            careSteps: ['Water every 5 days', 'Check the drainage holes'],
+          ),
+        ],
+      );
+      final repository = FakePlantRepository();
+      await tester.pumpWidget(
+        wrapDoctor(service, plant: testPlant(), repository: repository),
+      );
+      await pickGalleryPhoto(tester);
+
+      await tester.tap(find.text('Diagnose'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Suggested care adjustments'), findsOneWidget);
+      expect(find.text('Watering'), findsOneWidget);
+      expect(find.text('Every 5 days'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Confirm'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Confirm'));
+      await tester.pumpAndSettle();
+
+      expect(repository.appliedUpdates, hasLength(1));
+      expect(repository.appliedUpdates.single, {
+        'careSchedule.wateringFrequency': 5,
+        'status': 'needs_attention',
+      });
+      expect(
+        repository.appliedUpdates.single.containsKey('careSchedule'),
+        isFalse,
+      );
+    });
+
+    testWidgets('cancel leaves the plant unchanged', (tester) async {
+      await usePhoneViewport(tester);
+      final service = FakePlantAiService();
+      final repository = FakePlantRepository();
+      await tester.pumpWidget(
+        wrapDoctor(service, plant: testPlant(), repository: repository),
+      );
+      await pickGalleryPhoto(tester);
+
+      await tester.tap(find.text('Diagnose'));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(repository.appliedUpdates, isEmpty);
+      expect(repository.addedLogs, isEmpty);
+      expect(find.text('Suggested care adjustments'), findsNothing);
+    });
+
+    testWidgets('only the health-log save applies without concrete adjustments',
+        (tester) async {
+      await usePhoneViewport(tester);
+      final service = FakePlantAiService(
+        outcomes: [
+          const DiagnosisResult(
+            condition: 'Slight yellowing',
+            severity: 'mild',
+            confidence: 0.6,
+            causes: ['Low nitrogen'],
+            careSteps: ['Fertilize lightly'],
+          ),
+        ],
+      );
+      final repository = FakePlantRepository();
+      await tester.pumpWidget(
+        wrapDoctor(service, plant: testPlant(), repository: repository),
+      );
+      await pickGalleryPhoto(tester);
+
+      await tester.tap(find.text('Diagnose'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Slight yellowing'), findsOneWidget);
+      expect(find.text('Suggested care adjustments'), findsNothing);
+      expect(find.text('Save to health log'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Save to health log'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save to health log'));
+      await tester.pumpAndSettle();
+
+      expect(repository.addedLogs, hasLength(1));
+      expect(repository.addedLogs.single['type'], 'issue');
+      expect(repository.appliedUpdates, isEmpty);
     });
   });
 }

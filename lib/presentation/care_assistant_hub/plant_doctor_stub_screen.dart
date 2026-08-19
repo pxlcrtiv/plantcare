@@ -4,13 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../models/plant.dart';
 import '../../providers/plant_ai_service_provider.dart';
+import '../../repositories/plant_repository.dart';
+import '../../repositories/plant_repository_impl.dart';
+import '../../services/firebase_service.dart';
 import '../../services/plant_ai_service.dart';
+import '../../widgets/ai_schedule_suggestion_card.dart';
 
 class PlantDoctorStubScreen extends StatefulWidget {
-  const PlantDoctorStubScreen({super.key, this.initialSpecies});
+  const PlantDoctorStubScreen({
+    super.key,
+    this.initialSpecies,
+    this.plant,
+    this.plantRepository,
+  });
 
   final String? initialSpecies;
+
+  final Plant? plant;
+
+  final PlantRepository? plantRepository;
 
   @override
   State<PlantDoctorStubScreen> createState() => _PlantDoctorStubScreenState();
@@ -20,17 +34,30 @@ class _PlantDoctorStubScreenState extends State<PlantDoctorStubScreen> {
   final ImagePicker _imagePicker = ImagePicker();
   final TextEditingController _speciesController = TextEditingController();
 
+  PlantRepository? _plantRepository;
+
   PlantAiService _service = const StubPlantAiService();
   Uint8List? _photoBytes;
   String _photoMimeType = 'image/jpeg';
   bool _isLoading = false;
   DiagnosisResult? _result;
   PlantAiException? _error;
+  bool _logSaved = false;
+  List<_CareAdjustment> _adjustments = const [];
 
   @override
   void initState() {
     super.initState();
     _speciesController.text = widget.initialSpecies ?? '';
+  }
+
+  PlantRepository _repo() {
+    final existing = _plantRepository;
+    if (existing != null) return existing;
+    final repository =
+        widget.plantRepository ?? PlantRepositoryImpl(FirebaseService());
+    _plantRepository = repository;
+    return repository;
   }
 
   @override
@@ -69,6 +96,8 @@ class _PlantDoctorStubScreenState extends State<PlantDoctorStubScreen> {
       _photoMimeType = mimeType;
       _result = null;
       _error = null;
+      _logSaved = false;
+      _adjustments = const [];
     });
   }
 
@@ -98,6 +127,8 @@ class _PlantDoctorStubScreenState extends State<PlantDoctorStubScreen> {
       setState(() {
         _result = result;
         _isLoading = false;
+        _logSaved = false;
+        _adjustments = _deriveAdjustments(result);
       });
     } on PlantAiException catch (error) {
       if (!mounted) return;
@@ -119,6 +150,8 @@ class _PlantDoctorStubScreenState extends State<PlantDoctorStubScreen> {
       _photoBytes = null;
       _result = null;
       _error = null;
+      _logSaved = false;
+      _adjustments = const [];
     });
   }
 
@@ -429,6 +462,14 @@ class _PlantDoctorStubScreenState extends State<PlantDoctorStubScreen> {
           ),
         ),
         SizedBox(height: 2.h),
+        if (widget.plant != null) ...[
+          _buildSaveToLogButton(context),
+          if (_adjustments.isNotEmpty) ...[
+            SizedBox(height: 2.h),
+            _buildAdjustmentsCard(context, _adjustments),
+          ],
+          SizedBox(height: 2.h),
+        ],
         OutlinedButton.icon(
           onPressed: _resetToNewPhoto,
           icon: const Icon(Icons.add_a_photo_outlined),
@@ -436,6 +477,212 @@ class _PlantDoctorStubScreenState extends State<PlantDoctorStubScreen> {
         ),
       ],
     );
+  }
+
+  Widget _buildSaveToLogButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 6.h,
+      child: FilledButton.icon(
+        onPressed: _logSaved ? null : _saveToHealthLog,
+        icon: Icon(_logSaved ? Icons.check : Icons.bookmark_add_outlined),
+        label: Text(_logSaved ? 'Saved to health log' : 'Save to health log'),
+      ),
+    );
+  }
+
+  Widget _buildAdjustmentsCard(
+    BuildContext context,
+    List<_CareAdjustment> adjustments,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return _buildCard(
+      context,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(2.5.w),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.auto_awesome,
+                  size: 5.w,
+                  color: colorScheme.primary,
+                ),
+              ),
+              SizedBox(width: 3.w),
+              Expanded(
+                child: Text(
+                  'Suggested care adjustments',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 2.h),
+          for (final adjustment in adjustments)
+            Padding(
+              padding: EdgeInsets.only(bottom: 1.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      adjustment.label,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ),
+                  Text(
+                    adjustment.value,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          SizedBox(height: 1.h),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _cancelAdjustments,
+                  child: const Text('Cancel'),
+                ),
+              ),
+              SizedBox(width: 2.w),
+              Expanded(
+                child: FilledButton(
+                  onPressed: _confirmAdjustments,
+                  child: const Text('Confirm'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<_CareAdjustment> _deriveAdjustments(DiagnosisResult result) {
+    final adjustments = <_CareAdjustment>[];
+    final wateringDays = _extractWateringDays(result.careSteps);
+    if (wateringDays != null) {
+      adjustments.add(
+        _CareAdjustment(
+          label: 'Watering',
+          value: AiScheduleSuggestionCard.frequencyLabel(wateringDays),
+          path: 'careSchedule.wateringFrequency',
+          data: wateringDays,
+        ),
+      );
+    }
+    final severity = result.severity.toLowerCase();
+    if (severity == 'moderate' || severity == 'severe') {
+      adjustments.add(
+        _CareAdjustment(
+          label: 'Plant status',
+          value: 'Needs attention',
+          path: 'status',
+          data: 'needs_attention',
+        ),
+      );
+    }
+    return adjustments;
+  }
+
+  int? _extractWateringDays(List<String> careSteps) {
+    final pattern = RegExp(r'every\s+(\d{1,2})\s+days', caseSensitive: false);
+    for (final step in careSteps) {
+      final match = pattern.firstMatch(step);
+      if (match == null) continue;
+      final days = int.tryParse(match.group(1)!);
+      if (days != null && days >= 1 && days <= 30) {
+        return days;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _saveToHealthLog() async {
+    final plant = widget.plant;
+    final result = _result;
+    if (plant == null || result == null || _logSaved) return;
+    final now = DateTime.now();
+    final causes = result.causes.join(', ');
+    final description = causes.isEmpty
+        ? _capitalize(result.severity)
+        : '${_capitalize(result.severity)} · $causes';
+    try {
+      await _repo().addHealthLog(plant.id, {
+        'type': 'issue',
+        'title': result.condition,
+        'description': description,
+        'date': now.toIso8601String(),
+        'createdAt': now.toIso8601String(),
+      });
+      if (!mounted) return;
+      setState(() {
+        _logSaved = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Diagnosis saved to health log')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save diagnosis: ${e.toString()}'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _confirmAdjustments() async {
+    final plant = widget.plant;
+    if (plant == null || _adjustments.isEmpty) return;
+    final updates = <String, dynamic>{
+      for (final adjustment in _adjustments)
+        adjustment.path: adjustment.data,
+    };
+    try {
+      await _repo().updatePlant(plant.id, updates);
+      if (!mounted) return;
+      setState(() {
+        _adjustments = const [];
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Care adjustments applied')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to apply care adjustments: ${e.toString()}'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
+
+  void _cancelAdjustments() {
+    setState(() {
+      _adjustments = const [];
+    });
+  }
+
+  String _capitalize(String value) {
+    if (value.isEmpty) return value;
+    return value[0].toUpperCase() + value.substring(1);
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
@@ -576,4 +823,18 @@ class _PlantDoctorStubScreenState extends State<PlantDoctorStubScreen> {
       child: child,
     );
   }
+}
+
+class _CareAdjustment {
+  const _CareAdjustment({
+    required this.label,
+    required this.value,
+    required this.path,
+    required this.data,
+  });
+
+  final String label;
+  final String value;
+  final String path;
+  final Object data;
 }
