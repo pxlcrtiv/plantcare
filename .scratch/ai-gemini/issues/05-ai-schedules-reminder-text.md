@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 (hub); wayfinder 13, 14, 19.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Add-plant wizard proposes an AI schedule for confirmation (not auto-applied)
 - [ ] Regenerate works from the care-reminders sheet

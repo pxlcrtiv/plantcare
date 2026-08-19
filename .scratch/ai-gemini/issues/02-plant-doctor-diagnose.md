@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 (hub); wayfinder 13, 14, 17 (diagnosis half of the doctor grilling).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Diagnose from a live camera capture or a gallery photo
 - [ ] Result card shows diagnosis, severity, and treatment steps, grounded in species + profile

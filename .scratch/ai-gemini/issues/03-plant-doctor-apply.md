@@ -4,7 +4,7 @@
 
 **Blocked by:** 02 (diagnose); wayfinder 17 (apply half of the doctor grilling).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Saving a diagnosis creates a care-log entry on the plant, visible in its health history
 - [ ] Suggested care adjustments are presented and only applied after user confirmation

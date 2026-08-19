@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 (hub); wayfinder 13, 14, 20.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Summarize action on the Health tab produces a grounded summary card
 - [ ] Regenerate produces an updated summary reflecting the latest entries

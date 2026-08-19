@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 (hub); wayfinder 13, 14, 18.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Multi-turn chat from hub entry and from a plant's detail screen
 - [ ] Chat answers grounded in the plant's data; suggested-question chips render
