@@ -6,6 +6,7 @@ import 'package:sizer/sizer.dart';
 
 import '../../providers/plant_ai_service_provider.dart';
 import '../../services/plant_ai_service.dart';
+import '../../widgets/ai_error_card.dart';
 import 'care_chat_stub_screen.dart';
 import 'plant_doctor_stub_screen.dart';
 
@@ -108,11 +109,14 @@ class _CareAssistantHubState extends State<CareAssistantHub> {
         ),
         if (!_isOnline) ...[
           SizedBox(height: 2.h),
-          const _OfflineBanner(),
+          const AiErrorCard(error: OfflineError()),
         ],
         if (!_isAvailable) ...[
           SizedBox(height: 2.h),
-          const _RestingNotice(),
+          AiErrorCard(
+            error: const QuotaExceededError(),
+            onRetry: _refreshAvailability,
+          ),
         ],
         SizedBox(height: 3.h),
         _FeatureCard(
@@ -129,100 +133,6 @@ class _CareAssistantHubState extends State<CareAssistantHub> {
           onTap: () => _openCareChat(context),
         ),
       ],
-    );
-  }
-}
-
-class _OfflineBanner extends StatelessWidget {
-  const _OfflineBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: EdgeInsets.all(3.w),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.cloud_off, size: 5.w, color: colorScheme.onSurfaceVariant),
-          SizedBox(width: 2.5.w),
-          Expanded(
-            child: Text(
-              "You're offline — AI features need a connection",
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RestingNotice extends StatelessWidget {
-  const _RestingNotice();
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: EdgeInsets.all(3.w),
-      decoration: BoxDecoration(
-        color: isDark ? Theme.of(context).cardColor : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(2.5.w),
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.self_improvement,
-              size: 5.w,
-              color: colorScheme.primary,
-            ),
-          ),
-          SizedBox(width: 3.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'The assistant is resting',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                SizedBox(height: 0.3.h),
-                Text(
-                  'Try again in a moment.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark ? Colors.white70 : const Color(0xFF888888),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

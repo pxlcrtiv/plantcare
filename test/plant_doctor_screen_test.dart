@@ -300,7 +300,7 @@ void main() {
       expect(find.text('Try again in a moment.'), findsOneWidget);
     });
 
-    testWidgets('shows a no-blame message when the photo is blocked',
+    testWidgets('shows the blocked message for a blocked photo',
         (tester) async {
       await usePhoneViewport(tester);
       final service = FakePlantAiService(outcomes: [const BlockedError()]);
@@ -310,11 +310,8 @@ void main() {
       await tester.tap(find.text('Diagnose'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Photo not reviewable'), findsOneWidget);
-      expect(
-        find.textContaining('could not review this photo'),
-        findsOneWidget,
-      );
+      expect(find.text('The assistant could not answer'), findsOneWidget);
+      expect(find.text('Try rephrasing or summarize again.'), findsOneWidget);
     });
 
     testWidgets('shows a timeout message', (tester) async {
@@ -339,7 +336,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text("You're offline"), findsOneWidget);
-      expect(find.text('AI features need a connection.'), findsOneWidget);
+      expect(find.text('Connect to the internet and try again.'), findsOneWidget);
     });
 
     testWidgets('shows a generic message on unknown errors', (tester) async {

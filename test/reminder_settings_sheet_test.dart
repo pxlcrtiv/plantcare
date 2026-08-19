@@ -336,6 +336,60 @@ void main() {
       expect(find.text('Try again in a moment.'), findsOneWidget);
     });
 
+    testWidgets('Try again on the schedule error card re-calls the service',
+        (tester) async {
+      final service = FakePlantAiService(error: const QuotaExceededError());
+      await openReminderSheet(
+        tester,
+        repository: RecordingPlantRepository(),
+        service: service,
+      );
+
+      await tester.ensureVisible(find.text('Regenerate schedule'));
+      await tester.tap(find.text('Regenerate schedule'));
+      await pumpUi(tester);
+
+      expect(find.text('The assistant is resting'), findsOneWidget);
+      expect(service.suggestCalls, 1);
+
+      service.error = null;
+      await tester.ensureVisible(find.text('Try again'));
+      await tester.tap(find.text('Try again'));
+      await pumpUi(tester);
+
+      expect(service.suggestCalls, 2);
+      expect(find.text('Suggested schedule'), findsOneWidget);
+    });
+
+    testWidgets(
+        'Try again on the reminder-text error card re-calls the service',
+        (tester) async {
+      final service = FakePlantAiService(
+        error: const QuotaExceededError(),
+        reminderText: 'Monstera is thirsty — water it today!',
+      );
+      await openReminderSheet(
+        tester,
+        repository: RecordingPlantRepository(),
+        service: service,
+      );
+
+      await tester.ensureVisible(find.text('Write smart reminder text'));
+      await tester.tap(find.text('Write smart reminder text'));
+      await pumpUi(tester);
+
+      expect(find.text('The assistant is resting'), findsOneWidget);
+      expect(service.reminderCalls, 1);
+
+      service.error = null;
+      await tester.ensureVisible(find.text('Try again'));
+      await tester.tap(find.text('Try again'));
+      await pumpUi(tester);
+
+      expect(service.reminderCalls, 2);
+      expect(find.text('Suggested reminder message'), findsOneWidget);
+    });
+
     testWidgets('shows the current reminder message after confirmation',
         (tester) async {
       final repository = RecordingPlantRepository();

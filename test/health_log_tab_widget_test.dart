@@ -334,6 +334,37 @@ void main() {
       expect(find.text('Healthy and growing steadily.'), findsNothing);
     });
 
+    testWidgets('retry after an error re-runs the summarizer',
+        (tester) async {
+      await usePhoneViewport(tester);
+      var calls = 0;
+      await tester.pumpWidget(
+        wrapApp(
+          HealthLogTabWidget(
+            plant: buildPlant(),
+            healthLogs: const [],
+            onAddLog: (type, notes, date) async {},
+          ),
+          service: FakePlantAiService(onSummarize: (_) async {
+            calls++;
+            if (calls == 1) throw const QuotaExceededError();
+            return buildSummary();
+          }),
+        ),
+      );
+
+      await tester.tap(find.text('Summarize'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('The assistant is resting'), findsOneWidget);
+
+      await tester.tap(find.text('Try again'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Healthy and growing steadily.'), findsOneWidget);
+      expect(calls, 2);
+    });
+
     for (final (error, title, body) in [
       (
         const QuotaExceededError(),

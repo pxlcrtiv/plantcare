@@ -10,6 +10,7 @@ import '../../repositories/plant_repository.dart';
 import '../../repositories/plant_repository_impl.dart';
 import '../../services/firebase_service.dart';
 import '../../services/plant_ai_service.dart';
+import '../../widgets/ai_error_card.dart';
 import '../../widgets/ai_schedule_suggestion_card.dart';
 
 class PlantDoctorStubScreen extends StatefulWidget {
@@ -212,7 +213,7 @@ class _PlantDoctorStubScreenState extends State<PlantDoctorStubScreen> {
         _buildDiagnoseButton(context),
         if (_error != null) ...[
           SizedBox(height: 2.h),
-          _buildErrorCard(context, _error!),
+          AiErrorCard(error: _error!, onRetry: _diagnose),
         ],
       ],
     );
@@ -716,92 +717,6 @@ class _PlantDoctorStubScreenState extends State<PlantDoctorStubScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildErrorCard(BuildContext context, PlantAiException error) {
-    final (title, message, icon) = _errorPresentation(error);
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return _buildCard(
-      context,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(2.5.w),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, size: 5.w, color: colorScheme.primary),
-              ),
-              SizedBox(width: 3.w),
-              Expanded(
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 1.h),
-          Text(
-            message,
-            style: TextStyle(
-              fontSize: 12,
-              color: isDark ? Colors.white70 : const Color(0xFF888888),
-            ),
-          ),
-          SizedBox(height: 1.5.h),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: _diagnose,
-              child: const Text('Try again'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  (String, String, IconData) _errorPresentation(PlantAiException error) {
-    return switch (error) {
-      QuotaExceededError() => (
-          'The assistant is resting',
-          'Try again in a moment.',
-          Icons.self_improvement,
-        ),
-      MalformedOutputError() => (
-          'The assistant is resting',
-          'Try again in a moment.',
-          Icons.self_improvement,
-        ),
-      BlockedError() => (
-          'Photo not reviewable',
-          'The assistant could not review this photo. Please try a different one.',
-          Icons.visibility_off_outlined,
-        ),
-      TimeoutError() => (
-          'The assistant took too long',
-          'Please try again in a moment.',
-          Icons.hourglass_empty,
-        ),
-      OfflineError() => (
-          "You're offline",
-          'AI features need a connection.',
-          Icons.cloud_off,
-        ),
-      UnknownError() => (
-          'Something went wrong',
-          'Please try again.',
-          Icons.error_outline,
-        ),
-    };
   }
 
   Widget _buildCard(BuildContext context, {required Widget child}) {

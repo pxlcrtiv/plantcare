@@ -239,12 +239,11 @@ void main() {
     testWidgets('renders a message for each taxonomy error', (tester) async {
       final cases = <PlantAiException, String>{
         const QuotaExceededError(): 'The assistant is resting',
-        const BlockedError(): "The assistant couldn't answer that",
+        const BlockedError(): 'The assistant could not answer',
         const TimeoutError(): 'The assistant took too long',
-        const MalformedOutputError():
-            'The assistant returned an unexpected answer',
+        const MalformedOutputError(): 'The assistant is resting',
         const OfflineError(): "You're offline",
-        const UnknownError(): 'The assistant hit a snag',
+        const UnknownError(): 'Something went wrong',
       };
 
       for (final entry in cases.entries) {
@@ -279,8 +278,35 @@ void main() {
       await tester.tap(find.text('Generate AI schedule'));
       await tester.pumpAndSettle();
 
-      expect(find.text('The assistant hit a snag'), findsOneWidget);
+      expect(find.text('Something went wrong'), findsOneWidget);
       expect(find.text('Try again in a moment.'), findsOneWidget);
+    });
+
+    testWidgets('retries the proposal from the error card', (tester) async {
+      await usePhoneViewport(tester);
+      final service = FakePlantAiService(
+        error: const QuotaExceededError(),
+        suggestion: const ScheduleSuggestion(wateringFrequency: 12),
+      );
+      await tester.pumpWidget(wrapSetup(
+        CareScheduleSetup(species: 'Monstera', onScheduleChanged: (_) {}),
+        service: service,
+      ));
+      await tester.pump();
+
+      await tester.tap(find.text('Generate AI schedule'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('The assistant is resting'), findsOneWidget);
+      expect(service.suggestCalls, 1);
+
+      service.error = null;
+      await tester.tap(find.text('Try again'));
+      await tester.pumpAndSettle();
+
+      expect(service.suggestCalls, 2);
+      expect(find.text('Suggested schedule'), findsOneWidget);
+      expect(find.text('Every 12 days'), findsOneWidget);
     });
   });
 }

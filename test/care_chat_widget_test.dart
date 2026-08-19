@@ -13,8 +13,8 @@ import 'package:sizer/sizer.dart';
 class FakeChatPlantAiService implements PlantAiService {
   FakeChatPlantAiService({this.reply = 'Water it weekly.', this.error});
 
-  final String? reply;
-  final PlantAiException? error;
+  String? reply;
+  PlantAiException? error;
   Completer<String>? pending;
   ChatRequest? lastRequest;
   List<ChatMessage> lastRequestMessages = const [];
@@ -150,30 +150,75 @@ void main() {
     testWidgets('renders a resting card for each taxonomy error',
         (tester) async {
       await usePhoneViewport(tester);
-      final errors = <PlantAiException>[
-        const QuotaExceededError(),
-        const BlockedError(),
-        const TimeoutError(),
-        const MalformedOutputError(),
-        const OfflineError(),
-        const UnknownError(),
-      ];
+      final cases = <PlantAiException, (String, String)>{
+        const QuotaExceededError(): (
+          'The assistant is resting',
+          'Try again in a moment.',
+        ),
+        const BlockedError(): (
+          'The assistant could not answer',
+          'Try rephrasing or summarize again.',
+        ),
+        const TimeoutError(): (
+          'The assistant took too long',
+          'Try again in a moment.',
+        ),
+        const MalformedOutputError(): (
+          'The assistant is resting',
+          'Try again in a moment.',
+        ),
+        const OfflineError(): (
+          "You're offline",
+          'Connect to the internet and try again.',
+        ),
+        const UnknownError(): (
+          'Something went wrong',
+          'Try again in a moment.',
+        ),
+      };
 
-      for (final error in errors) {
+      for (final entry in cases.entries) {
         await tester.pumpWidget(wrapChat(
           const CareChatStubScreen(),
-          service: FakeChatPlantAiService(error: error),
+          service: FakeChatPlantAiService(error: entry.key),
         ));
         await tester.pumpAndSettle();
 
         await sendMessage(tester, 'Is my plant okay?');
         await tester.pumpAndSettle();
 
-        expect(find.text('The assistant is resting'), findsOneWidget,
-            reason: error.runtimeType.toString());
-        expect(find.text(error.message), findsOneWidget,
-            reason: error.runtimeType.toString());
+        final (title, body) = entry.value;
+        expect(find.text(title), findsOneWidget,
+            reason: entry.key.runtimeType.toString());
+        expect(find.text(body), findsOneWidget,
+            reason: entry.key.runtimeType.toString());
+        expect(find.text('Try again'), findsOneWidget,
+            reason: entry.key.runtimeType.toString());
       }
+    });
+
+    testWidgets('retry re-sends the last message', (tester) async {
+      await usePhoneViewport(tester);
+      final fake = FakeChatPlantAiService(error: const QuotaExceededError());
+      await tester.pumpWidget(wrapChat(
+        const CareChatStubScreen(),
+        service: fake,
+      ));
+      await tester.pumpAndSettle();
+
+      await sendMessage(tester, 'Why is it drooping?');
+      await tester.pumpAndSettle();
+
+      expect(find.text('The assistant is resting'), findsOneWidget);
+
+      fake.error = null;
+      fake.reply = 'Check the soil moisture.';
+      await tester.tap(find.text('Try again'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Check the soil moisture.'), findsOneWidget);
+      expect(fake.lastRequestMessages, hasLength(1));
+      expect(fake.lastRequestMessages.first.text, 'Why is it drooping?');
     });
 
     testWidgets('disables the send button while the assistant is typing',

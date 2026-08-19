@@ -7,6 +7,7 @@ import 'package:sizer/sizer.dart';
 import '../../models/plant.dart';
 import '../../providers/plant_ai_service_provider.dart';
 import '../../services/plant_ai_service.dart';
+import '../../widgets/ai_error_card.dart';
 
 class CareChatStubScreen extends StatefulWidget {
   const CareChatStubScreen({super.key, this.plant});
@@ -85,6 +86,15 @@ class _CareChatStubScreenState extends State<CareChatStubScreen> {
     _requestReply();
   }
 
+  void _retryLastMessage() {
+    if (_isTyping) return;
+    setState(() {
+      _chatError = null;
+      _isTyping = true;
+    });
+    _requestReply();
+  }
+
   Future<void> _requestReply() async {
     try {
       final reply = await _service.chatAboutPlant(_buildRequest());
@@ -155,7 +165,15 @@ class _CareChatStubScreenState extends State<CareChatStubScreen> {
                       },
                     ),
             ),
-            if (_chatError != null) _RestingCard(error: _chatError!),
+            if (_chatError != null) ...[
+              Padding(
+                padding: EdgeInsets.fromLTRB(4.w, 0, 4.w, 1.h),
+                child: AiErrorCard(
+                  error: _chatError!,
+                  onRetry: _retryLastMessage,
+                ),
+              ),
+            ],
             _Composer(
               controller: _inputController,
               canSend: _canSend,
@@ -278,72 +296,6 @@ class _TypingBubble extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _RestingCard extends StatelessWidget {
-  const _RestingCard({required this.error});
-
-  final PlantAiException error;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      margin: EdgeInsets.fromLTRB(4.w, 0, 4.w, 1.h),
-      padding: EdgeInsets.all(3.w),
-      decoration: BoxDecoration(
-        color: isDark ? Theme.of(context).cardColor : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.all(2.5.w),
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.self_improvement,
-              size: 5.w,
-              color: colorScheme.primary,
-            ),
-          ),
-          SizedBox(width: 3.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'The assistant is resting',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                SizedBox(height: 0.3.h),
-                Text(
-                  error.message,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark ? Colors.white70 : const Color(0xFF888888),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

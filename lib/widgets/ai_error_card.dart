@@ -4,25 +4,26 @@ import 'package:sizer/sizer.dart';
 import '../services/plant_ai_service.dart';
 
 class AiErrorCard extends StatelessWidget {
-  const AiErrorCard({super.key, required this.error});
+  const AiErrorCard({super.key, required this.error, this.onRetry});
 
   final PlantAiException error;
+  final VoidCallback? onRetry;
 
   static String titleFor(PlantAiException error) => switch (error) {
         QuotaExceededError() => 'The assistant is resting',
-        BlockedError() => "The assistant couldn't answer that",
+        BlockedError() => 'The assistant could not answer',
         TimeoutError() => 'The assistant took too long',
-        MalformedOutputError() => 'The assistant returned an unexpected answer',
+        MalformedOutputError() => 'The assistant is resting',
         OfflineError() => "You're offline",
-        UnknownError() => 'The assistant hit a snag',
+        UnknownError() => 'Something went wrong',
       };
 
   static String messageFor(PlantAiException error) => switch (error) {
         QuotaExceededError() => 'Try again in a moment.',
-        BlockedError() => 'Try again in a moment.',
+        BlockedError() => 'Try rephrasing or summarize again.',
         TimeoutError() => 'Try again in a moment.',
         MalformedOutputError() => 'Try again in a moment.',
-        OfflineError() => 'AI features need a connection.',
+        OfflineError() => 'Connect to the internet and try again.',
         UnknownError() => 'Try again in a moment.',
       };
 
@@ -31,6 +32,7 @@ class AiErrorCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
         color: isDark ? Theme.of(context).cardColor : Colors.white,
@@ -43,42 +45,58 @@ class AiErrorCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: EdgeInsets.all(2.5.w),
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.self_improvement,
-              size: 5.w,
-              color: colorScheme.primary,
-            ),
-          ),
-          SizedBox(width: 3.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  titleFor(error),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsets.all(2.5.w),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.self_improvement,
+                  size: 5.w,
+                  color: colorScheme.primary,
+                ),
+              ),
+              SizedBox(width: 3.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      titleFor(error),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    SizedBox(height: 0.3.h),
+                    Text(
+                      messageFor(error),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.white70 : const Color(0xFF888888),
                       ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 0.3.h),
-                Text(
-                  messageFor(error),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark ? Colors.white70 : const Color(0xFF888888),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
+          if (onRetry != null) ...[
+            SizedBox(height: 1.5.h),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: onRetry,
+                child: const Text('Try again'),
+              ),
+            ),
+          ],
         ],
       ),
     );

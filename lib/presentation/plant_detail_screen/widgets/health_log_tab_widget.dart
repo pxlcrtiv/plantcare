@@ -6,6 +6,7 @@ import '../../../../core/app_export.dart';
 import '../../../../models/plant.dart';
 import '../../../../providers/plant_ai_service_provider.dart';
 import '../../../../services/plant_ai_service.dart';
+import '../../../../widgets/ai_error_card.dart';
 
 enum _SummaryPhase { idle, loading, success, error }
 
@@ -353,7 +354,7 @@ class _SummarySection extends StatelessWidget {
           onRegenerate: onSummarize,
         );
       case _SummaryPhase.error:
-        return _SummaryErrorCard(error: error!, onRetry: onSummarize);
+        return AiErrorCard(error: error!, onRetry: onSummarize);
       case _SummaryPhase.idle:
         return _SummaryIdleCard(onSummarize: onSummarize);
     }
@@ -599,101 +600,6 @@ class _SummaryList extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class _SummaryErrorCard extends StatelessWidget {
-  const _SummaryErrorCard({required this.error, required this.onRetry});
-
-  final PlantAiException error;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final (title, body) = switch (error) {
-      QuotaExceededError() => (
-          'The assistant is resting',
-          'Try again in a moment.',
-        ),
-      BlockedError() => (
-          'The assistant could not answer',
-          'Try rephrasing or summarize again.',
-        ),
-      TimeoutError() => (
-          'The assistant took too long',
-          'Try again in a moment.',
-        ),
-      MalformedOutputError() => (
-          'The assistant is resting',
-          'Try again in a moment.',
-        ),
-      OfflineError() => (
-          "You're offline",
-          'Connect to the internet and try again.',
-        ),
-      UnknownError() => (
-          'Something went wrong',
-          'Try again in a moment.',
-        ),
-    };
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(3.w),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(2.5.w),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.self_improvement,
-                  size: 5.w,
-                  color: colorScheme.primary,
-                ),
-              ),
-              SizedBox(width: 3.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    SizedBox(height: 0.3.h),
-                    Text(
-                      body,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 1.h),
-          TextButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh, size: 18),
-            label: const Text('Try again'),
-          ),
-        ],
-      ),
     );
   }
 }

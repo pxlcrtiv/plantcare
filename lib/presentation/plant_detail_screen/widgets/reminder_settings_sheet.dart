@@ -367,7 +367,10 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet> {
               ),
               if (_scheduleProposalError != null) ...[
                 SizedBox(height: 2.h),
-                AiErrorCard(error: _scheduleProposalError!),
+                AiErrorCard(
+                  error: _scheduleProposalError!,
+                  onRetry: _retryScheduleProposal,
+                ),
               ],
               if (_scheduleProposal != null) ...[
                 SizedBox(height: 2.h),
@@ -433,7 +436,10 @@ class _ReminderSettingsSheetState extends State<ReminderSettingsSheet> {
               ),
               if (_reminderTextError != null) ...[
                 SizedBox(height: 2.h),
-                AiErrorCard(error: _reminderTextError!),
+                AiErrorCard(
+                  error: _reminderTextError!,
+                  onRetry: _retryReminderText,
+                ),
               ],
               if (_reminderTextProposal != null) ...[
                 SizedBox(height: 2.h),

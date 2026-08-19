@@ -164,5 +164,21 @@ void main() {
       expect(find.textContaining("You're offline"), findsOneWidget);
       expect(find.text('Plant Doctor'), findsOneWidget);
     });
+
+    testWidgets('retry on the resting notice re-checks availability',
+        (tester) async {
+      await usePhoneViewport(tester);
+      final service = FakePlantAiService(available: false);
+      await tester.pumpWidget(wrapHub(const CareAssistantHub(), service: service));
+      await tester.pumpAndSettle();
+
+      expect(find.text('The assistant is resting'), findsOneWidget);
+
+      service.available = true;
+      await tester.tap(find.text('Try again'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('The assistant is resting'), findsNothing);
+    });
   });
 }

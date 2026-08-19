@@ -302,7 +302,7 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
         ),
         if (_proposalError != null) ...[
           SizedBox(height: 2.h),
-          AiErrorCard(error: _proposalError!),
+          AiErrorCard(error: _proposalError!, onRetry: _retryProposal),
         ],
         if (_proposal != null) ...[
           SizedBox(height: 2.h),
