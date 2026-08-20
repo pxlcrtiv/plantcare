@@ -801,7 +801,8 @@ class GeminiPlantAiService implements PlantAiService {
     final message = error.message.toLowerCase();
     if (message.contains('quota') ||
         message.contains('resource_exhausted') ||
-        message.contains('429')) {
+        message.contains('429') ||
+        message.contains('high demand')) {
       return const QuotaExceededError();
     }
     if (message.contains('blocked') ||
