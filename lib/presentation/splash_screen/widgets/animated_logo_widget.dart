@@ -90,7 +90,7 @@ class _AnimatedLogoWidgetState extends State<AnimatedLogoWidget>
               width: 25.w,
               height: 25.w,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface
+                color: AppTheme.lightTheme.colorScheme.surface
                     .withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
@@ -100,7 +100,7 @@ class _AnimatedLogoWidgetState extends State<AnimatedLogoWidget>
                   child: CustomIconWidget(
                     iconName: 'eco',
                     size: 15.w,
-                    color: Theme.of(context).colorScheme.surface,
+                    color: AppTheme.lightTheme.colorScheme.surface,
                   ),
                 ),
               ),

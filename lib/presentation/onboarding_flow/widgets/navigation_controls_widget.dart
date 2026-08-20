@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../../core/app_export.dart';
+import '../../../theme/app_theme.dart';
 
 class NavigationControlsWidget extends StatelessWidget {
   final int currentPage;
@@ -33,13 +35,13 @@ class NavigationControlsWidget extends StatelessWidget {
               onPressed: onSkip,
               style: TextButton.styleFrom(
                 foregroundColor:
-                    Theme.of(context).colorScheme.onSurfaceVariant,
+                    AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                 padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
               ),
               child: Text(
                 'Skip',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                 ),
               ),
             )
@@ -54,17 +56,17 @@ class NavigationControlsWidget extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onNext,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+                  foregroundColor: AppTheme.lightTheme.colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: Text(
                   'Next',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onPrimary,
+                    color: AppTheme.lightTheme.colorScheme.onPrimary,
                   ),
                 ),
               ),

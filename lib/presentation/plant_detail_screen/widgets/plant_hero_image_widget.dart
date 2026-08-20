@@ -118,7 +118,7 @@ class PlantHeroImageWidget extends StatelessWidget {
             right: 4.w,
             child: Text(
               plantName,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 shadows: [

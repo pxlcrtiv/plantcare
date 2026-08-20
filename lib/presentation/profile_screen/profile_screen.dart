@@ -3,9 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sizer/sizer.dart';
 import '../../core/app_export.dart';
 import '../../services/firebase_service.dart';
-import 'notification_settings_screen.dart';
-import 'privacy_settings_screen.dart';
-import 'help_support_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -43,15 +40,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Profile',
-          style: Theme.of(context).appBarTheme.titleTextStyle,
+          style: AppTheme.lightTheme.appBarTheme.titleTextStyle,
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        foregroundColor: AppTheme.lightTheme.colorScheme.onSurface,
       ),
       body: Padding(
         padding: EdgeInsets.all(4.w),
@@ -67,10 +64,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       width: 15.w,
                       height: 15.w,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: AppTheme.lightTheme.colorScheme.primary,
                         borderRadius: BorderRadius.circular(7.5.w),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.outline,
+                          color: AppTheme.lightTheme.colorScheme.outline,
                           width: 0.5,
                         ),
                       ),
@@ -87,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           Text(
                             _currentUser?.displayName ?? 'User',
-                            style: Theme.of(context).textTheme.titleMedium
+                            style: AppTheme.lightTheme.textTheme.titleMedium
                                 ?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -95,9 +92,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           SizedBox(height: 0.5.h),
                           Text(
                             _currentUser?.email ?? 'No email',
-                            style: Theme.of(context).textTheme.bodyMedium
+                            style: AppTheme.lightTheme.textTheme.bodyMedium
                                 ?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: AppTheme.lightTheme.colorScheme
+                                  .onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -117,54 +115,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ListTile(
                     leading: CustomIconWidget(
                       iconName: 'notifications',
-                      color: Theme.of(context).colorScheme.primary,
+                      color: AppTheme.lightTheme.colorScheme.primary,
                       size: 6.w,
                     ),
                     title: Text('Notification Settings'),
                     trailing: Icon(Icons.chevron_right),
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const NotificationSettingsScreen(),
-                        ),
-                      );
+                      // Navigate to notification settings
                     },
                   ),
                   Divider(height: 1),
                   ListTile(
                     leading: CustomIconWidget(
                       iconName: 'privacy_tip',
-                      color: Theme.of(context).colorScheme.primary,
+                      color: AppTheme.lightTheme.colorScheme.primary,
                       size: 6.w,
                     ),
                     title: Text('Privacy Settings'),
                     trailing: Icon(Icons.chevron_right),
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const PrivacySettingsScreen(),
-                        ),
-                      );
+                      // Navigate to privacy settings
                     },
                   ),
                   Divider(height: 1),
                   ListTile(
                     leading: CustomIconWidget(
                       iconName: 'help',
-                      color: Theme.of(context).colorScheme.primary,
+                      color: AppTheme.lightTheme.colorScheme.primary,
                       size: 6.w,
                     ),
                     title: Text('Help & Support'),
                     trailing: Icon(Icons.chevron_right),
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const HelpSupportScreen(),
-                        ),
-                      );
+                      // Navigate to help screen
                     },
                   ),
                 ],
@@ -181,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 2.h),
                   side: BorderSide(
-                    color: Theme.of(context).colorScheme.error,
+                    color: AppTheme.lightTheme.colorScheme.error,
                   ),
                 ),
                 child: Row(
@@ -189,15 +172,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     CustomIconWidget(
                       iconName: 'logout',
-                      color: Theme.of(context).colorScheme.error,
+                      color: AppTheme.lightTheme.colorScheme.error,
                       size: 5.w,
                     ),
                     SizedBox(width: 2.w),
                     Text(
                       'Sign Out',
-                      style: Theme.of(context).textTheme.titleMedium
+                      style: AppTheme.lightTheme.textTheme.titleMedium
                           ?.copyWith(
-                        color: Theme.of(context).colorScheme.error,
+                        color: AppTheme.lightTheme.colorScheme.error,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

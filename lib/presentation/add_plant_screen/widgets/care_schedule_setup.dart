@@ -2,30 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../../core/app_export.dart';
-import '../../../../providers/plant_ai_service_provider.dart';
-import '../../../../services/plant_ai_service.dart';
-import '../../../../widgets/ai_error_card.dart';
-import '../../../../widgets/ai_schedule_suggestion_card.dart';
 
 class CareScheduleSetup extends StatefulWidget {
   final Function(Map<String, dynamic>) onScheduleChanged;
 
-  /// Values used to prefill the schedule (e.g. when editing an existing plant).
-  final Map<String, dynamic>? initialData;
-
-  final String species;
-  final String? light;
-  final int? humidity;
-  final String? location;
-
   const CareScheduleSetup({
     super.key,
     required this.onScheduleChanged,
-    this.initialData,
-    this.species = '',
-    this.light,
-    this.humidity,
-    this.location,
   });
 
   @override
@@ -41,46 +24,14 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
   double _mistingFrequency = 3.0; // days
   double _rotatingFrequency = 7.0; // days
 
-  PlantAiService _service = const StubPlantAiService();
-  ScheduleSuggestion? _proposal;
-  PlantAiException? _proposalError;
-  bool _isProposing = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final service = PlantAiServiceProvider.of(context);
-    if (!identical(service, _service)) {
-      _service = service;
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    final initial = widget.initialData;
-    if (initial != null) {
-      double clamped(num? value, double min, double max) =>
-          (value ?? 0).toDouble().clamp(min, max);
-      _wateringFrequency = clamped(
-          initial['wateringFrequency'] as num?, 1, 30);
-      _fertilizingEnabled = initial['fertilizingEnabled'] == true;
-      _mistingEnabled = initial['mistingEnabled'] == true;
-      _rotatingEnabled = initial['rotatingEnabled'] == true;
-      _fertilizingFrequency =
-          clamped(initial['fertilizingFrequency'] as num?, 7, 90);
-      _mistingFrequency =
-          clamped(initial['mistingFrequency'] as num?, 1, 14);
-      _rotatingFrequency =
-          clamped(initial['rotatingFrequency'] as num?, 3, 30);
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateSchedule();
-    });
+    _updateSchedule();
   }
 
-  Map<String, dynamic> _currentSchedule() {
-    return {
+  void _updateSchedule() {
+    widget.onScheduleChanged({
       'wateringFrequency': _wateringFrequency.round(),
       'fertilizingEnabled': _fertilizingEnabled,
       'fertilizingFrequency': _fertilizingFrequency.round(),
@@ -88,82 +39,6 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
       'mistingFrequency': _mistingFrequency.round(),
       'rotatingEnabled': _rotatingEnabled,
       'rotatingFrequency': _rotatingFrequency.round(),
-    };
-  }
-
-  void _updateSchedule() {
-    widget.onScheduleChanged(_currentSchedule());
-  }
-
-  Future<void> _proposeSchedule() async {
-    setState(() {
-      _isProposing = true;
-      _proposalError = null;
-    });
-    try {
-      final suggestion = await _service.suggestWateringSchedule(
-        ScheduleRequest(
-          species: widget.species,
-          light: widget.light,
-          humidity: widget.humidity,
-          location: widget.location,
-          careSchedule: _currentSchedule(),
-        ),
-      );
-      if (!mounted) return;
-      setState(() {
-        _proposal = suggestion;
-        _isProposing = false;
-      });
-    } on PlantAiException catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _proposalError = error;
-        _isProposing = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _proposalError = const UnknownError();
-        _isProposing = false;
-      });
-    }
-  }
-
-  void _confirmProposal() {
-    final proposal = _proposal;
-    if (proposal == null) return;
-    double clamp(double value, double min, double max) =>
-        value.clamp(min, max);
-    setState(() {
-      _wateringFrequency = clamp(
-          proposal.wateringFrequency.toDouble(), 1, 30);
-      _fertilizingEnabled = proposal.fertilizingEnabled;
-      _fertilizingFrequency = clamp(
-          proposal.fertilizingFrequency.toDouble(), 7, 90);
-      _mistingEnabled = proposal.mistingEnabled;
-      _mistingFrequency = clamp(
-          proposal.mistingFrequency.toDouble(), 1, 14);
-      _rotatingEnabled = proposal.rotatingEnabled;
-      _rotatingFrequency = clamp(
-          proposal.rotatingFrequency.toDouble(), 3, 30);
-      _proposal = null;
-    });
-    _updateSchedule();
-  }
-
-  void _retryProposal() {
-    setState(() {
-      _proposal = null;
-      _proposalError = null;
-    });
-    _proposeSchedule();
-  }
-
-  void _cancelProposal() {
-    setState(() {
-      _proposal = null;
-      _proposalError = null;
     });
   }
 
@@ -186,19 +61,16 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
             'Care Schedule',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: AppTheme.lightTheme.colorScheme.onSurface,
                 ),
           ),
           SizedBox(height: 1.h),
           Text(
             'Set up automated reminders for plant care tasks',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                 ),
           ),
-          SizedBox(height: 3.h),
-
-          _buildAiScheduleProposal(),
           SizedBox(height: 3.h),
 
           // Watering Schedule
@@ -278,53 +150,14 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
     );
   }
 
-  Widget _buildAiScheduleProposal() {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: _isProposing ? null : _proposeSchedule,
-            icon: _isProposing
-                ? SizedBox(
-                    width: 5.w,
-                    height: 5.w,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: colorScheme.primary,
-                    ),
-                  )
-                : Icon(Icons.auto_awesome, size: 5.w),
-            label: Text(_isProposing ? 'Proposing…' : 'Generate AI schedule'),
-          ),
-        ),
-        if (_proposalError != null) ...[
-          SizedBox(height: 2.h),
-          AiErrorCard(error: _proposalError!, onRetry: _retryProposal),
-        ],
-        if (_proposal != null) ...[
-          SizedBox(height: 2.h),
-          AiScheduleSuggestionCard(
-            suggestion: _proposal!,
-            onConfirm: _confirmProposal,
-            onTryAgain: _retryProposal,
-            onCancel: _cancelProposal,
-          ),
-        ],
-      ],
-    );
-  }
-
   Widget _buildWateringSchedule() {
     return Container(
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+        color: AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+          color: AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -335,12 +168,12 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
               Container(
                 padding: EdgeInsets.all(2.w),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: AppTheme.lightTheme.colorScheme.primary,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: CustomIconWidget(
                   iconName: 'water_drop',
-                  color: Theme.of(context).colorScheme.onPrimary,
+                  color: AppTheme.lightTheme.colorScheme.onPrimary,
                   size: 5.w,
                 ),
               ),
@@ -353,7 +186,7 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
                       'Watering Schedule',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.onSurface,
+                            color: AppTheme.lightTheme.colorScheme.onSurface,
                           ),
                     ),
                     Text(
@@ -373,17 +206,17 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
             'Frequency: ${_getFrequencyText(_wateringFrequency)}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: AppTheme.lightTheme.colorScheme.onSurface,
                 ),
           ),
           SizedBox(height: 1.h),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              activeTrackColor: Theme.of(context).colorScheme.primary,
-              thumbColor: Theme.of(context).colorScheme.primary,
-              overlayColor: Theme.of(context).colorScheme.primary
+              activeTrackColor: AppTheme.lightTheme.colorScheme.primary,
+              thumbColor: AppTheme.lightTheme.colorScheme.primary,
+              overlayColor: AppTheme.lightTheme.colorScheme.primary
                   .withValues(alpha: 0.2),
-              inactiveTrackColor: Theme.of(context).colorScheme.primary
+              inactiveTrackColor: AppTheme.lightTheme.colorScheme.primary
                   .withValues(alpha: 0.3),
             ),
             child: Slider(
@@ -405,13 +238,13 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
               Text(
                 'Daily',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                     ),
               ),
               Text(
                 'Monthly',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                     ),
               ),
             ],
@@ -435,10 +268,10 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
     return Container(
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -449,17 +282,17 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
                 padding: EdgeInsets.all(2.w),
                 decoration: BoxDecoration(
                   color: isEnabled
-                      ? Theme.of(context).colorScheme.primary
+                      ? AppTheme.lightTheme.colorScheme.primary
                           .withValues(alpha: 0.1)
-                      : Theme.of(context).colorScheme.onSurfaceVariant
+                      : AppTheme.lightTheme.colorScheme.onSurfaceVariant
                           .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: CustomIconWidget(
                   iconName: iconName,
                   color: isEnabled
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ? AppTheme.lightTheme.colorScheme.primary
+                      : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                   size: 5.w,
                 ),
               ),
@@ -472,7 +305,7 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w500,
-                            color: Theme.of(context).colorScheme.onSurface,
+                            color: AppTheme.lightTheme.colorScheme.onSurface,
                           ),
                     ),
                     Text(
@@ -497,7 +330,7 @@ class _CareScheduleSetupState extends State<CareScheduleSetup> {
               'Frequency: ${_getFrequencyText(frequency)}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: AppTheme.lightTheme.colorScheme.onSurface,
                   ),
             ),
             SizedBox(height: 1.h),

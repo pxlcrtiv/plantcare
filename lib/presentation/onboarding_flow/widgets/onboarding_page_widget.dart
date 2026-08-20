@@ -52,9 +52,9 @@ class OnboardingPageWidget extends StatelessWidget {
                   Text(
                     title,
                     style:
-                        Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: AppTheme.lightTheme.colorScheme.onSurface,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
@@ -66,8 +66,8 @@ class OnboardingPageWidget extends StatelessWidget {
                   // Subtitle
                   Text(
                     subtitle,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
+                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                       height: 1.5,
                     ),
                     textAlign: TextAlign.center,
@@ -86,19 +86,19 @@ class OnboardingPageWidget extends StatelessWidget {
                         onPressed: onGetStarted,
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              Theme.of(context).colorScheme.primary,
+                              AppTheme.lightTheme.colorScheme.primary,
                           foregroundColor:
-                              Theme.of(context).colorScheme.onPrimary,
+                              AppTheme.lightTheme.colorScheme.onPrimary,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: Text(
                           'Get Started',
-                          style: Theme.of(context).textTheme.titleMedium
+                          style: AppTheme.lightTheme.textTheme.titleMedium
                               ?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.onPrimary,
+                            color: AppTheme.lightTheme.colorScheme.onPrimary,
                           ),
                         ),
                       ),

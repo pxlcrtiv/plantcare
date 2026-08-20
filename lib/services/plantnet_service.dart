@@ -42,15 +42,13 @@ class PlantNetService {
           imagePath,
           filename: 'plant_image.jpg',
         ),
+        'api-key': _apiKey,
+        'lang': 'en',
       });
 
       final response = await _dio.post(
         '$_baseUrl/identify/all',
         data: formData,
-        queryParameters: {
-          'api-key': _apiKey,
-          'lang': 'en',
-        },
         options: Options(
           validateStatus: (_) => true,
           headers: {
@@ -74,7 +72,10 @@ class PlantNetService {
     List<String> imagePaths,
   ) async {
     try {
-      final formData = FormData.fromMap({});
+      final formData = FormData.fromMap({
+        'api-key': _apiKey,
+        'lang': 'en',
+      });
 
       for (int i = 0; i < imagePaths.length; i++) {
         formData.files.add(MapEntry(
@@ -89,10 +90,6 @@ class PlantNetService {
       final response = await _dio.post(
         '$_baseUrl/identify/all',
         data: formData,
-        queryParameters: {
-          'api-key': _apiKey,
-          'lang': 'en',
-        },
         options: Options(
           validateStatus: (_) => true,
           headers: {

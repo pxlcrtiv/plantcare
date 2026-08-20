@@ -22,11 +22,6 @@ class PlantCareService {
     }
   }
 
-  /// Cancel all care reminders for a plant
-  Future<void> cancelReminders(String plantId) async {
-    await _notificationService.cancelPlantReminders(plantId);
-  }
-
   /// Log a care event and update plant status
   Future<void> logCareEvent(String plantId, String eventType, {String? notes}) async {
     final event = {

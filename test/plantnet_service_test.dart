@@ -163,14 +163,15 @@ void main() {
       expect(adapter.lastData, isA<FormData>());
     });
 
-    test('sends the injected api-key as a query parameter, not a form field',
-        () async {
+    test('sends the injected api-key inside the multipart form', () async {
       await service.identifyPlantFromImageFile(tempFile.path);
 
-      expect(adapter.lastRequest!.queryParameters['api-key'], 'TEST_KEY');
       final formData = adapter.lastData as FormData;
-      final apiKeyField = formData.fields.where((f) => f.key == 'api-key');
-      expect(apiKeyField, isEmpty);
+      final apiKeyField = formData.fields.firstWhere(
+        (f) => f.key == 'api-key',
+        orElse: () => const MapEntry('missing', ''),
+      );
+      expect(apiKeyField.value, 'TEST_KEY');
     });
   });
 

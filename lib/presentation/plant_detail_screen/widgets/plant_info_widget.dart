@@ -7,9 +7,6 @@ class PlantInfoWidget extends StatefulWidget {
   final String plantName;
   final String species;
   final String difficulty;
-  final int? humidity;
-  final String? light;
-  final int? wateringFrequency;
   final VoidCallback onNameEdit;
 
   const PlantInfoWidget({
@@ -17,9 +14,6 @@ class PlantInfoWidget extends StatefulWidget {
     required this.plantName,
     required this.species,
     required this.difficulty,
-    this.humidity,
-    this.light,
-    this.wateringFrequency,
     required this.onNameEdit,
   }) : super(key: key);
 
@@ -46,65 +40,20 @@ class _PlantInfoWidgetState extends State<PlantInfoWidget> {
   Color _getDifficultyColor() {
     switch (widget.difficulty.toLowerCase()) {
       case 'easy':
-        return AppTheme.getSuccessColor(
-            Theme.of(context).brightness == Brightness.dark);
+        return AppTheme.getSuccessColor(true);
       case 'medium':
-        return AppTheme.getWarningColor(
-            Theme.of(context).brightness == Brightness.dark);
+        return AppTheme.getWarningColor(true);
       case 'hard':
-        return Theme.of(context).colorScheme.error;
+        return AppTheme.lightTheme.colorScheme.error;
       default:
-        return Theme.of(context).colorScheme.primary;
+        return AppTheme.lightTheme.colorScheme.primary;
     }
-  }
-
-  Widget _buildStatTile(
-      {required Widget icon,
-      required String value,
-      required String label}) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 1.5.h),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            icon,
-            SizedBox(height: 0.8.h),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            SizedBox(height: 0.3.h),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 10.sp,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(4.w, 1.5.h, 4.w, 1.h),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -115,10 +64,10 @@ class _PlantInfoWidgetState extends State<PlantInfoWidget> {
                 child: _isEditing
                     ? TextField(
                         controller: _nameController,
-                        style: Theme.of(context).textTheme.headlineSmall,
+                        style: AppTheme.lightTheme.textTheme.headlineSmall,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           contentPadding: EdgeInsets.symmetric(
                             horizontal: 3.w,
@@ -134,7 +83,7 @@ class _PlantInfoWidgetState extends State<PlantInfoWidget> {
                       )
                     : Text(
                         widget.plantName,
-                        style: Theme.of(context).textTheme.headlineSmall
+                        style: AppTheme.lightTheme.textTheme.headlineSmall
                             ?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -154,87 +103,53 @@ class _PlantInfoWidgetState extends State<PlantInfoWidget> {
                 },
                 icon: CustomIconWidget(
                   iconName: _isEditing ? 'check' : 'edit',
-                  color: Theme.of(context).colorScheme.primary,
+                  color: AppTheme.lightTheme.colorScheme.primary,
                   size: 20,
                 ),
               ),
             ],
           ),
 
-          SizedBox(height: 0.5.h),
+          SizedBox(height: 1.h),
 
-          // Species + difficulty
+          // Species information
+          Text(
+            'Species: ${widget.species}',
+            style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
+              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+
+          SizedBox(height: 1.h),
+
+          // Care difficulty indicator
           Row(
             children: [
-              Flexible(
-                child: Text(
-                  widget.species,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              Text(
+                'Care Difficulty: ',
+                style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              SizedBox(width: 2.w),
               Container(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.4.h),
+                padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
                 decoration: BoxDecoration(
                   color: _getDifficultyColor().withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _getDifficultyColor(), width: 1),
+                  border: Border.all(
+                    color: _getDifficultyColor(),
+                    width: 1,
+                  ),
                 ),
                 child: Text(
                   widget.difficulty.toUpperCase(),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
                     color: _getDifficultyColor(),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-            ],
-          ),
-
-          SizedBox(height: 1.5.h),
-
-          // Stats row
-          Row(
-            children: [
-              _buildStatTile(
-                icon: Icon(
-                  Icons.water_drop,
-                  size: 22,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppTheme.dropletDark
-                      : AppTheme.dropletLight,
-                ),
-                value: '${widget.humidity ?? 65}%',
-                label: 'Humidity',
-              ),
-              SizedBox(width: 2.5.w),
-              _buildStatTile(
-                icon: Icon(
-                  Icons.wb_sunny,
-                  size: 22,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppTheme.sunDark
-                      : AppTheme.sunLight,
-                ),
-                value: widget.light ?? 'Sunny',
-                label: 'Light',
-              ),
-              SizedBox(width: 2.5.w),
-              _buildStatTile(
-                icon: Icon(
-                  Icons.water_drop_outlined,
-                  size: 22,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppTheme.dropletDark
-                      : AppTheme.dropletLight,
-                ),
-                value: '${widget.wateringFrequency ?? 7} days',
-                label: 'Watering',
               ),
             ],
           ),

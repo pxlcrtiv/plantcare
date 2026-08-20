@@ -21,21 +21,21 @@ class PlantResultCardWidget extends StatelessWidget {
     Color getDifficultyColor() {
       switch (careDifficulty.toLowerCase()) {
         case 'easy':
-          return AppTheme.getSuccessColor(Theme.of(context).brightness == Brightness.dark);
+          return AppTheme.getSuccessColor(true);
         case 'medium':
-          return AppTheme.getWarningColor(Theme.of(context).brightness == Brightness.dark);
+          return AppTheme.getWarningColor(true);
         case 'hard':
-          return Theme.of(context).colorScheme.error;
+          return AppTheme.lightTheme.colorScheme.error;
         default:
-          return Theme.of(context).colorScheme.onSurface;
+          return AppTheme.lightTheme.colorScheme.onSurface;
       }
     }
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        color: AppTheme.lightTheme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
@@ -56,7 +56,7 @@ class PlantResultCardWidget extends StatelessWidget {
                 height: 20.w,
                 margin: EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.1),
@@ -66,7 +66,7 @@ class PlantResultCardWidget extends StatelessWidget {
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                   child: CustomImageWidget(
                     imageUrl: plantData['image'] as String,
                     width: 20.w,
@@ -88,24 +88,24 @@ class PlantResultCardWidget extends StatelessWidget {
                             horizontal: 2.w, vertical: 0.5.h),
                         decoration: BoxDecoration(
                           color: confidence >= 80
-                              ? AppTheme.getSuccessColor(Theme.of(context).brightness == Brightness.dark)
+                              ? AppTheme.getSuccessColor(true)
                                   .withValues(alpha: 0.1)
                               : confidence >= 60
-                                  ? AppTheme.getWarningColor(Theme.of(context).brightness == Brightness.dark)
+                                  ? AppTheme.getWarningColor(true)
                                       .withValues(alpha: 0.1)
-                                  : Theme.of(context).colorScheme.error
+                                  : AppTheme.lightTheme.colorScheme.error
                                       .withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           '${confidence.toInt()}% match',
-                          style: Theme.of(context).textTheme.labelSmall
+                          style: AppTheme.lightTheme.textTheme.labelSmall
                               ?.copyWith(
                             color: confidence >= 80
-                                ? AppTheme.getSuccessColor(Theme.of(context).brightness == Brightness.dark)
+                                ? AppTheme.getSuccessColor(true)
                                 : confidence >= 60
-                                    ? AppTheme.getWarningColor(Theme.of(context).brightness == Brightness.dark)
-                                    : Theme.of(context).colorScheme.error,
+                                    ? AppTheme.getWarningColor(true)
+                                    : AppTheme.lightTheme.colorScheme.error,
                             fontWeight: FontWeight.w600,
                             fontSize: 10.sp,
                           ),
@@ -116,7 +116,7 @@ class PlantResultCardWidget extends StatelessWidget {
                       Text(
                         plantData['name'] as String,
                         style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                            AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           fontSize: 14.sp,
                         ),
@@ -128,9 +128,9 @@ class PlantResultCardWidget extends StatelessWidget {
                       Text(
                         plantData['scientificName'] as String,
                         style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                            AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
                           fontStyle: FontStyle.italic,
-                          color: Theme.of(context).colorScheme.onSurface
+                          color: AppTheme.lightTheme.colorScheme.onSurface
                               .withValues(alpha: 0.7),
                           fontSize: 11.sp,
                         ),
@@ -153,7 +153,7 @@ class PlantResultCardWidget extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
                   decoration: BoxDecoration(
                     color: getDifficultyColor().withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -167,7 +167,7 @@ class PlantResultCardWidget extends StatelessWidget {
                       Text(
                         '$careDifficulty Care',
                         style:
-                            Theme.of(context).textTheme.labelMedium?.copyWith(
+                            AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
                           color: getDifficultyColor(),
                           fontWeight: FontWeight.w500,
                           fontSize: 11.sp,
@@ -182,13 +182,13 @@ class PlantResultCardWidget extends StatelessWidget {
                   children: [
                     CustomIconWidget(
                       iconName: 'water_drop',
-                      color: Theme.of(context).colorScheme.primary,
+                      color: AppTheme.lightTheme.colorScheme.primary,
                       size: 4.w,
                     ),
                     SizedBox(width: 1.w),
                     Text(
                       plantData['wateringFrequency'] as String,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
                         fontSize: 10.sp,
                       ),
                     ),
@@ -206,17 +206,17 @@ class PlantResultCardWidget extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onSelectPlant,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+                  foregroundColor: AppTheme.lightTheme.colorScheme.onPrimary,
                   padding: EdgeInsets.symmetric(vertical: 2.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: Text(
                   'Select This Plant',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimary,
+                  style: AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
+                    color: AppTheme.lightTheme.colorScheme.onPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 13.sp,
                   ),

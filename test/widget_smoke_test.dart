@@ -79,9 +79,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Hi Plant Parent!'), findsOneWidget);
-      expect(find.text('No plants here yet'), findsOneWidget);
-      expect(find.text('My Plants'), findsOneWidget);
+      expect(find.text('Start Your Plant Journey'), findsOneWidget);
+      expect(find.text('Add Your First Plant'), findsOneWidget);
       expect(find.byType(FloatingActionButton), findsNothing);
     });
 
@@ -97,9 +96,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Monstera'), findsWidgets);
-      expect(find.text('No plants here yet'), findsNothing);
-      expect(find.text('Popular plants'), findsOneWidget);
+      expect(find.text('Monstera'), findsOneWidget);
+      expect(find.text('Start Your Plant Journey'), findsNothing);
     });
   });
 

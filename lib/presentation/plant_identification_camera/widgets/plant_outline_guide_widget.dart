@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../../core/app_export.dart';
+import '../../../theme/app_theme.dart';
 
 class PlantOutlineGuideWidget extends StatelessWidget {
   const PlantOutlineGuideWidget({Key? key}) : super(key: key);
@@ -14,7 +16,7 @@ class PlantOutlineGuideWidget extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(
             color:
-                Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.8),
+                AppTheme.lightTheme.colorScheme.tertiary.withValues(alpha: 0.8),
             width: 2,
           ),
           borderRadius: BorderRadius.circular(20),
@@ -31,11 +33,11 @@ class PlantOutlineGuideWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
-                      color: Theme.of(context).colorScheme.tertiary,
+                      color: AppTheme.lightTheme.colorScheme.tertiary,
                       width: 4,
                     ),
                     left: BorderSide(
-                      color: Theme.of(context).colorScheme.tertiary,
+                      color: AppTheme.lightTheme.colorScheme.tertiary,
                       width: 4,
                     ),
                   ),
@@ -51,11 +53,11 @@ class PlantOutlineGuideWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
-                      color: Theme.of(context).colorScheme.tertiary,
+                      color: AppTheme.lightTheme.colorScheme.tertiary,
                       width: 4,
                     ),
                     right: BorderSide(
-                      color: Theme.of(context).colorScheme.tertiary,
+                      color: AppTheme.lightTheme.colorScheme.tertiary,
                       width: 4,
                     ),
                   ),
@@ -71,11 +73,11 @@ class PlantOutlineGuideWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: Theme.of(context).colorScheme.tertiary,
+                      color: AppTheme.lightTheme.colorScheme.tertiary,
                       width: 4,
                     ),
                     left: BorderSide(
-                      color: Theme.of(context).colorScheme.tertiary,
+                      color: AppTheme.lightTheme.colorScheme.tertiary,
                       width: 4,
                     ),
                   ),
@@ -91,11 +93,11 @@ class PlantOutlineGuideWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: Theme.of(context).colorScheme.tertiary,
+                      color: AppTheme.lightTheme.colorScheme.tertiary,
                       width: 4,
                     ),
                     right: BorderSide(
-                      color: Theme.of(context).colorScheme.tertiary,
+                      color: AppTheme.lightTheme.colorScheme.tertiary,
                       width: 4,
                     ),
                   ),
@@ -108,7 +110,7 @@ class PlantOutlineGuideWidget extends StatelessWidget {
                 width: 4.w,
                 height: 4.w,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.tertiary
+                  color: AppTheme.lightTheme.colorScheme.tertiary
                       .withValues(alpha: 0.8),
                   shape: BoxShape.circle,
                 ),

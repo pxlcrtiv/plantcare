@@ -29,19 +29,19 @@ class EntryMethodCard extends StatelessWidget {
         padding: EdgeInsets.all(4.w),
         decoration: BoxDecoration(
           color: isSelected
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-              : Theme.of(context).colorScheme.surface,
+              ? AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1)
+              : AppTheme.lightTheme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.outline
+                ? AppTheme.lightTheme.colorScheme.primary
+                : AppTheme.lightTheme.colorScheme.outline
                     .withValues(alpha: 0.2),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).colorScheme.shadow,
+              color: AppTheme.lightTheme.colorScheme.shadow,
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -54,8 +54,8 @@ class EntryMethodCard extends StatelessWidget {
               height: 15.w,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.primary
+                    ? AppTheme.lightTheme.colorScheme.primary
+                    : AppTheme.lightTheme.colorScheme.primary
                         .withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -63,8 +63,8 @@ class EntryMethodCard extends StatelessWidget {
                 child: CustomIconWidget(
                   iconName: iconName,
                   color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimary
-                      : Theme.of(context).colorScheme.primary,
+                      ? AppTheme.lightTheme.colorScheme.onPrimary
+                      : AppTheme.lightTheme.colorScheme.primary,
                   size: 8.w,
                 ),
               ),
@@ -74,7 +74,7 @@ class EntryMethodCard extends StatelessWidget {
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: AppTheme.lightTheme.colorScheme.onSurface,
                   ),
               textAlign: TextAlign.center,
             ),
@@ -82,7 +82,7 @@ class EntryMethodCard extends StatelessWidget {
             Text(
               description,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                   ),
               textAlign: TextAlign.center,
               maxLines: 2,

@@ -24,7 +24,7 @@ class SearchBarWidget extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         decoration: InputDecoration(
-          hintText: 'Search plants…',
+          hintText: 'Search plants by name or species...',
           prefixIcon: Padding(
             padding: EdgeInsets.all(3.w),
             child: CustomIconWidget(

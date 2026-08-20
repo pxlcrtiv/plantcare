@@ -76,11 +76,11 @@ class _ProcessingScreenWidgetState extends State<ProcessingScreenWidget>
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      color: Theme.of(context).colorScheme.surface,
+                      color: AppTheme.lightTheme.colorScheme.surface,
                       child: Center(
                         child: CustomIconWidget(
                           iconName: 'image',
-                          color: Theme.of(context).colorScheme.onSurface
+                          color: AppTheme.lightTheme.colorScheme.onSurface
                               .withValues(alpha: 0.5),
                           size: 12.w,
                         ),
@@ -103,7 +103,7 @@ class _ProcessingScreenWidgetState extends State<ProcessingScreenWidget>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.tertiary
+                        color: AppTheme.lightTheme.colorScheme.tertiary
                             .withValues(alpha: 0.3),
                         width: 2,
                       ),
@@ -117,7 +117,7 @@ class _ProcessingScreenWidgetState extends State<ProcessingScreenWidget>
                           child: Container(
                             height: 2,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.tertiary,
+                              color: AppTheme.lightTheme.colorScheme.tertiary,
                               borderRadius: BorderRadius.circular(1),
                             ),
                           ),
@@ -132,7 +132,7 @@ class _ProcessingScreenWidgetState extends State<ProcessingScreenWidget>
             // Processing Text
             Text(
               'Analyzing plant...',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
                 color: Colors.white,
                 fontSize: 16.sp,
               ),
@@ -140,7 +140,7 @@ class _ProcessingScreenWidgetState extends State<ProcessingScreenWidget>
             SizedBox(height: 2.h),
             Text(
               'This may take a few moments',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
                 color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 12.sp,
               ),

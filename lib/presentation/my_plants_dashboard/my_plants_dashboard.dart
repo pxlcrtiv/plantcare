@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sizer/sizer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 
 import '../../core/app_export.dart';
@@ -10,18 +9,13 @@ import '../../repositories/plant_repository.dart';
 import '../../repositories/plant_repository_impl.dart';
 import '../../services/firebase_service.dart';
 import '../../models/plant.dart';
-import '../../widgets/floating_dock.dart';
-import '../calendar/calendar_screen.dart';
-import '../add_plant_screen/widgets/plant_database_browser.dart';
-import '../care_assistant_hub/care_assistant_hub.dart';
-import './widgets/home_tab.dart';
-import './widgets/plant_list_tab.dart';
-import './widgets/placeholder_tabs.dart';
+import './widgets/bottom_navigation_widget.dart';
+import './widgets/empty_state_widget.dart';
+import './widgets/greeting_header_widget.dart';
+import './widgets/plant_card_widget.dart';
 import './widgets/quick_actions_sheet_widget.dart';
+import './widgets/search_bar_widget.dart';
 
-/// App shell: hosts the reference design's 5-tab dock (Home / Plant /
-/// Search / Flask / Target) over an IndexedStack. Calendar + Profile are
-/// reached from the Home header menu.
 class MyPlantsDashboard extends StatefulWidget {
   const MyPlantsDashboard({Key? key, this.plantRepository}) : super(key: key);
 
@@ -38,8 +32,7 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  int _currentNavIndex = 0;
-  int _environmentIndex = 0;
+  int _currentBottomNavIndex = 0;
   String _searchQuery = '';
 
   late PlantRepository _plantRepository;
@@ -47,20 +40,30 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
   List<Plant> _allPlants = [];
   List<Plant> _filteredPlants = [];
 
+  int get _plantsNeedingCare {
+    return _allPlants
+        .where((plant) =>
+            plant.status == 'needs_attention' ||
+            plant.status == 'overdue')
+        .length;
+  }
+
   @override
   void initState() {
     super.initState();
-
+    
+    // Initialize the repository
     _plantRepository =
         widget.plantRepository ?? PlantRepositoryImpl(FirebaseService());
-
+    
+    // Listen to plant changes
     _plantsSubscription = _plantRepository.getPlants().listen((plants) {
       setState(() {
         _allPlants = plants;
         _applySearchFilter();
       });
     });
-
+    
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text;
@@ -68,7 +71,7 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
       });
     });
   }
-
+  
   void _applySearchFilter() {
     if (_searchQuery.isEmpty) {
       _filteredPlants = _allPlants;
@@ -91,7 +94,10 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
   }
 
   Future<void> _handleRefresh() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    // In a real implementation, we could force refresh from server if needed
+    // For Firestore, the real-time listener already keeps data updated
+    await Future.delayed(Duration(milliseconds: 500));
+
     Fluttertoast.showToast(
       msg: "Plants data refreshed",
       toastLength: Toast.LENGTH_SHORT,
@@ -99,65 +105,8 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
     );
   }
 
-  String get _userName {
-    try {
-      final displayName = FirebaseAuth.instance.currentUser?.displayName;
-      if (displayName != null && displayName.isNotEmpty) return displayName;
-    } catch (_) {
-      // No Firebase app in test/detached contexts — fall back to default.
-    }
-    return 'Plant Parent';
-  }
-
-  String get _locationLabel {
-    final code = Localizations.localeOf(context).countryCode;
-    const names = {
-      'US': 'United States',
-      'GB': 'United Kingdom',
-      'CA': 'Canada',
-      'AU': 'Australia',
-      'DE': 'Germany',
-      'FR': 'France',
-      'ES': 'Spain',
-      'IT': 'Italy',
-      'NL': 'Netherlands',
-      'JP': 'Japan',
-      'KR': 'South Korea',
-      'CN': 'China',
-      'IN': 'India',
-      'BR': 'Brazil',
-      'MX': 'Mexico',
-      'SE': 'Sweden',
-      'PL': 'Poland',
-      'TR': 'Turkey',
-      'VN': 'Vietnam',
-      'TH': 'Thailand',
-      'ID': 'Indonesia',
-      'SG': 'Singapore',
-      'PH': 'Philippines',
-      'PT': 'Portugal',
-      'IE': 'Ireland',
-      'CH': 'Switzerland',
-      'AT': 'Austria',
-      'BE': 'Belgium',
-      'DK': 'Denmark',
-      'NO': 'Norway',
-      'FI': 'Finland',
-      'GR': 'Greece',
-      'CZ': 'Czechia',
-      'RO': 'Romania',
-      'HU': 'Hungary',
-      'IL': 'Israel',
-      'SA': 'Saudi Arabia',
-      'AE': 'United Arab Emirates',
-      'ZA': 'South Africa',
-      'NG': 'Nigeria',
-      'EG': 'Egypt',
-    };
-    return names[code] ?? (code != null ? code : 'My Garden');
-  }
-
   void _handlePlantTap(Plant plant) {
+    // Convert Plant object to Map for navigation (for compatibility with existing detail screen)
     final plantMap = {
       'id': plant.id,
       'name': plant.name,
@@ -168,8 +117,6 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
       'nextWatering': plant.nextWatering,
       'careNotes': plant.careNotes,
       'location': plant.location,
-      'humidity': plant.humidity,
-      'light': plant.light,
       'dateAdded': plant.dateAdded.toString(),
       'careSchedule': plant.careSchedule,
       'photos': plant.photos,
@@ -207,10 +154,10 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
       await _plantRepository.updatePlant(plant.id, {
         'status': 'healthy',
         'lastWatered': Timestamp.now(),
-        'nextWatering': Timestamp.fromDate(DateTime.now().add(Duration(
-            days: plant.careSchedule['wateringFrequency'] ?? 7))),
+        'nextWatering': Timestamp.fromDate(DateTime.now().add(Duration(days: plant.careSchedule['wateringFrequency'] ?? 7))),
       });
 
+      // Add care event
       await _plantRepository.addCareEvent(plant.id, {
         'type': 'watering',
         'date': Timestamp.now(),
@@ -233,6 +180,7 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
   }
 
   void _handleEditPlant(Plant plant) {
+    // Convert Plant object to Map for navigation
     final plantMap = {
       'id': plant.id,
       'name': plant.name,
@@ -243,8 +191,6 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
       'nextWatering': plant.nextWatering,
       'careNotes': plant.careNotes,
       'location': plant.location,
-      'humidity': plant.humidity,
-      'light': plant.light,
       'careSchedule': plant.careSchedule,
     };
     Navigator.pushNamed(context, '/add-plant-screen', arguments: plantMap);
@@ -253,6 +199,7 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
   Future<void> _handleRemovePlant(Plant plant) async {
     try {
       await _plantRepository.deletePlant(plant.id);
+      
       Fluttertoast.showToast(
         msg: "${plant.name} removed from collection",
         toastLength: Toast.LENGTH_SHORT,
@@ -313,8 +260,8 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
                   size: 6.w,
                 ),
               ),
-              title: const Text('Camera Identification'),
-              subtitle: const Text('Take a photo to identify your plant'),
+              title: Text('Camera Identification'),
+              subtitle: Text('Take a photo to identify your plant'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/plant-identification-camera');
@@ -336,11 +283,11 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
                   size: 6.w,
                 ),
               ),
-              title: const Text('Browse Database'),
-              subtitle: const Text('Search from our plant database'),
+              title: Text('Browse Database'),
+              subtitle: Text('Search from our plant database'),
               onTap: () {
                 Navigator.pop(context);
-                setState(() => _currentNavIndex = 2);
+                Navigator.pushNamed(context, '/add-plant-screen');
               },
             ),
             ListTile(
@@ -359,8 +306,8 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
                   size: 6.w,
                 ),
               ),
-              title: const Text('Manual Entry'),
-              subtitle: const Text('Add plant details manually'),
+              title: Text('Manual Entry'),
+              subtitle: Text('Add plant details manually'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/add-plant-screen',
@@ -374,19 +321,31 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
     );
   }
 
-  void _handleAddFromDatabase(Map<String, dynamic> plant) {
-    Navigator.pushNamed(context, '/add-plant-screen', arguments: {
-      'database': plant,
+  void _handleBottomNavTap(int index) {
+    setState(() {
+      _currentBottomNavIndex = index;
     });
-  }
 
-  void _handleCalendar() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CalendarScreen(plants: _allPlants),
-      ),
-    );
+    switch (index) {
+      case 0:
+        // Already on My Plants
+        break;
+      case 1:
+        // Navigate to Calendar (placeholder)
+        Fluttertoast.showToast(
+          msg: "Calendar feature coming soon!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+        break;
+      case 2:
+        Navigator.pushNamed(context, '/plant-identification-camera');
+        break;
+      case 3:
+        // Navigate to Profile
+        Navigator.pushNamed(context, '/profile-screen');
+        break;
+    }
   }
 
   void _clearSearch() {
@@ -398,56 +357,80 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final DateTime now = DateTime.now();
+    final String currentDate = "${now.month}/${now.day}/${now.year}";
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
-        bottom: false,
-        child: IndexedStack(
-          index: _currentNavIndex,
+        child: Column(
           children: [
-            HomeTab(
-              userName: _userName,
-              locationLabel: _locationLabel,
-              plants: _allPlants,
-              environmentIndex: _environmentIndex,
-              onEnvironmentChanged: (i) => setState(() => _environmentIndex = i),
-              onPlantTap: _handlePlantTap,
-              onAddPlant: _handleAddPlant,
-              onAddFromDatabase: _handleAddFromDatabase,
-              onViewAllPlants: () => setState(() => _currentNavIndex = 1),
-              onViewAllPopular: () => setState(() => _currentNavIndex = 2),
-              onProfile: () =>
-                  Navigator.pushNamed(context, '/profile-screen'),
-              onCalendar: _handleCalendar,
-              onScan: () =>
-                  Navigator.pushNamed(context, '/plant-identification-camera'),
+            // Greeting Header
+            GreetingHeaderWidget(
+              userName: "Plant Parent",
+              currentDate: currentDate,
+              weatherInfo: "72°F",
+              plantsNeedingCare: _plantsNeedingCare,
             ),
-            PlantListTab(
-              searchController: _searchController,
-              plants: _filteredPlants,
-              hasQuery: _searchQuery.isNotEmpty,
-              onPlantTap: _handlePlantTap,
-              onPlantLongPress: _handlePlantLongPress,
-              onSearchChanged: (value) {
+
+            // Search Bar
+            SearchBarWidget(
+              controller: _searchController,
+              onChanged: (value) {
                 setState(() {
                   _searchQuery = value;
                   _applySearchFilter();
                 });
               },
-              onClearSearch: _clearSearch,
-              onAddPlant: _handleAddPlant,
-              onRefresh: _handleRefresh,
+              onClear: _clearSearch,
             ),
-            _buildSearchTab(),
-            const CareAssistantHub(),
-            IdentifyTab(
-              onScan: () =>
-                  Navigator.pushNamed(context, '/plant-identification-camera'),
+
+            // Main Content
+            Expanded(
+              child: _filteredPlants.isEmpty
+                  ? _searchQuery.isNotEmpty
+                      ? _buildNoSearchResults()
+                      : EmptyStateWidget(onAddPlant: _handleAddPlant)
+                  : RefreshIndicator(
+                      onRefresh: _handleRefresh,
+                      child: GridView.builder(
+                        controller: _scrollController,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 4.w, vertical: 2.h),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: _getCrossAxisCount(),
+                          crossAxisSpacing: 3.w,
+                          mainAxisSpacing: 3.w,
+                          childAspectRatio: 0.75,
+                        ),
+                        itemCount: _filteredPlants.length,
+                        itemBuilder: (context, index) {
+                          final plant = _filteredPlants[index];
+                          return PlantCardWidget(
+                            plant: {
+                              'id': plant.id,
+                              'name': plant.name,
+                              'species': plant.species,
+                              'imageUrl': plant.imageUrl,
+                              'status': plant.status,
+                              'lastWatered': plant.lastWatered,
+                              'nextWatering': plant.nextWatering,
+                              'careNotes': plant.careNotes,
+                            },
+                            onTap: () => _handlePlantTap(plant),
+                            onLongPress: () => _handlePlantLongPress(plant),
+                            onWaterTap: () => _handleWaterPlant(plant),
+                          );
+                        },
+                      ),
+                    ),
             ),
           ],
         ),
       ),
-      floatingActionButton: _currentNavIndex == 1 && _filteredPlants.isNotEmpty
+
+      // Floating Action Button
+      floatingActionButton: _filteredPlants.isNotEmpty
           ? FloatingActionButton(
               onPressed: _handleAddPlant,
               child: CustomIconWidget(
@@ -459,42 +442,58 @@ class _MyPlantsDashboardState extends State<MyPlantsDashboard> {
               ),
             )
           : null,
-      bottomNavigationBar: FloatingDock(
-        currentIndex: _currentNavIndex,
-        onTap: (index) => setState(() => _currentNavIndex = index),
-        destinations: const [
-          (icon: Icons.home, label: 'Home'),
-          (icon: Icons.local_florist, label: 'Plant'),
-          (icon: Icons.search, label: 'Search'),
-          (icon: Icons.science, label: 'Flask'),
-          (icon: Icons.qr_code_scanner, label: 'Target'),
-        ],
+
+      // Bottom Navigation
+      bottomNavigationBar: BottomNavigationWidget(
+        currentIndex: _currentBottomNavIndex,
+        onTap: _handleBottomNavTap,
       ),
     );
   }
 
-  Widget _buildSearchTab() {
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(5.w, 2.h, 5.w, 1.h),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Browse plants',
+  Widget _buildNoSearchResults() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(8.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CustomIconWidget(
+              iconName: 'search_off',
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: 20.w,
+            ),
+            SizedBox(height: 3.h),
+            Text(
+              'No Plants Found',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.5,
+                    fontWeight: FontWeight.w600,
                   ),
             ),
-          ),
+            SizedBox(height: 1.h),
+            Text(
+              'Try searching with different keywords or add a new plant to your collection.',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 3.h),
+            ElevatedButton(
+              onPressed: _clearSearch,
+              child: Text('Clear Search'),
+            ),
+          ],
         ),
-        Expanded(
-          child: PlantDatabaseBrowser(
-            onPlantSelected: _handleAddFromDatabase,
-          ),
-        ),
-      ],
+      ),
     );
+  }
+
+  int _getCrossAxisCount() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth > 600) {
+      return 3; // Tablet
+    }
+    return 2; // Phone
   }
 }

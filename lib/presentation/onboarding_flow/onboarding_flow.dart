@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../core/app_export.dart';
+import '../../theme/app_theme.dart';
 import './widgets/navigation_controls_widget.dart';
 import './widgets/onboarding_page_widget.dart';
 import './widgets/page_indicator_widget.dart';
@@ -79,7 +81,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       body: Column(
         children: [
           // Skip button in top-right corner
@@ -96,14 +98,14 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                   onPressed: _skipOnboarding,
                   style: TextButton.styleFrom(
                     foregroundColor:
-                        Theme.of(context).colorScheme.onSurfaceVariant,
+                        AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                     padding:
                         EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                   ),
                   child: Text(
                     'Skip',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
