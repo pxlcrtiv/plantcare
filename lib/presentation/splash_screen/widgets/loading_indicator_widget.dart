@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
-import '../../../core/app_export.dart';
-import '../../../theme/app_theme.dart';
 
 class LoadingIndicatorWidget extends StatefulWidget {
   final String loadingText;
@@ -61,9 +59,9 @@ class _LoadingIndicatorWidgetState extends State<LoadingIndicatorWidget>
                 value: _animation.value,
                 strokeWidth: 3.0,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  AppTheme.lightTheme.colorScheme.surface,
+                  Theme.of(context).colorScheme.surface,
                 ),
-                backgroundColor: AppTheme.lightTheme.colorScheme.surface
+                backgroundColor: Theme.of(context).colorScheme.surface
                     .withValues(alpha: 0.3),
               );
             },
@@ -72,8 +70,8 @@ class _LoadingIndicatorWidgetState extends State<LoadingIndicatorWidget>
         SizedBox(height: 3.h),
         Text(
           widget.loadingText,
-          style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-            color: AppTheme.lightTheme.colorScheme.surface,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.surface,
             fontSize: 14.sp,
           ),
           textAlign: TextAlign.center,

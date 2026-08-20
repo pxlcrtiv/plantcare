@@ -50,7 +50,7 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
       case 'repotting':
         return Colors.brown;
       default:
-        return AppTheme.lightTheme.colorScheme.primary;
+        return Theme.of(context).colorScheme.primary;
     }
   }
 
@@ -66,10 +66,10 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
             width: double.infinity,
             padding: EdgeInsets.all(4.w),
             decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.surface,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: AppTheme.lightTheme.colorScheme.outline
+                color: Theme.of(context).colorScheme.outline
                     .withValues(alpha: 0.2),
               ),
             ),
@@ -83,28 +83,28 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
                 SizedBox(height: 1.h),
                 Text(
                   'Next Watering',
-                  style: AppTheme.lightTheme.textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 SizedBox(height: 0.5.h),
                 if (widget.nextWateringDate != null) 
                   Text(
                     '${widget.nextWateringDate!.day}/${widget.nextWateringDate!.month}/${widget.nextWateringDate!.year}',
-                    style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   )
                 else
                   Text(
                     'Not scheduled',
-                    style: AppTheme.lightTheme.textTheme.headlineSmall?.copyWith(
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 SizedBox(height: 0.5.h),
                 Text(
                   _getCountdownText(),
-                  style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 SizedBox(height: 2.h),
@@ -120,7 +120,7 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
                     child: Text(
                       'Water Now',
                       style:
-                          AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                          Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -136,7 +136,7 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
           // Weekly calendar view
           Text(
             'This Week',
-            style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -170,14 +170,14 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
                   margin: EdgeInsets.only(right: 2.w),
                   decoration: BoxDecoration(
                     color: date.day == DateTime.now().day
-                        ? AppTheme.lightTheme.colorScheme.primary
+                        ? Theme.of(context).colorScheme.primary
                             .withValues(alpha: 0.1)
-                        : AppTheme.lightTheme.colorScheme.surface,
+                        : Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: date.day == DateTime.now().day
-                          ? AppTheme.lightTheme.colorScheme.primary
-                          : AppTheme.lightTheme.colorScheme.outline
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outline
                               .withValues(alpha: 0.2),
                     ),
                   ),
@@ -186,13 +186,13 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
                     children: [
                       Text(
                         dayName,
-                        style: AppTheme.lightTheme.textTheme.labelSmall,
+                        style: Theme.of(context).textTheme.labelSmall,
                       ),
                       SizedBox(height: 0.5.h),
                       Text(
                         '${date.day}',
                         style:
-                            AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -217,7 +217,7 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
           // Recent care history
           Text(
             'Recent Care History',
-            style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -238,10 +238,10 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
                 margin: EdgeInsets.only(bottom: 1.h),
                 padding: EdgeInsets.all(3.w),
                 decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: AppTheme.lightTheme.colorScheme.outline
+                    color: Theme.of(context).colorScheme.outline
                         .withValues(alpha: 0.2),
                   ),
                 ),
@@ -262,7 +262,7 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
                         children: [
                           Text(
                             activityType,
-                            style: AppTheme.lightTheme.textTheme.titleSmall
+                            style: Theme.of(context).textTheme.titleSmall
                                 ?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -271,7 +271,7 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
                             SizedBox(height: 0.5.h),
                             Text(
                               notes,
-                              style: AppTheme.lightTheme.textTheme.bodySmall,
+                              style: Theme.of(context).textTheme.bodySmall,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -281,8 +281,8 @@ class _CareScheduleTabWidgetState extends State<CareScheduleTabWidget> {
                     ),
                     Text(
                       '${date.day}/${date.month}',
-                      style: AppTheme.lightTheme.textTheme.labelSmall?.copyWith(
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

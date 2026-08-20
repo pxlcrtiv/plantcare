@@ -223,8 +223,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 // App name
                 Text(
                   "PlantCare",
-                  style: AppTheme.lightTheme.textTheme.headlineLarge?.copyWith(
-                    color: AppTheme.lightTheme.colorScheme.surface,
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.surface,
                     fontSize: 28.sp,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.5,
@@ -236,8 +236,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 // Tagline
                 Text(
                   "Nurture your green companions",
-                  style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.lightTheme.colorScheme.surface
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.surface
                         .withValues(alpha: 0.8),
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w400,
@@ -256,7 +256,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     padding:
                         EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                     decoration: BoxDecoration(
-                      color: AppTheme.lightTheme.colorScheme.surface
+                      color: Theme.of(context).colorScheme.surface
                           .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -266,14 +266,14 @@ class _SplashScreenState extends State<SplashScreen> {
                         CustomIconWidget(
                           iconName: 'check_circle',
                           size: 5.w,
-                          color: AppTheme.lightTheme.colorScheme.surface,
+                          color: Theme.of(context).colorScheme.surface,
                         ),
                         SizedBox(width: 2.w),
                         Text(
                           _loadingText,
-                          style: AppTheme.lightTheme.textTheme.bodyMedium
+                          style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
-                            color: AppTheme.lightTheme.colorScheme.surface,
+                            color: Theme.of(context).colorScheme.surface,
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
                           ),
@@ -289,8 +289,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   padding: EdgeInsets.only(bottom: 2.h),
                   child: Text(
                     "Version 1.0.0",
-                    style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                      color: AppTheme.lightTheme.colorScheme.surface
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.surface
                           .withValues(alpha: 0.6),
                       fontSize: 12.sp,
                     ),

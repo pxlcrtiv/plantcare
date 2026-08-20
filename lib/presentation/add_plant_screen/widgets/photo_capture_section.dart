@@ -145,14 +145,14 @@ class _PhotoCaptureSectionState extends State<PhotoCaptureSection> {
             'Plant Photos',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
           ),
           SizedBox(height: 1.h),
           Text(
             'Add photos to help identify and track your plant\'s growth',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
           SizedBox(height: 2.h),
@@ -260,7 +260,7 @@ class _PhotoCaptureSectionState extends State<PhotoCaptureSection> {
                 : null,
             icon: CustomIconWidget(
               iconName: 'camera_alt',
-              color: AppTheme.lightTheme.colorScheme.primary,
+              color: Theme.of(context).colorScheme.primary,
               size: 5.w,
             ),
             label: Text('Take Photo'),
@@ -275,7 +275,7 @@ class _PhotoCaptureSectionState extends State<PhotoCaptureSection> {
             onPressed: _pickFromGallery,
             icon: CustomIconWidget(
               iconName: 'photo_library',
-              color: AppTheme.lightTheme.colorScheme.primary,
+              color: Theme.of(context).colorScheme.primary,
               size: 5.w,
             ),
             label: Text('Gallery'),
@@ -296,7 +296,7 @@ class _PhotoCaptureSectionState extends State<PhotoCaptureSection> {
           'Photos (${_capturedImages.length})',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w500,
-                color: AppTheme.lightTheme.colorScheme.onSurface,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
         ),
         SizedBox(height: 1.h),
@@ -317,7 +317,7 @@ class _PhotoCaptureSectionState extends State<PhotoCaptureSection> {
                       height: 20.h,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        color: AppTheme.lightTheme.colorScheme.surface,
+                        color: Theme.of(context).colorScheme.surface,
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
@@ -328,12 +328,11 @@ class _PhotoCaptureSectionState extends State<PhotoCaptureSection> {
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
                                     color:
-                                        AppTheme.lightTheme.colorScheme.surface,
+                                        Theme.of(context).colorScheme.surface,
                                     child: Center(
                                       child: CustomIconWidget(
                                         iconName: 'image',
-                                        color: AppTheme.lightTheme.colorScheme
-                                            .onSurfaceVariant,
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                                         size: 8.w,
                                       ),
                                     ),

@@ -68,7 +68,7 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
                     if (widget.photos[index]['date'] != null) 
                       Text(
                         'Taken on ${_formatDate(widget.photos[index]['date'])}',
-                        style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.white,
                         ),
                       ),
@@ -76,7 +76,7 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
                       Text(
                         widget.photos[index]['caption'] as String,
                         style:
-                            AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.white70,
                         ),
                       ),
@@ -117,7 +117,7 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
             children: [
               Text(
                 'Growth Gallery',
-                style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -130,7 +130,7 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
                 ),
                 label: Text('Add Photo'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
                 ),
@@ -143,8 +143,8 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
           // Photo count
           Text(
             '${widget.photos.length} photos',
-            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-              color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
 
@@ -156,10 +156,10 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
                   height: 30.h,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.surface,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppTheme.lightTheme.colorScheme.outline
+                      color: Theme.of(context).colorScheme.outline
                           .withValues(alpha: 0.2),
                     ),
                   ),
@@ -168,25 +168,25 @@ class _PhotosTabWidgetState extends State<PhotosTabWidget> {
                     children: [
                       CustomIconWidget(
                         iconName: 'photo_library',
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         size: 48,
                       ),
                       SizedBox(height: 2.h),
                       Text(
                         'No photos yet',
                         style:
-                            AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
                           color:
-                              AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                              Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       SizedBox(height: 1.h),
                       Text(
                         'Start documenting your plant\'s growth journey',
                         style:
-                            AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color:
-                              AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                              Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),

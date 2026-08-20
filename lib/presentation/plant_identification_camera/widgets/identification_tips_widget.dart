@@ -22,7 +22,7 @@ class IdentificationTipsWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color:
-              AppTheme.lightTheme.colorScheme.tertiary.withValues(alpha: 0.5),
+              Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.5),
           width: 1,
         ),
       ),
@@ -30,14 +30,14 @@ class IdentificationTipsWidget extends StatelessWidget {
         children: [
           CustomIconWidget(
             iconName: 'lightbulb_outline',
-            color: AppTheme.lightTheme.colorScheme.tertiary,
+            color: Theme.of(context).colorScheme.tertiary,
             size: 5.w,
           ),
           SizedBox(width: 3.w),
           Expanded(
             child: Text(
               'Focus on leaves and overall plant shape',
-              style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.white,
                 fontSize: 13.sp,
               ),

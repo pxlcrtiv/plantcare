@@ -35,6 +35,10 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   List<XFile> _plantPhotos = [];
   Map<String, dynamic> _selectedPlantFromDatabase = {};
 
+  // Edit mode (when the screen is opened from a plant card)
+  bool _isEditing = false;
+  String? _editingPlantId;
+
   late PlantRepository _plantRepository;
 
   final List<String> _stepTitles = [
@@ -45,6 +49,8 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
     'Review & Save'
   ];
 
+  bool _argsProcessed = false;
+
   @override
   void initState() {
     super.initState();
@@ -52,9 +58,75 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_argsProcessed) return;
+    _argsProcessed = true;
+
+    // Prefill from the Search tab: a database plant lands directly on
+    // Review & Save with everything set.
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map && args['database'] is Map) {
+      final db = Map<String, dynamic>.from(args['database'] as Map);
+      _selectedEntryMethod = 'database';
+      _selectedPlantFromDatabase = db;
+      _plantFormData = {
+        'plantName': db['commonName'],
+        'species': db['name'],
+        'location': '',
+        'imageUrl': db['image'],
+        'light': db['lightRequirement'],
+      };
+      _careScheduleData = {
+        'wateringFrequency': db['wateringFrequency'],
+        'fertilizingEnabled': false,
+        'fertilizingFrequency': 30,
+        'mistingEnabled': false,
+        'mistingFrequency': 3,
+        'rotatingEnabled': false,
+        'rotatingFrequency': 7,
+      };
+      _currentStep = _stepTitles.length - 1;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _pageController.jumpToPage(_stepTitles.length - 1);
+      });
+    } else if (args is Map &&
+        args['id'] is String &&
+        (args['id'] as String).isNotEmpty) {
+      // Edit mode: an existing plant map (from the plant card "Edit" action)
+      // was passed. Prefill every form field and save via updatePlant.
+      _isEditing = true;
+      _editingPlantId = args['id'] as String;
+      _selectedEntryMethod = 'manual';
+      _plantFormData = {
+        'plantName': args['name'] ?? '',
+        'species': args['species'] ?? '',
+        'location': args['location'] ?? '',
+        'imageUrl': args['imageUrl'] ?? '',
+        'light': args['light'],
+        'humidity': args['humidity'],
+        'careNotes': args['careNotes'],
+      };
+      final careSchedule = args['careSchedule'];
+      if (careSchedule is Map) {
+        final care = Map<String, dynamic>.from(careSchedule);
+        _careScheduleData = {
+          'wateringFrequency': care['wateringFrequency'] ?? 7,
+          'fertilizingEnabled': care['fertilizingEnabled'] == true,
+          'fertilizingFrequency': care['fertilizingFrequency'] ?? 30,
+          'mistingEnabled': care['mistingEnabled'] == true,
+          'mistingFrequency': care['mistingFrequency'] ?? 3,
+          'rotatingEnabled': care['rotatingEnabled'] == true,
+          'rotatingFrequency': care['rotatingFrequency'] ?? 7,
+        };
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(),
       body: Column(
         children: [
@@ -81,14 +153,14 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: Text(
-        'Add New Plant',
+        _isEditing ? 'Edit Plant' : 'Add New Plant',
         style: Theme.of(context).appBarTheme.titleTextStyle,
       ),
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
         icon: CustomIconWidget(
           iconName: 'close',
-          color: AppTheme.lightTheme.colorScheme.onSurface,
+          color: Theme.of(context).colorScheme.onSurface,
           size: 6.w,
         ),
       ),
@@ -97,11 +169,11 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
           TextButton(
             onPressed: _canSave() ? _savePlant : null,
             child: Text(
-              'Save',
+              _isEditing ? 'Save Changes' : 'Save',
               style: TextStyle(
                 color: _canSave()
-                    ? AppTheme.lightTheme.colorScheme.primary
-                    : AppTheme.lightTheme.colorScheme.onSurfaceVariant
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant
                         .withValues(alpha: 0.5),
                 fontWeight: FontWeight.w600,
               ),
@@ -127,8 +199,8 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                   margin: EdgeInsets.symmetric(horizontal: 1.w),
                   decoration: BoxDecoration(
                     color: isCompleted || isActive
-                        ? AppTheme.lightTheme.colorScheme.primary
-                        : AppTheme.lightTheme.colorScheme.outline
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.outline
                             .withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
@@ -140,7 +212,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
           Text(
             '${_currentStep + 1} of ${_stepTitles.length}: ${_stepTitles[_currentStep]}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
           ),
@@ -164,14 +236,14 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                   'How would you like to add your plant?',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: AppTheme.lightTheme.colorScheme.onSurface,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                 ),
                 SizedBox(height: 1.h),
                 Text(
                   'Choose the method that works best for you',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
               ],
@@ -246,6 +318,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
     } else {
       return SingleChildScrollView(
         child: ManualEntryForm(
+          initialData: _isEditing ? _plantFormData : null,
           onFormChanged: (formData) {
             setState(() {
               _plantFormData = formData;
@@ -271,6 +344,11 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   Widget _buildCareScheduleStep() {
     return SingleChildScrollView(
       child: CareScheduleSetup(
+        species: _plantFormData['species'] as String? ?? '',
+        light: _plantFormData['light'] as String?,
+        humidity: (_plantFormData['humidity'] as num?)?.toInt(),
+        location: _plantFormData['location'] as String?,
+        initialData: _isEditing ? _careScheduleData : null,
         onScheduleChanged: (scheduleData) {
           setState(() {
             _careScheduleData = scheduleData;
@@ -290,14 +368,14 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
             'Review Your Plant',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
           ),
           SizedBox(height: 1.h),
           Text(
             'Make sure everything looks correct before saving',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
           SizedBox(height: 3.h),
@@ -313,7 +391,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                     children: [
                       CustomIconWidget(
                         iconName: 'local_florist',
-                        color: AppTheme.lightTheme.colorScheme.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 6.w,
                       ),
                       SizedBox(width: 3.w),
@@ -324,7 +402,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                             .titleMedium
                             ?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: AppTheme.lightTheme.colorScheme.onSurface,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                       ),
                     ],
@@ -360,7 +438,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                       children: [
                         CustomIconWidget(
                           iconName: 'photo_library',
-                          color: AppTheme.lightTheme.colorScheme.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           size: 6.w,
                         ),
                         SizedBox(width: 3.w),
@@ -372,7 +450,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                               ?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color:
-                                    AppTheme.lightTheme.colorScheme.onSurface,
+                                    Theme.of(context).colorScheme.onSurface,
                               ),
                         ),
                       ],
@@ -389,7 +467,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                             margin: EdgeInsets.only(right: 2.w),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              color: AppTheme.lightTheme.colorScheme.surface,
+                              color: Theme.of(context).colorScheme.surface,
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
@@ -400,13 +478,11 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                                       errorBuilder:
                                           (context, error, stackTrace) {
                                         return Container(
-                                          color: AppTheme
-                                              .lightTheme.colorScheme.surface,
+                                          color: Theme.of(context).colorScheme.surface,
                                           child: Center(
                                             child: CustomIconWidget(
                                               iconName: 'image',
-                                              color: AppTheme.lightTheme
-                                                  .colorScheme.onSurfaceVariant,
+                                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                                               size: 8.w,
                                             ),
                                           ),
@@ -442,7 +518,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                     children: [
                       CustomIconWidget(
                         iconName: 'schedule',
-                        color: AppTheme.lightTheme.colorScheme.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 6.w,
                       ),
                       SizedBox(width: 3.w),
@@ -453,7 +529,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                             .titleMedium
                             ?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: AppTheme.lightTheme.colorScheme.onSurface,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                       ),
                     ],
@@ -490,7 +566,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
             child: Text(
               '$label:',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
             ),
@@ -499,7 +575,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
             child: Text(
               value,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.lightTheme.colorScheme.onSurface,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
             ),
           ),
@@ -512,11 +588,11 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
     return Container(
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.scaffoldBackgroundColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
           top: BorderSide(
             color:
-                AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+                Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
       ),
@@ -545,12 +621,12 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            AppTheme.lightTheme.colorScheme.onPrimary,
+                            Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                       )
                     : Text(_currentStep == _stepTitles.length - 1
-                        ? 'Save Plant'
+                        ? (_isEditing ? 'Save Changes' : 'Save Plant')
                         : 'Next'),
               ),
             ),
@@ -608,26 +684,52 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
     });
 
     try {
-      // Create plant object
-      final plant = Plant(
-        id: DateTime.now().millisecondsSinceEpoch.toString(), // In production, use Firebase auto-generated ID
-        name: _plantFormData['plantName'] ?? '',
-        species: _plantFormData['species'] ?? '',
-        imageUrl: _plantPhotos.isNotEmpty 
-            ? _plantPhotos[0].path 
-            : 'https://via.placeholder.com/400x300', // Default image
-        status: 'healthy',
-        lastWatered: null,
-        nextWatering: null,
-        careNotes: _plantFormData['careNotes'],
-        location: _plantFormData['location'],
-        dateAdded: DateTime.now(),
-        careSchedule: _careScheduleData,
-        photos: _plantPhotos.map((photo) => photo.path).toList(),
-      );
+      final String imageUrl = _plantPhotos.isNotEmpty
+          ? _plantPhotos[0].path
+          : (_plantFormData['imageUrl']?.isNotEmpty == true
+              ? _plantFormData['imageUrl'] as String
+              : 'https://via.placeholder.com/400x300');
 
-      // Save to Firebase
-      await _plantRepository.addPlant(plant);
+      if (_isEditing) {
+        // Update path: only the fields the wizard edits are written back.
+        // Null optionals are dropped so existing values are preserved.
+        final data = <String, dynamic>{
+          'name': _plantFormData['plantName'] ?? '',
+          'species': _plantFormData['species'] ?? '',
+          'imageUrl': imageUrl,
+          'careNotes': _plantFormData['careNotes'],
+          'location': _plantFormData['location'],
+          'humidity': (_plantFormData['humidity'] as num?)?.toInt(),
+          'light': _plantFormData['light'],
+          'careSchedule': _careScheduleData,
+          if (_plantPhotos.isNotEmpty)
+            'photos': _plantPhotos.map((photo) => photo.path).toList(),
+        };
+        data.removeWhere((key, value) => value == null);
+
+        await _plantRepository.updatePlant(_editingPlantId!, data);
+      } else {
+        // Create plant object
+        final plant = Plant(
+          id: DateTime.now().millisecondsSinceEpoch.toString(), // In production, use Firebase auto-generated ID
+          name: _plantFormData['plantName'] ?? '',
+          species: _plantFormData['species'] ?? '',
+          imageUrl: imageUrl,
+          status: 'healthy',
+          lastWatered: null,
+          nextWatering: null,
+          careNotes: _plantFormData['careNotes'],
+          location: _plantFormData['location'],
+          humidity: (_plantFormData['humidity'] as num?)?.toInt(),
+          light: _plantFormData['light'] as String?,
+          dateAdded: DateTime.now(),
+          careSchedule: _careScheduleData,
+          photos: _plantPhotos.map((photo) => photo.path).toList(),
+        );
+
+        // Save to Firebase
+        await _plantRepository.addPlant(plant);
+      }
 
       // Show success dialog
       if (mounted) {
@@ -639,23 +741,28 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
               children: [
                 CustomIconWidget(
                   iconName: 'check_circle',
-                  color: AppTheme.getSuccessColor(true),
+                  color: AppTheme.getSuccessColor(Theme.of(context).brightness == Brightness.dark),
                   size: 6.w,
                 ),
                 SizedBox(width: 3.w),
-                Text('Plant Added!'),
+                Text(_isEditing ? 'Plant Updated!' : 'Plant Added!'),
               ],
             ),
-            content: Text(
-                '${_plantFormData['plantName']} has been successfully added to your collection.'),
+            content: Text(_isEditing
+                ? 'Plant updated successfully.'
+                : '${_plantFormData['plantName']} has been successfully added to your collection.'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context); // Close dialog
-                  Navigator.pushNamed(
-                      context, '/add-plant-screen'); // Add another plant
+                  if (_isEditing) {
+                    Navigator.pop(context); // Return to the dashboard
+                  } else {
+                    Navigator.pushNamed(context,
+                        '/add-plant-screen'); // Add another plant
+                  }
                 },
-                child: Text('Add Another'),
+                child: Text(_isEditing ? 'Done' : 'Add Another'),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -678,7 +785,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to save plant: ${e.toString()}'),
-            backgroundColor: AppTheme.lightTheme.colorScheme.error,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }

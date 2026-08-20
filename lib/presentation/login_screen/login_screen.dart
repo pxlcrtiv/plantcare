@@ -122,10 +122,59 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _forgotPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty ||
+        !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter your email address')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password reset email sent. Check your inbox.'),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = 'Could not send reset email. Please try again.';
+      if (e.code == 'user-not-found') {
+        message = 'No account found for that email.';
+      } else if (e.code == 'invalid-email') {
+        message = 'Enter a valid email address.';
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not send reset email. Please try again.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(4.w),
@@ -139,8 +188,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: 25.w,
                   height: 25.w,
                   decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(16),
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Icon(
                     Icons.local_florist,
@@ -153,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 Text(
                   'Welcome to PlantCare',
-                  style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -162,8 +211,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 Text(
                   'Sign in to manage your plants',
-                  style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -177,11 +226,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: 'Email',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(28),
                     ),
                     prefixIcon: CustomIconWidget(
                       iconName: 'email',
-                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   validator: (value) {
@@ -204,11 +253,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: 'Password',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(28),
                     ),
                     prefixIcon: CustomIconWidget(
                       iconName: 'lock',
-                      color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   validator: (value) {
@@ -233,14 +282,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: _isLoading
                         ? CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              AppTheme.lightTheme.colorScheme.onPrimary,
+                              Theme.of(context).colorScheme.onPrimary,
                             ),
                           )
                         : Text(
                             'Sign In',
-                            style: AppTheme.lightTheme.textTheme.titleMedium
+                            style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(
-                              color: AppTheme.lightTheme.colorScheme.onPrimary,
+                              color: Theme.of(context).colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -257,7 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _isLoading ? null : _signUp,
                     child: Text(
                       'Create Account',
-                      style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -271,21 +320,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Expanded(
                       child: Divider(
-                        color: AppTheme.lightTheme.colorScheme.outline,
+                        color: Theme.of(context).colorScheme.outline,
                       ),
                     ),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 2.w),
                       child: Text(
                         'or',
-                        style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
                     Expanded(
                       child: Divider(
-                        color: AppTheme.lightTheme.colorScheme.outline,
+                        color: Theme.of(context).colorScheme.outline,
                       ),
                     ),
                   ],
@@ -306,7 +355,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     label: Text(
                       'Continue with Google',
-                      style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -317,13 +366,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 // Forgot password
                 TextButton(
-                  onPressed: () {
-                    // Implement forgot password functionality
-                  },
+                  onPressed: _isLoading ? null : _forgotPassword,
                   child: Text(
                     'Forgot Password?',
-                    style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.lightTheme.colorScheme.primary,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),

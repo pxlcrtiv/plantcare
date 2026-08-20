@@ -70,7 +70,7 @@ class CameraControlsWidget extends StatelessWidget {
                   width: 18.w,
                   height: 18.w,
                   decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.tertiary,
+                    color: Theme.of(context).colorScheme.tertiary,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: Colors.white,
@@ -102,13 +102,13 @@ class CameraControlsWidget extends StatelessWidget {
                         height: 12.w,
                         decoration: BoxDecoration(
                           color: isFlashOn
-                              ? AppTheme.lightTheme.colorScheme.tertiary
+                              ? Theme.of(context).colorScheme.tertiary
                                   .withValues(alpha: 0.3)
                               : Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: isFlashOn
-                                ? AppTheme.lightTheme.colorScheme.tertiary
+                                ? Theme.of(context).colorScheme.tertiary
                                 : Colors.white.withValues(alpha: 0.3),
                             width: 1,
                           ),
@@ -116,7 +116,7 @@ class CameraControlsWidget extends StatelessWidget {
                         child: CustomIconWidget(
                           iconName: isFlashOn ? 'flash_on' : 'flash_off',
                           color: isFlashOn
-                              ? AppTheme.lightTheme.colorScheme.tertiary
+                              ? Theme.of(context).colorScheme.tertiary
                               : Colors.white,
                           size: 6.w,
                         ),

@@ -7,11 +7,17 @@ import '../../../../core/app_export.dart';
 class NotesTabWidget extends StatefulWidget {
   final List<Map<String, dynamic>> notes;
   final Function(String) onAddNote;
+  final void Function(int index, String newContent) onEditNote;
+  final void Function(int index) onToggleImportant;
+  final void Function(int index) onDeleteNote;
 
   const NotesTabWidget({
     Key? key,
     required this.notes,
     required this.onAddNote,
+    required this.onEditNote,
+    required this.onToggleImportant,
+    required this.onDeleteNote,
   }) : super(key: key);
 
   @override
@@ -38,6 +44,84 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
     }
   }
 
+  Future<void> _showEditNoteDialog(int index, String initialContent) async {
+    final controller = TextEditingController(text: initialContent);
+    final newContent = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Theme.of(dialogContext).colorScheme.surface,
+        title: Text(
+          'Edit Note',
+          style: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLines: 5,
+          decoration: InputDecoration(
+            hintText:
+                'Write your observations, care tips, or reminders...',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            contentPadding: EdgeInsets.all(3.w),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () =>
+                Navigator.pop(dialogContext, controller.text.trim()),
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (newContent != null && newContent.isNotEmpty) {
+      widget.onEditNote(index, newContent);
+    }
+  }
+
+  Future<void> _showDeleteNoteDialog(int index) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Theme.of(dialogContext).colorScheme.surface,
+        title: Text(
+          'Delete Note',
+          style: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text('Are you sure you want to delete this note?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              'Delete',
+              style: TextStyle(
+                color: Theme.of(dialogContext).colorScheme.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      widget.onDeleteNote(index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -51,7 +135,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
             children: [
               Text(
                 'Care Notes',
-                style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -63,7 +147,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                 },
                 icon: CustomIconWidget(
                   iconName: _isAddingNote ? 'close' : 'add',
-                  color: AppTheme.lightTheme.colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 16,
                 ),
                 label: Text(_isAddingNote ? 'Cancel' : 'Add Note'),
@@ -78,10 +162,10 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
             Container(
               padding: EdgeInsets.all(4.w),
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppTheme.lightTheme.colorScheme.outline
+                  color: Theme.of(context).colorScheme.outline
                       .withValues(alpha: 0.2),
                 ),
               ),
@@ -90,7 +174,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                 children: [
                   Text(
                     'New Note',
-                    style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -142,10 +226,10 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                   height: 30.h,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: AppTheme.lightTheme.colorScheme.surface,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppTheme.lightTheme.colorScheme.outline
+                      color: Theme.of(context).colorScheme.outline
                           .withValues(alpha: 0.2),
                     ),
                   ),
@@ -154,25 +238,25 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                     children: [
                       CustomIconWidget(
                         iconName: 'note',
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         size: 48,
                       ),
                       SizedBox(height: 2.h),
                       Text(
                         'No notes yet',
                         style:
-                            AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
                           color:
-                              AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                              Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       SizedBox(height: 1.h),
                       Text(
                         'Start documenting your plant care journey',
                         style:
-                            AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color:
-                              AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                              Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -215,15 +299,15 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                       padding: EdgeInsets.all(4.w),
                       decoration: BoxDecoration(
                         color: isImportant
-                            ? AppTheme.getWarningColor(true)
+                            ? AppTheme.getWarningColor(Theme.of(context).brightness == Brightness.dark)
                                 .withValues(alpha: 0.05)
-                            : AppTheme.lightTheme.colorScheme.surface,
+                            : Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isImportant
-                              ? AppTheme.getWarningColor(true)
+                              ? AppTheme.getWarningColor(Theme.of(context).brightness == Brightness.dark)
                                   .withValues(alpha: 0.3)
-                              : AppTheme.lightTheme.colorScheme.outline
+                              : Theme.of(context).colorScheme.outline
                                   .withValues(alpha: 0.2),
                         ),
                       ),
@@ -239,18 +323,16 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                                   if (isImportant) ...[
                                     CustomIconWidget(
                                       iconName: 'star',
-                                      color: AppTheme.getWarningColor(true),
+                                      color: AppTheme.getWarningColor(Theme.of(context).brightness == Brightness.dark),
                                       size: 16,
                                     ),
                                     SizedBox(width: 1.w),
                                   ],
                                   Text(
                                     '${date.day}/${date.month}/${date.year}',
-                                    style: AppTheme
-                                        .lightTheme.textTheme.labelMedium
+                                    style: Theme.of(context).textTheme.labelMedium
                                         ?.copyWith(
-                                      color: AppTheme.lightTheme.colorScheme
-                                          .onSurfaceVariant,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -258,7 +340,17 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                               ),
                               PopupMenuButton<String>(
                                 onSelected: (value) {
-                                  // Handle note actions (edit, delete, mark important)
+                                  switch (value) {
+                                    case 'edit':
+                                      _showEditNoteDialog(index, content);
+                                      break;
+                                    case 'important':
+                                      widget.onToggleImportant(index);
+                                      break;
+                                    case 'delete':
+                                      _showDeleteNoteDialog(index);
+                                      break;
+                                  }
                                 },
                                 itemBuilder: (context) => [
                                   PopupMenuItem(
@@ -267,8 +359,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                                       children: [
                                         CustomIconWidget(
                                           iconName: 'edit',
-                                          color: AppTheme
-                                              .lightTheme.colorScheme.onSurface,
+                                          color: Theme.of(context).colorScheme.onSurface,
                                           size: 16,
                                         ),
                                         SizedBox(width: 2.w),
@@ -284,7 +375,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                                           iconName: isImportant
                                               ? 'star_border'
                                               : 'star',
-                                          color: AppTheme.getWarningColor(true),
+                                          color: AppTheme.getWarningColor(Theme.of(context).brightness == Brightness.dark),
                                           size: 16,
                                         ),
                                         SizedBox(width: 2.w),
@@ -300,8 +391,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                                       children: [
                                         CustomIconWidget(
                                           iconName: 'delete',
-                                          color: AppTheme
-                                              .lightTheme.colorScheme.error,
+                                          color: Theme.of(context).colorScheme.error,
                                           size: 16,
                                         ),
                                         SizedBox(width: 2.w),
@@ -312,8 +402,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                                 ],
                                 child: CustomIconWidget(
                                   iconName: 'more_vert',
-                                  color: AppTheme
-                                      .lightTheme.colorScheme.onSurfaceVariant,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   size: 20,
                                 ),
                               ),
@@ -325,7 +414,7 @@ class _NotesTabWidgetState extends State<NotesTabWidget> {
                           // Note content
                           Text(
                             content,
-                            style: AppTheme.lightTheme.textTheme.bodyMedium,
+                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
                       ),

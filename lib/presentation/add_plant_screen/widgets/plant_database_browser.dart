@@ -11,29 +11,9 @@ class PlantDatabaseBrowser extends StatefulWidget {
     required this.onPlantSelected,
   });
 
-  @override
-  State<PlantDatabaseBrowser> createState() => _PlantDatabaseBrowserState();
-}
-
-class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
-  final TextEditingController _searchController = TextEditingController();
-  String _selectedType = 'All';
-  String _selectedCareLevel = 'All';
-  String _selectedLightRequirement = 'All';
-  List<Map<String, dynamic>> _filteredPlants = [];
-
-  final List<String> _plantTypes = [
-    'All',
-    'Houseplant',
-    'Succulent',
-    'Herb',
-    'Flowering',
-    'Fern',
-    'Tropical'
-  ];
-  final List<String> _careLevels = ['All', 'Easy', 'Moderate', 'Advanced'];
-
-  final List<Map<String, dynamic>> _plantDatabase = [
+  /// Curated species database powering both the wizard's "database" entry
+  /// method and the Search tab / Popular plants lists.
+  static final List<Map<String, dynamic>> plantDatabase = [
     {
       'id': 1,
       'name': 'Monstera Deliciosa',
@@ -141,15 +121,37 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
   ];
 
   @override
+  State<PlantDatabaseBrowser> createState() => _PlantDatabaseBrowserState();
+}
+
+class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedType = 'All';
+  String _selectedCareLevel = 'All';
+  String _selectedLightRequirement = 'All';
+  List<Map<String, dynamic>> _filteredPlants = [];
+
+  final List<String> _plantTypes = [
+    'All',
+    'Houseplant',
+    'Succulent',
+    'Herb',
+    'Flowering',
+    'Fern',
+    'Tropical'
+  ];
+  final List<String> _careLevels = ['All', 'Easy', 'Moderate', 'Advanced'];
+
+  @override
   void initState() {
     super.initState();
-    _filteredPlants = List.from(_plantDatabase);
+    _filteredPlants = List.from(PlantDatabaseBrowser.plantDatabase);
     _searchController.addListener(_filterPlants);
   }
 
   void _filterPlants() {
     setState(() {
-      _filteredPlants = _plantDatabase.where((plant) {
+      _filteredPlants = PlantDatabaseBrowser.plantDatabase.where((plant) {
         final matchesSearch = _searchController.text.isEmpty ||
             (plant['name'] as String)
                 .toLowerCase()
@@ -181,14 +183,14 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
             'Browse Plant Database',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
           ),
           SizedBox(height: 1.h),
           Text(
             'Find your plant from our curated collection',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
           SizedBox(height: 2.h),
@@ -202,7 +204,7 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
                 padding: EdgeInsets.all(3.w),
                 child: CustomIconWidget(
                   iconName: 'search',
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   size: 5.w,
                 ),
               ),
@@ -214,7 +216,7 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
                       },
                       icon: CustomIconWidget(
                         iconName: 'clear',
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         size: 5.w,
                       ),
                     )
@@ -231,7 +233,7 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
           Text(
             '${_filteredPlants.length} plants found',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
           ),
@@ -261,7 +263,7 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
           'Plant Type',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
-                color: AppTheme.lightTheme.colorScheme.onSurface,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
         ),
         SizedBox(height: 0.5.h),
@@ -281,10 +283,10 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
                     });
                     _filterPlants();
                   },
-                  backgroundColor: AppTheme.lightTheme.colorScheme.surface,
-                  selectedColor: AppTheme.lightTheme.colorScheme.primary
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                  selectedColor: Theme.of(context).colorScheme.primary
                       .withValues(alpha: 0.2),
-                  checkmarkColor: AppTheme.lightTheme.colorScheme.primary,
+                  checkmarkColor: Theme.of(context).colorScheme.primary,
                 ),
               );
             }).toList(),
@@ -297,7 +299,7 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
           'Care Level',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
-                color: AppTheme.lightTheme.colorScheme.onSurface,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
         ),
         SizedBox(height: 0.5.h),
@@ -317,10 +319,10 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
                     });
                     _filterPlants();
                   },
-                  backgroundColor: AppTheme.lightTheme.colorScheme.surface,
-                  selectedColor: AppTheme.lightTheme.colorScheme.primary
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                  selectedColor: Theme.of(context).colorScheme.primary
                       .withValues(alpha: 0.2),
-                  checkmarkColor: AppTheme.lightTheme.colorScheme.primary,
+                  checkmarkColor: Theme.of(context).colorScheme.primary,
                 ),
               );
             }).toList(),
@@ -346,7 +348,7 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
                 height: 20.w,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: AppTheme.lightTheme.colorScheme.surface,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
@@ -369,7 +371,7 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
                       plant['commonName'] as String,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.lightTheme.colorScheme.onSurface,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                     ),
                     Text(
@@ -413,7 +415,7 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
               // Select Button
               CustomIconWidget(
                 iconName: 'arrow_forward_ios',
-                color: AppTheme.lightTheme.colorScheme.primary,
+                color: Theme.of(context).colorScheme.primary,
                 size: 5.w,
               ),
             ],
@@ -427,7 +429,7 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.primary.withValues(alpha: 0.1),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -435,14 +437,14 @@ class _PlantDatabaseBrowserState extends State<PlantDatabaseBrowser> {
         children: [
           CustomIconWidget(
             iconName: iconName,
-            color: AppTheme.lightTheme.colorScheme.primary,
+            color: Theme.of(context).colorScheme.primary,
             size: 3.w,
           ),
           SizedBox(width: 1.w),
           Text(
             text,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w500,
                 ),
           ),

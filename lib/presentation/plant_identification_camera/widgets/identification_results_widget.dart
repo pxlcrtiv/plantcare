@@ -23,7 +23,7 @@ class IdentificationResultsWidget extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: AppTheme.lightTheme.scaffoldBackgroundColor,
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: SafeArea(
         child: Column(
           children: [
@@ -37,12 +37,12 @@ class IdentificationResultsWidget extends StatelessWidget {
                     child: Container(
                       padding: EdgeInsets.all(2.w),
                       decoration: BoxDecoration(
-                        color: AppTheme.lightTheme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(8),
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(28),
                       ),
                       child: CustomIconWidget(
                         iconName: 'arrow_back',
-                        color: AppTheme.lightTheme.colorScheme.onSurface,
+                        color: Theme.of(context).colorScheme.onSurface,
                         size: 6.w,
                       ),
                     ),
@@ -50,8 +50,8 @@ class IdentificationResultsWidget extends StatelessWidget {
                   SizedBox(width: 4.w),
                   Expanded(
                     child: Text(
-                      'Plant Identification Results',
-                      style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+                      'Scan your plants',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 16.sp,
                       ),
@@ -63,7 +63,7 @@ class IdentificationResultsWidget extends StatelessWidget {
             // Results List
             Expanded(
               child: results.isEmpty
-                  ? _buildEmptyState()
+                  ? _buildEmptyState(context)
                   : ListView.builder(
                       padding: EdgeInsets.symmetric(vertical: 2.h),
                       itemCount: results.length,
@@ -79,7 +79,7 @@ class IdentificationResultsWidget extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(4.w),
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.surface,
+                color: Theme.of(context).colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.1),
@@ -98,8 +98,8 @@ class IdentificationResultsWidget extends StatelessWidget {
                       child: Text(
                         'Not quite right? Try manual search',
                         style:
-                            AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.lightTheme.colorScheme.primary,
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
                           decoration: TextDecoration.underline,
                           fontSize: 13.sp,
                         ),
@@ -109,24 +109,27 @@ class IdentificationResultsWidget extends StatelessWidget {
                   // Retry Photo Button
                   SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton.icon(
+                    child: ElevatedButton.icon(
                       onPressed: onRetryPhoto,
-                      icon: CustomIconWidget(
-                        iconName: 'camera_alt',
-                        color: AppTheme.lightTheme.colorScheme.primary,
-                        size: 5.w,
+                      icon: Icon(
+                        Icons.camera_alt,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        size: 20,
                       ),
                       label: Text(
                         'Take Another Photo',
                         style:
-                            AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
+                            Theme.of(context).textTheme.labelLarge?.copyWith(
                           fontSize: 14.sp,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      style: OutlinedButton.styleFrom(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         padding: EdgeInsets.symmetric(vertical: 2.h),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(28),
                         ),
                       ),
                     ),
@@ -140,7 +143,7 @@ class IdentificationResultsWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
         padding: EdgeInsets.all(8.w),
@@ -149,14 +152,14 @@ class IdentificationResultsWidget extends StatelessWidget {
           children: [
             CustomIconWidget(
               iconName: 'search_off',
-              color: AppTheme.lightTheme.colorScheme.onSurface
+              color: Theme.of(context).colorScheme.onSurface
                   .withValues(alpha: 0.5),
               size: 20.w,
             ),
             SizedBox(height: 4.h),
             Text(
               'No plants identified',
-              style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 fontSize: 16.sp,
               ),
@@ -164,8 +167,8 @@ class IdentificationResultsWidget extends StatelessWidget {
             SizedBox(height: 2.h),
             Text(
               'Try taking another photo with better lighting or focus on the plant\'s leaves and overall shape.',
-              style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-                color: AppTheme.lightTheme.colorScheme.onSurface
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface
                     .withValues(alpha: 0.7),
                 fontSize: 13.sp,
               ),

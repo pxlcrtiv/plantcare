@@ -63,7 +63,7 @@ class PlantResult {
       scientificName: json['species']?['scientificName'] as String?,
       family: json['species']?['family']?['scientificName'] as String?,
       genus: json['species']?['genus']?['scientificName'] as String?,
-      commonNames: json['species']?['commonNames'] as Map<String, dynamic>?,
+      commonNames: _normalizeCommonNames(json['species']?['commonNames']),
       gbif: json['species']?['gbif'] as Map<String, dynamic>?,
       images: json['species']?['images'] != null
           ? (json['species']['images'] as List)
@@ -72,6 +72,16 @@ class PlantResult {
           : null,
       links: json['species']?['links'] as Map<String, dynamic>?,
     );
+  }
+
+  static Map<String, dynamic>? _normalizeCommonNames(dynamic value) {
+    if (value == null || value is Map<String, dynamic>) {
+      return value as Map<String, dynamic>?;
+    }
+    if (value is List) {
+      return {'en': value};
+    }
+    return null;
   }
 }
 
