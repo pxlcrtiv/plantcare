@@ -49,10 +49,19 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
     'Review & Save'
   ];
 
+  bool _argsProcessed = false;
+
   @override
   void initState() {
     super.initState();
     _plantRepository = PlantRepositoryImpl(FirebaseService());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_argsProcessed) return;
+    _argsProcessed = true;
 
     // Prefill from the Search tab: a database plant lands directly on
     // Review & Save with everything set.
