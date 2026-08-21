@@ -4,11 +4,13 @@
 
 **Blocked by:** None on the implementation chain — can start immediately once wayfinder 13 (AI Logic provisioning), 14 (service design) and 16 (hub prototype) land.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Flask dock tab shows the hub with entry cards for Plant Doctor and Care chat, matching the approved prototype
-- [ ] Tapping an entry card navigates to its destination (stub screens acceptable for not-yet-built features)
-- [ ] Contextual entries (Home scan area, plant detail) route into the hub or its destinations
-- [ ] Empty and offline states render without dead ends
-- [ ] Widget tests cover hub rendering, navigation, and empty/offline states via the injected fake service
-- [ ] `flutter analyze` clean; full test suite green
+- [x] Flask dock tab shows the hub with entry cards for Plant Doctor and Care chat, matching the approved prototype
+- [x] Tapping an entry card navigates to its destination (stub screens acceptable for not-yet-built features)
+- [x] Contextual entries (Home scan area, plant detail) route into the hub or its destinations
+- [x] Empty and offline states render without dead ends
+- [x] Widget tests cover hub rendering, navigation, and empty/offline states via the injected fake service
+- [x] `flutter analyze` clean; full test suite green
+
+Resolved as part of the AI layer effort (slices 01–08 on `feat/ai-assistant`). The hub navigates to the real Plant Doctor and Care chat screens (the "stub" files were reimplemented as full screens, keeping their placeholder filenames). Offline/resting states verified on-device: `care_assistant_hub_test.dart` covers rendering/navigation/offline; on-emulator evidence `/tmp/08-24-offline-hub.png` shows the "You're offline" banner + "The assistant is resting" card. `flutter analyze` clean, 183/183 tests green on `feat/ai-assistant`.
