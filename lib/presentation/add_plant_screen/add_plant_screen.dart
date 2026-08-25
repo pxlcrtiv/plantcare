@@ -15,7 +15,9 @@ import './widgets/photo_capture_section.dart';
 import './widgets/plant_database_browser.dart';
 
 class AddPlantScreen extends StatefulWidget {
-  const AddPlantScreen({super.key});
+  const AddPlantScreen({super.key, this.repository});
+
+  final PlantRepository? repository;
 
   @override
   State<AddPlantScreen> createState() => _AddPlantScreenState();
@@ -54,7 +56,8 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   @override
   void initState() {
     super.initState();
-    _plantRepository = PlantRepositoryImpl(FirebaseService());
+    _plantRepository =
+        widget.repository ?? PlantRepositoryImpl(FirebaseService());
   }
 
   @override
@@ -79,6 +82,40 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
       };
       _careScheduleData = {
         'wateringFrequency': db['wateringFrequency'],
+        'fertilizingEnabled': false,
+        'fertilizingFrequency': 30,
+        'mistingEnabled': false,
+        'mistingFrequency': 3,
+        'rotatingEnabled': false,
+        'rotatingFrequency': 7,
+      };
+      _currentStep = _stepTitles.length - 1;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _pageController.jumpToPage(_stepTitles.length - 1);
+      });
+    } else if (args is Map && args['scientificName'] is String) {
+      _selectedEntryMethod = 'database';
+      _plantFormData = {
+        'plantName': args['name'] ?? '',
+        'species': args['scientificName'],
+        'location': '',
+        'imageUrl': args['image'] ?? '',
+        'light': args['lightRequirement'],
+      };
+      final watering = args['wateringFrequency'];
+      int wateringDays = 7;
+      if (watering is num) {
+        wateringDays = watering.round().clamp(1, 30).toInt();
+      } else if (watering is String) {
+        wateringDays = switch (watering.toLowerCase()) {
+          'daily' => 1,
+          'biweekly' => 14,
+          'monthly' => 30,
+          _ => 7,
+        };
+      }
+      _careScheduleData = {
+        'wateringFrequency': wateringDays,
         'fertilizingEnabled': false,
         'fertilizingFrequency': 30,
         'mistingEnabled': false,
