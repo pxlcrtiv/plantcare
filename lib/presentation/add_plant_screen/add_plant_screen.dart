@@ -432,15 +432,19 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                         size: 6.w,
                       ),
                       SizedBox(width: 3.w),
-                      Text(
-                        'Plant Information',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
+                      Expanded(
+                        child: Text(
+                          'Plant Information',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface,
+                              ),
+                        ),
                       ),
                     ],
                   ),
@@ -782,7 +786,9 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
                   size: 6.w,
                 ),
                 SizedBox(width: 3.w),
-                Text(_isEditing ? 'Plant Updated!' : 'Plant Added!'),
+                Expanded(
+                  child: Text(_isEditing ? 'Plant Updated!' : 'Plant Added!'),
+                ),
               ],
             ),
             content: Text(_isEditing
