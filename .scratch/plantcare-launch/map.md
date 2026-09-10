@@ -17,6 +17,7 @@ A verified route from "app runs on-device" to **launch readiness**: a live Googl
 - **Skills**: `treehouse` (worktrees per ticket), `tdd`/`test-driven-development`, `verification-before-completion` (evidence before "resolved"), `gh-axi` (GitHub), `firebase-security-rules-auditor` (ticket 12), `grilling` (decision tickets 01, 11).
 - **Standing preferences** (from release map, still apply): no secrets in commits; PlantNet key + any API keys via `--dart-define` only; verify subagent work; single concern per commit; evidence (screenshots/logs/tests) recorded before resolving a ticket.
 - **Naming tension**: the ASO research suggests "LeafAI — Plant Identifier & Care", but the app, repo, Firebase project, and landing page are all branded **PlatCare** (`com.plantcare.app`, `platcare.app`, waitlist page). Ticket 01 resolves this before any listing/marketing work.
+- **Gap analysis (tickets 13–18)**: added after initial map — these cover the boring gates (policy/compliance) and measurement layer the strategy depends on. Tickets 13–15 are **blocking** (Play literally won't let you list without them). Ticket 16 is the measurement layer the revenue model depends on. Tickets 17–18 close operational gaps.
 
 ## Tickets
 
@@ -34,6 +35,19 @@ A verified route from "app runs on-device" to **launch readiness**: a live Googl
 | 10 | Unit economics validation | task | — |
 | 11 | iOS deferral decision | grilling | — |
 | 12 | Firestore rules audit | task | — |
+| 13 | Privacy policy + Play Data Safety form | task | — |
+| 14 | Account-deletion flow | task | — |
+| 15 | Merchant/tax setup for subscriptions | task | — |
+| 16 | Crashlytics + Analytics | task | — |
+| 17 | Waitlist → launch email pipeline | task | — |
+| 18 | Firebase Spark quota + Gemini AI cost at scale | task | — |
+
+## Dependency summary
+
+- **Blocking for listing (02/03)**: 01 (naming), 12 (rules), 13 (privacy), 14 (account deletion), 15 (merchant)
+- **Blocking for monetization (06)**: 05 (PlantNet cap), 15 (merchant)
+- **Measurement (must-have for launch)**: 16 (Crashlytics/Analytics)
+- **Growth/operations**: 04 (FCM), 08 (referrals), 09 (content), 17 (email), 18 (quotas)
 
 ## Out of scope
 
