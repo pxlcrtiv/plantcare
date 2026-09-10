@@ -1,8 +1,9 @@
 # 06 — Pro tier & paywall ($29.99/yr)
 
 Type: task
-Status: open
+Status: in-progress
 Blocked by: —
+Resolved: 3879ac3 (main) — entitlement model, free-limit enforcement, paywall screen. Billing SDK decision pending.
 
 ## Question
 
