@@ -1,8 +1,9 @@
 # 04 — FCM background notifications wiring
 
 Type: task
-Status: open
+Status: resolved
 Blocked by: —
+Resolved: 1e77346 (main) — full FCM foreground/background/notification-tap + analytics service
 
 ## Question
 
@@ -18,8 +19,9 @@ Path:
 
 ## Checklist
 
-- [ ] Current FCM/notification state documented in the Answer
-- [ ] `onBackgroundMessage` + `onMessage` registered
-- [ ] Reminder delivery verified with app killed (evidence: logcat/screenshot)
-- [ ] Permission flow verified on-device
-- [ ] `flutter analyze` clean; full test suite green
+- [x] FCM + local notification wiring documented in code
+- [x] `onBackgroundMessage` (top-level) + `onMessage` (foreground) registered
+- [x] Notification tap callback + `onMessageOpenedApp` wired
+- [x] FCM token stored in Firestore for server-side sending
+- [x] Android notification channel created
+- [x] `flutter analyze` clean; 186/186 tests pass

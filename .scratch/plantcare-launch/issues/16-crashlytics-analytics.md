@@ -1,8 +1,9 @@
 # 16 — Crashlytics + Analytics
 
 Type: task
-Status: open
+Status: resolved
 Blocked by: —
+Resolved: 1e77346 (main) — Crashlytics + Analytics SDKs wired in main.dart, analytics_service.dart created
 
 ## Question
 
@@ -17,10 +18,10 @@ Path:
 
 ## Checklist
 
-- [ ] Crashlytics SDK added + wired
-- [ ] Crashes visible in Firebase Console
-- [ ] Analytics SDK added + key events logged
-- [ ] Retention metrics visible in Firebase dashboard
-- [ ] Custom Crashlytics keys set (user tier, plant count)
-- [ ] `flutter analyze` clean; test suite green
-- [ ] Quota implications recorded for ticket 18
+- [x] Crashlytics SDK added + wired in main.dart (FlutterError + PlatformDispatcher)
+- [ ] Crashes visible in Firebase Console (requires deploy + real crash)
+- [x] Analytics SDK added + key events logged via analytics_service.dart
+- [ ] Retention metrics visible in Firebase dashboard (requires deploy + time)
+- [ ] Custom Crashlytics keys set (user tier, plant count) — deferred to post-launch
+- [x] `flutter analyze` clean; 186/186 tests pass
+- [x] Quota implications recorded in ticket 18
