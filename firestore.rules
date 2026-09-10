@@ -2,9 +2,88 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Dev default: authenticated users can read/write. Restrict before release.
+
+    // ── Users ──────────────────────────────────────────────
+    match /users/{userId} {
+      // Client never writes the user doc directly; only subcollections live here.
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+
+      // ── Plants (subcollection) ───────────────────────────
+      match /plants/{plantId} {
+        // Reads: owner only
+        allow read: if request.auth != null && request.auth.uid == userId;
+
+        // Create: owner only, validate required fields + types
+        allow create: if request.auth != null
+          && request.auth.uid == userId
+          && request.resource.data.keys().hasAll(['name', 'species', 'status', 'dateAdded'])
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 100
+          && request.resource.data.species is string
+          && request.resource.data.species.size() <= 200
+          && request.resource.data.status is string
+          && request.resource.data.status in ['healthy', 'needs_attention', 'overdue']
+          && request.resource.data.dateAdded is timestamp;
+
+        // Update: owner only, validate changed fields
+        allow update: if request.auth != null
+          && request.auth.uid == userId
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['name'])
+              || (request.resource.data.name is string
+                  && request.resource.data.name.size() > 0
+                  && request.resource.data.name.size() <= 100))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['species'])
+              || (request.resource.data.species is string
+                  && request.resource.data.species.size() <= 200))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['status'])
+              || (request.resource.data.status is string
+                  && request.resource.data.status in ['healthy', 'needs_attention', 'overdue']))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['humidity'])
+              || (request.resource.data.humidity is int
+                  && request.resource.data.humidity >= 0
+                  && request.resource.data.humidity <= 100));
+
+        // Delete: owner only
+        allow delete: if request.auth != null && request.auth.uid == userId;
+
+        // ── Care Events (subcollection of plant) ───────────
+        match /careEvents/{eventId} {
+          allow read: if request.auth != null && request.auth.uid == userId;
+
+          allow create: if request.auth != null
+            && request.auth.uid == userId
+            && request.resource.data.keys().hasAll(['type', 'date', 'notes'])
+            && request.resource.data.type is string
+            && request.resource.data.type in ['watering', 'fertilizing', 'pruning', 'repotting', 'pest_treatment', 'other']
+            && request.resource.data.notes is string
+            && request.resource.data.notes.size() <= 1000;
+
+          allow update, delete: if request.auth != null && request.auth.uid == userId;
+        }
+
+        // ── Health Logs (subcollection of plant) ───────────
+        match /healthLogs/{logId} {
+          allow read: if request.auth != null && request.auth.uid == userId;
+
+          allow create: if request.auth != null
+            && request.auth.uid == userId
+            && request.resource.data.keys().hasAll(['type', 'title', 'description', 'date'])
+            && request.resource.data.type is string
+            && request.resource.data.title is string
+            && request.resource.data.title.size() <= 200
+            && request.resource.data.description is string
+            && request.resource.data.description.size() <= 5000;
+
+          allow update, delete: if request.auth != null && request.auth.uid == userId;
+        }
+      }
+    }
+
+    // Deny everything else (top-level collection reads, cross-user access)
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }
