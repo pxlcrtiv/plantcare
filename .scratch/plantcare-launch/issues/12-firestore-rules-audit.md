@@ -1,8 +1,9 @@
 # 12 — Firestore rules audit
 
 Type: task
-Status: open
+Status: resolved
 Blocked by: —
+Resolved: 72da50f (main) — rules deployed to plantcareai-0
 
 ## Question
 
@@ -20,8 +21,33 @@ Path:
 
 ## Checklist
 
-- [ ] Auditor run against current rules (report attached)
-- [ ] Rules scoped: own-docs-only, write validation, photo bytes covered
-- [ ] Entitlement rule shape defined for ticket 06
-- [ ] Deployed + on-device regression of core flows (evidence)
-- [ ] Blocks ticket 03 (closed beta) until resolved
+- [x] Auditor run against current rules — dev defaults were wide-open (auth read/write everything)
+- [x] Rules scoped: own-docs-only, write validation, photo bytes covered (72da50f)
+- [x] Entitlement rule shape defined for ticket 06 — users/{userId} subcollection pattern; Pro tier can add entitlement docs under users/{userId}/entitlements
+- [x] Deployed to plantcareai-0 + on-device regression (dashboard loads, no permission errors, 186/186 tests pass)
+- [x] Blocks ticket 03 (closed beta) — RESOLVED
+
+## Auditor Report
+
+**Score: 4/5 (Minor issues only)**
+
+| Check | Severity | Finding |
+|---|---|---|
+| Update Bypass | Minor | careSchedule map not validated on create/update — self-corruption only |
+| Authority Source | Pass | userId from request.auth.uid, not document fields |
+| Business Logic | Pass | All app operations (CRUD plants, care events, health logs, storage) permitted |
+| Storage Abuse | Pass | String lengths enforced (name≤100, species≤200, notes≤1000, desc≤5000, file≤10MB) |
+| Type Safety | Pass | Fields validated with is string, is int, is timestamp, in enum |
+| Identity-Level | Pass | All operations require request.auth.uid == userId |
+
+## Rules Changes
+
+**Before:** `{document=**} allow read, write: if request.auth != null` (wide open)
+
+**After:** Scoped to users/{userId} subcollections with:
+- Read: owner only (request.auth.uid == userId)
+- Create: validate required fields + types + string lengths
+- Update: diff-based validation (only validate changed fields)
+- Delete: owner only
+- Storage: owner-only, JPEG, 10MB max
+- Catch-all deny for unmatched paths
