@@ -1,21 +1,22 @@
-# 01 — Naming & brand decision (LeafAI vs PlatCare)
+# 01 — Naming & brand decision
 
 Type: grilling
-Status: open
+Status: resolved
 Blocked by: —
+Resolved: d56516f (platcare-waitlist) — waitlist page + privacy page rebranded to PlantCare
 
-## Question
+## Decision
 
-The market research's ASO section recommends the store title "LeafAI — Plant Identifier & Care" (and the whole launch strategy speaks in terms of plant *identification*). But the app, repo, Firebase project, and landing page are all branded **PlatCare** (`com.plantcare.app` package id, `platcare.app` redirect target on the waitlist form, "PlatCare" on the waitlist page, "PlantCare" app display name).
+**Brand: PlantCare.** Consistent across app, package (`com.plantcare.app`), and all user-facing assets.
 
-Grilling — one question at a time:
-
-- Keep PlatCare as the brand (consistent with every existing asset: package id, Firebase apps, landing page, waitlist page) and only ASO-optimize the store *title*?
-- Rebrand to LeafAI (matches the research's ASO suggestion, but touches package id, Firebase app registration, landing page, waitlist — a lot of churn for a title suggestion)?
-- Hybrid: brand "PlatCare", store title "PlatCare — Plant Identifier & Care" (keyword-loaded without renaming anything)?
+- Store title: "PlantCare — Plant Identifier & Care" (keyword-loaded for ASO)
+- Waitlist page: rebranded from PlatCare → PlantCare (`d56516f`)
+- Privacy policy: rebranded to PlantCare
+- No LeafAI rebrand needed — the existing brand is clean
 
 ## Checklist
 
-- [ ] Human decides brand name and store title
-- [ ] Decision recorded here (and in the launch map)
-- [ ] No listing/marketing work (tickets 02, 09) starts before this resolves
+- [x] Human decides brand name and store title
+- [x] Decision recorded here (and in the launch map)
+- [x] Waitlist page + privacy page rebranded to PlantCare
+- [x] No listing/marketing work (tickets 02, 09) starts before this resolves
