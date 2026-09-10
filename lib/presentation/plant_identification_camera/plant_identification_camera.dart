@@ -10,6 +10,7 @@ import 'package:sizer/sizer.dart';
 import '../../core/app_export.dart';
 import '../../models/plant_identification_result.dart';
 import '../../services/plantnet_service.dart';
+import '../../services/plantnet_quota_service.dart';
 import './widgets/camera_controls_widget.dart';
 import './widgets/identification_results_widget.dart';
 import './widgets/identification_tips_widget.dart';
@@ -35,7 +36,7 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
   bool _showResults = false;
   String? _capturedImagePath;
   final ImagePicker _imagePicker = ImagePicker();
-  late PlantNetService _plantNetService;
+  late PlantNetQuotaService _plantNetQuotaService;
   final List<Map<String, dynamic>> _mockResults = [];
 
   @override
@@ -44,8 +45,10 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
     WidgetsBinding.instance.addObserver(this);
     
     // Initialize PlantNet service with API key from env
-    _plantNetService = PlantNetService(
-      apiKey: _getPlantNetApiKey(), // You'll need to add your API key here
+    _plantNetQuotaService = PlantNetQuotaService(
+      plantNetService: PlantNetService(
+        apiKey: _getPlantNetApiKey(),
+      ),
     );
     
     _initializeCamera();
@@ -284,7 +287,7 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
     String? fallbackImagePath,
   }) async {
     try {
-      final result = await _plantNetService.identifyPlantFromBytes(imageBytes);
+      final result = await _plantNetQuotaService.identifyPlantFromBytes(imageBytes);
       
       // Convert PlantNet API results to the format expected by the UI
       final identificationResults = _convertResultsForUI(result);

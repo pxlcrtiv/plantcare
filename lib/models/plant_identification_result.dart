@@ -15,6 +15,15 @@ class PlantIdentificationResult {
     this.similarImages,
   });
 
+  Map<String, dynamic> toJson() => {
+        'queryId': queryId,
+        'queryType': queryType,
+        'queryHash': queryHash,
+        'queryImage': queryImage,
+        'results': results.map((r) => r.toJson()).toList(),
+        'similarImages': similarImages?.map((s) => s.toJson()).toList(),
+      };
+
   factory PlantIdentificationResult.fromJson(Map<String, dynamic> json) {
     return PlantIdentificationResult(
       queryId: json['queryId'],
@@ -74,6 +83,20 @@ class PlantResult {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'score': score,
+        'species': {
+          'scientificName': scientificName,
+          'family': family != null ? {'scientificName': family} : null,
+          'genus': genus != null ? {'scientificName': genus} : null,
+          'commonNames': commonNames,
+          'gbif': gbif,
+          'images': images?.map((i) => i.toJson()).toList(),
+          'links': links,
+        },
+      };
+
   static Map<String, dynamic>? _normalizeCommonNames(dynamic value) {
     if (value == null || value is Map<String, dynamic>) {
       return value as Map<String, dynamic>?;
@@ -103,6 +126,10 @@ class SpeciesImage {
       url: json['m']?['url'] as String?,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'm': {'url': url},
+      };
 }
 
 class SimilarImage {
@@ -120,4 +147,9 @@ class SimilarImage {
       sourceUrl: json['sourceUrl'] as String?,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'url': url,
+        'sourceUrl': sourceUrl,
+      };
 }
