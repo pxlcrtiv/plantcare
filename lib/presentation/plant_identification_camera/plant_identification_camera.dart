@@ -155,8 +155,11 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
         _isProcessing = true;
       });
 
+      // Read bytes (works for both file paths and content:// URIs)
+      final imageBytes = await photo.readAsBytes();
+
       // Call PlantNet API to identify the plant
-      await _identifyPlantFromImage(photo.path);
+      await _identifyPlantFromImage(imageBytes, fallbackImagePath: photo.path);
 
       if (mounted) {
         setState(() {
@@ -185,8 +188,11 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
           _isProcessing = true;
         });
 
+        // Read bytes (works for both file paths and content:// URIs)
+        final imageBytes = await image.readAsBytes();
+
         // Call PlantNet API to identify the plant
-        await _identifyPlantFromImage(image.path);
+        await _identifyPlantFromImage(imageBytes, fallbackImagePath: image.path);
 
         if (mounted) {
           setState(() {
@@ -273,9 +279,12 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
     );
   }
 
-  Future<void> _identifyPlantFromImage(String imagePath) async {
+  Future<void> _identifyPlantFromImage(
+    Uint8List imageBytes, {
+    String? fallbackImagePath,
+  }) async {
     try {
-      final result = await _plantNetService.identifyPlantFromImageFile(imagePath);
+      final result = await _plantNetService.identifyPlantFromBytes(imageBytes);
       
       // Convert PlantNet API results to the format expected by the UI
       final identificationResults = _convertResultsForUI(result);
@@ -303,7 +312,7 @@ class _PlantIdentificationCameraState extends State<PlantIdentificationCamera>
                 "confidence": 0.0,
                 "careDifficulty": "Easy",
                 "wateringFrequency": "Weekly",
-                "image": imagePath,
+                "image": fallbackImagePath ?? '',
                 "description": "Could not identify plant. Please try another image or search manually.",
                 "lightRequirement": "Varies",
                 "humidity": "Varies",
