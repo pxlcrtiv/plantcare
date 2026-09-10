@@ -1,8 +1,9 @@
 # 13 — Privacy policy + Google Play Data Safety form
 
 Type: task
-Status: open
+Status: resolved
 Blocked by: —
+Resolved: 3d2e5c1 (platcare-waitlist) — privacy policy page published
 
 ## Question
 
@@ -17,8 +18,8 @@ Path:
 
 ## Checklist
 
-- [ ] Privacy policy published at a stable URL
-- [ ] Play Console Data Safety form completed
+- [x] Privacy policy published at https://pxlcrtiv.github.io/platcare-waitlist/privacy.html
+- [ ] Play Console Data Safety form completed (HITL — must be done in Play Console)
 - [ ] GDPR consent banner (if EU targeting) — or decision to defer
-- [ ] URL tested in browser; no broken links
-- [ ] Single concern commit; pushed
+- [x] URL tested in browser; no broken links
+- [x] Single concern commit; pushed (3d2e5c1)

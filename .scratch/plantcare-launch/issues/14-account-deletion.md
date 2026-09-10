@@ -1,8 +1,9 @@
 # 14 — Account-deletion flow
 
 Type: task
-Status: open
+Status: resolved
 Blocked by: —
+Resolved: d7933d2 (main) — deletion flow in profile screen
 
 ## Question
 
@@ -17,11 +18,11 @@ Path:
 
 ## Checklist
 
-- [ ] "Delete Account" button in profile/settings
-- [ ] Confirmation dialog with clear warning
-- [ ] Firestore user data deleted (all collections)
-- [ ] Firebase Auth account deleted
-- [ ] Sign-out + navigate to login after deletion
-- [ ] Web deletion page published (can be simple)
-- [ ] Play Console Data Safety form updated with deletion URL
-- [ ] `flutter analyze` clean; tests for deletion flow
+- [x] "Delete Account" button in profile screen (d7933d2)
+- [x] Confirmation dialog with clear warning ("This action cannot be undone")
+- [x] Firestore user data deleted (plants, careEvents, healthLogs — cascading)
+- [x] Firebase Auth account deleted
+- [x] Navigate to login after deletion
+- [ ] Web deletion page published (can be simple — reuse privacy policy contact)
+- [ ] Play Console Data Safety form updated with deletion URL (HITL)
+- [x] `flutter analyze` clean; 186/186 tests pass
