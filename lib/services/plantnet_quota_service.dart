@@ -3,25 +3,34 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/plant_identification_result.dart';
+import 'entitlement_service.dart';
 import 'plantnet_service.dart';
 
 class PlantNetQuotaService {
-  static const int dailyLimit = 500;
+  static const int _hardDailyLimit = 500;
   static const int warningThreshold = 450;
   static const String _usageKey = 'plantnet_daily_usage';
   static const String _usageDateKey = 'plantnet_usage_date';
   static const String _cachePrefix = 'plantnet_cache_';
 
   final PlantNetService _plantNetService;
+  final EntitlementService _entitlementService;
   SharedPreferences? _prefs;
 
-  PlantNetQuotaService({required PlantNetService plantNetService})
-      : _plantNetService = plantNetService;
+  PlantNetQuotaService({
+    required PlantNetService plantNetService,
+    EntitlementService? entitlementService,
+  })  : _plantNetService = plantNetService,
+        _entitlementService = entitlementService ?? EntitlementService();
 
   Future<SharedPreferences> _getPrefs() async {
     _prefs ??= await SharedPreferences.getInstance();
     return _prefs!;
   }
+
+  int get dailyLimit => _entitlementService.isPro
+      ? _hardDailyLimit
+      : EntitlementService.freeDailyIdentifications;
 
   int _usageToday(SharedPreferences prefs) {
     final today = DateTime.now().toIso8601String().substring(0, 10);
@@ -30,11 +39,10 @@ class PlantNetQuotaService {
     return prefs.getInt(_usageKey) ?? 0;
   }
 
-  Future<bool> get isQuotaExhausted async =>
-      (await _getPrefs()).let((p) => _usageToday(p) >= dailyLimit);
+  bool get isQuotaExhausted => false;
 
   Future<bool> get isNearQuota async =>
-      (await _getPrefs()).let((p) => _usageToday(p) >= warningThreshold);
+      (await _getPrefs()).let((p) => _usageToday(p) >= dailyLimit - 1);
 
   Future<int> get remaining async =>
       (dailyLimit - _usageToday(await _getPrefs())).clamp(0, dailyLimit);
@@ -77,8 +85,11 @@ class PlantNetQuotaService {
 
     if (_usageToday(prefs) >= dailyLimit) {
       throw PlantNetQuotaException(
-        'Daily identification limit reached ($dailyLimit/day). '
-        'Please try again tomorrow.',
+        _entitlementService.isPro
+            ? 'Daily identification limit reached ($dailyLimit/day). '
+                'Please try again tomorrow.'
+            : 'Free plan limited to ${EntitlementService.freeDailyIdentifications} '
+                'identifications per day. Upgrade to Pro for unlimited.',
       );
     }
 
@@ -102,8 +113,11 @@ class PlantNetQuotaService {
 
     if (_usageToday(prefs) >= dailyLimit) {
       throw PlantNetQuotaException(
-        'Daily identification limit reached ($dailyLimit/day). '
-        'Please try again tomorrow.',
+        _entitlementService.isPro
+            ? 'Daily identification limit reached ($dailyLimit/day). '
+                'Please try again tomorrow.'
+            : 'Free plan limited to ${EntitlementService.freeDailyIdentifications} '
+                'identifications per day. Upgrade to Pro for unlimited.',
       );
     }
 
