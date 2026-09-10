@@ -158,7 +158,7 @@ class FirebaseService {
         .add(log);
   }
 
-  // Account deletion
+  // Account deletion — batched to minimize Firestore reads/writes
   Future<void> deleteAccount() async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not authenticated');
@@ -167,23 +167,33 @@ class FirebaseService {
     final plantsRef = _firestore.collection('users').doc(userId).collection('plants');
     final plants = await plantsRef.get();
 
-    // Delete all subcollections (careEvents, healthLogs) for each plant
+    var batch = _firestore.batch();
+    var ops = 0;
+
     for (final plant in plants.docs) {
       final careEvents = await plant.reference.collection('careEvents').get();
       for (final doc in careEvents.docs) {
-        await doc.reference.delete();
+        batch.delete(doc.reference);
+        ops++;
       }
       final healthLogs = await plant.reference.collection('healthLogs').get();
       for (final doc in healthLogs.docs) {
-        await doc.reference.delete();
+        batch.delete(doc.reference);
+        ops++;
       }
-      await plant.reference.delete();
+      batch.delete(plant.reference);
+      ops++;
+
+      if (ops >= 450) {
+        await batch.commit();
+        batch = _firestore.batch();
+        ops = 0;
+      }
     }
 
-    // Delete the user document
-    await _firestore.collection('users').doc(userId).delete();
+    batch.delete(_firestore.collection('users').doc(userId));
+    await batch.commit();
 
-    // Delete the Firebase Auth account
     await user.delete();
   }
 }
