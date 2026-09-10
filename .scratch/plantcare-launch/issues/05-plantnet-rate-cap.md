@@ -1,8 +1,9 @@
 # 05 — PlantNet 500/day rate-cap strategy
 
 Type: task
-Status: open
+Status: resolved
 Blocked by: —
+Resolved: 93e22e8 (main) — PlantNetQuotaService with image-hash caching + daily quota guard
 
 ## Question
 
