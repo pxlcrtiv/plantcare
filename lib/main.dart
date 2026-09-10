@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:firebase_core/firebase_core.dart' hide FirebaseService;
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
@@ -16,6 +20,7 @@ import '../repositories/plant_repository_impl.dart';
 import '../providers/sync_provider.dart';
 import '../providers/plant_ai_service_provider.dart';
 import '../widgets/custom_error_widget.dart';
+import '../services/analytics_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +33,14 @@ void main() async {
   await FirebaseAppCheck.instance.activate(
     providerAndroid: AndroidDebugProvider(),
   );
-  
+
+  // Crashlytics: pass all errors to Firebase Crashlytics
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
   // 🚨 CRITICAL: Custom error handling - DO NOT REMOVE
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return CustomErrorWidget(
@@ -66,6 +78,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.light,
+          navigatorObservers: [AnalyticsService().observer],
           // 🚨 CRITICAL: NEVER REMOVE OR MODIFY
           builder: (context, child) {
             return MediaQuery(
