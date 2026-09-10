@@ -27,7 +27,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _signOut() async {
     try {
       await _firebaseService.signOut();
-      // Navigate back to login screen
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/login-screen',
@@ -37,6 +36,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Sign out failed. Please try again.')),
       );
+    }
+  }
+
+  Future<void> _deleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'This will permanently delete your account and all plant data. '
+          'This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await _firebaseService.deleteAccount();
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/login-screen',
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Deletion failed. Please try again.')),
+        );
+      }
     }
   }
 
@@ -202,6 +246,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+
+            SizedBox(height: 2.h),
+
+            // Delete account button
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: _deleteAccount,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 2.h),
+                ),
+                child: Text(
+                  'Delete Account',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
+                  ),
                 ),
               ),
             ),

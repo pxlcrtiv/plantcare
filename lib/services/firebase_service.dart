@@ -157,4 +157,33 @@ class FirebaseService {
         .collection('healthLogs')
         .add(log);
   }
+
+  // Account deletion
+  Future<void> deleteAccount() async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    final userId = user.uid;
+    final plantsRef = _firestore.collection('users').doc(userId).collection('plants');
+    final plants = await plantsRef.get();
+
+    // Delete all subcollections (careEvents, healthLogs) for each plant
+    for (final plant in plants.docs) {
+      final careEvents = await plant.reference.collection('careEvents').get();
+      for (final doc in careEvents.docs) {
+        await doc.reference.delete();
+      }
+      final healthLogs = await plant.reference.collection('healthLogs').get();
+      for (final doc in healthLogs.docs) {
+        await doc.reference.delete();
+      }
+      await plant.reference.delete();
+    }
+
+    // Delete the user document
+    await _firestore.collection('users').doc(userId).delete();
+
+    // Delete the Firebase Auth account
+    await user.delete();
+  }
 }
