@@ -40,9 +40,23 @@ US federal — all historic PLANTCARE marks DEAD:
   mark; low conflict for an app.
 - No live US mark found covering PlantCare for mobile software (Cl. 9/42).
 
-Gaps: WIPO IRs 785976/937862 details unavailable without paid DB; Nigeria registry is
-paper-based (needs a local IP agent search); common-law users exist (iOS app,
-plantcare.app hardware, getplantcare.com).
+Gaps: Nigeria registry is paper-based (needs a local IP agent search);
+common-law users exist (iOS app, plantcare.app hardware, getplantcare.com).
+
+## WIPO IR 937862 deep-dive (Sep 11, 2026 — primary source, Madrid Monitor)
+
+Holder: PlantCare AG, Russikon, Switzerland (the hardware company).
+Goods: Cl. 9 irrigation sensors, Cl. 11 irrigation/lighting equipment,
+Cl. 21 pots/planters — ALL hardware. No software, no Cl. 42, no apps.
+- USA: total provisional refusal (2007) → partial grant (2013) → TOTAL
+  INVALIDATION Feb 2016 → US designation NOT renewed 2017. Dead in the US.
+- EU (EM): granted 2008, renewed 2017 — LIVE until Jun 2027, hardware goods only.
+- JP: refused 2009, not renewed.
+
+Implication: no live mark anywhere covers PlantCare for mobile software. Residual
+risk is EU-only (live hardware mark, same plant-care field, shared Cl. 9) — needs
+attorney read if/when filing an EUTM or if the Swiss company expands to software.
+NG: file locally (Cl. 9 + 42, consider 44) after agent clearance search.
 Recommendation: proceed with PlantCare for Android; run agent searches (NG + US)
 and consider intent-to-use filing once Reddit validation lands. Confirm with a
 trademark attorney before paid spend scales.
