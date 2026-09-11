@@ -15,6 +15,16 @@ Path:
 3. **Subscription product**: create the `$29.99/yr` subscription product in Play Console (Product ID: `pro_yearly`). This can be done before merchant verification completes — it just can't go live until verified.
 4. **Timeline**: merchant verification takes 1-3 business days. Start this ticket early to avoid blocking 06.
 
+## Nigeria specifics (developer is NG-based)
+
+- Play merchant registration works from Nigeria; tax form is **W-8BEN** (non-US individual).
+- Google pays out in **USD by wire** → needs a **domiciliary account** (not a naira account).
+- The $25 Play registration fee needs a **dollar-enabled card** — naira cards carry low
+  monthly intl limits, so a USD virtual card (Grey, Geegpay, etc.) is the fallback.
+- Same dollar-card constraint applies to Kit/Vercel/domain renewals later — all accept
+  international cards, none block NG.
+- AdMob publisher accounts work from Nigeria (wire payouts, $100 threshold).
+
 ## Checklist
 
 - [ ] Play Console Payments profile completed (bank + tax)
