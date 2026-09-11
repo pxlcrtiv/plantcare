@@ -1,8 +1,9 @@
 # 10 — Unit economics validation
 
 Type: task
-Status: open
+Status: resolved
 Blocked by: —
+Resolved: brief in 10-unit-economics-brief.md — keep $29.99/yr, 3mo free + 50% off Y1, RevCat median 2.1% base
 
 ## Question
 
@@ -21,8 +22,8 @@ Path:
 
 ## Checklist
 
-- [ ] Conversion/retention/pricing assumptions validated against current data (sources cited)
-- [ ] COGS model: Firebase, PlantNet paid tier, LLM per-diagnosis cost, crossover point
-- [ ] LTV/CAC estimates at 10K/100K/1M downloads
-- [ ] Recommended price + launch offer recorded
-- [ ] One-page brief attached to this ticket; feeds ticket 06
+- [x] Conversion/retention/pricing assumptions validated against current data (sources cited)
+- [x] COGS model: Firebase, PlantNet paid tier, LLM per-diagnosis cost, crossover point
+- [x] LTV/CAC estimates at 10K/100K/1M downloads
+- [x] Recommended price + launch offer recorded
+- [x] One-page brief attached to this ticket; feeds ticket 06

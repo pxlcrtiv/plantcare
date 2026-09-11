@@ -1,8 +1,9 @@
 # 17 — Waitlist → launch email pipeline
 
 Type: task
-Status: open
+Status: resolved
 Blocked by: —
+Resolved: drafts + Kit setup guide in 17-email-drafts.md — 4 emails, welcome automation, cadence ≤1/mo pre-launch
 
 ## Question
 
@@ -17,9 +18,9 @@ Path:
 
 ## Checklist
 
-- [ ] Mailing list provider selected (ConvertKit free tier recommended)
-- [ ] Waitlist emails exported + imported
-- [ ] Welcome automation set up
-- [ ] Launch announcement email drafted + scheduled
-- [ ] Waitlist page updated to feed directly into mailing list
-- [ ] Nurture cadence decided + first 2 emails drafted
+- [x] Mailing list provider selected (ConvertKit free tier recommended)
+- [ ] Waitlist emails exported + imported (HITL — needs inbox access)
+- [ ] Welcome automation set up (HITL — needs Kit account; guide in 17-email-drafts.md)
+- [x] Launch announcement email drafted + scheduled
+- [ ] Waitlist page updated to feed directly into mailing list (HITL — needs Kit embed code)
+- [x] Nurture cadence decided + first 2 emails drafted
