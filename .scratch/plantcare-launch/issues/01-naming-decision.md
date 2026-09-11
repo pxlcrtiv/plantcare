@@ -25,6 +25,28 @@ Resolved: d56516f (platcare-waitlist) — waitlist page + privacy page rebranded
   (Pakdata) and "PlantCare Hub". Our full title differentiates. Package
   `com.plantcare.app` is first-to-claim on publish — no evidence of conflict.
 
+## Preliminary trademark search (Sep 11, 2026 — NOT a legal opinion)
+
+Sources: USPTO records via uspto.report mirror; WIPO/Justia/Trademarkia walled (403/CAPTCHA).
+
+US federal — all historic PLANTCARE marks DEAD:
+- 79043951 / reg 3480968, Plantcare AG (Swiss irrigation hardware) — Dead/Cancelled.
+  Same company family likely behind plantcare.app hardware. Goods were irrigation
+  sensors, not software.
+- 76387831 / reg 2859368, Endress+Hauser — Dead/Cancelled.
+- 74098069, Plantcare Inc. — Dead/Abandoned.
+- 73373553 / reg 1273118 + 73116220, Plantlife (landscaping services) — Dead since 1990.
+- PROVEN WINNERS PLANTCARE 90279028 — live-ish but Class 1 plant food + composite
+  mark; low conflict for an app.
+- No live US mark found covering PlantCare for mobile software (Cl. 9/42).
+
+Gaps: WIPO IRs 785976/937862 details unavailable without paid DB; Nigeria registry is
+paper-based (needs a local IP agent search); common-law users exist (iOS app,
+plantcare.app hardware, getplantcare.com).
+Recommendation: proceed with PlantCare for Android; run agent searches (NG + US)
+and consider intent-to-use filing once Reddit validation lands. Confirm with a
+trademark attorney before paid spend scales.
+
 ## Checklist
 
 - [x] Human decides brand name and store title
