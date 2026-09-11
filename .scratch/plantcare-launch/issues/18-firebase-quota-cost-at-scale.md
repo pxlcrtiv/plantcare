@@ -1,8 +1,9 @@
 # 18 — Firebase Spark quota + Gemini AI cost at scale
 
 Type: task
-Status: open
+Status: in-progress
 Blocked by: —
+Progress: batched deleteAccount writes (83c1090, main). Left (HITL, Firebase Console): usage audit, budget alerts, Blaze threshold sign-off.
 
 ## Question
 

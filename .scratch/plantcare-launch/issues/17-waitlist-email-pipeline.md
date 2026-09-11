@@ -3,7 +3,7 @@
 Type: task
 Status: resolved
 Blocked by: —
-Resolved: drafts + Kit setup guide in 17-email-drafts.md — 4 emails, welcome automation, cadence ≤1/mo pre-launch
+Resolved: Kit Poplar form live on plantcare.app (embed ca0c0d3185) + drafts in 17-email-drafts.md. Left (HITL): confirm welcome automation enabled, import Formsubmit-era CSV.
 
 ## Question
 
