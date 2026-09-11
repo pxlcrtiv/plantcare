@@ -1,8 +1,9 @@
 # 02 — Google Play listing + ASO
 
 Type: task
-Status: open
+Status: in-progress
 Blocked by: —
+Progress: listing copy drafted in 02-play-listing-copy.md (title 28/30, short 67/80, long ~1850/4000, all 9 keywords). Left: human approval, 3 screenshots, APK upload, $25 dev account (HITL).
 
 ## Question
 

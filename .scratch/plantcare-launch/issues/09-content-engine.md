@@ -1,8 +1,9 @@
 # 09 — AI content engine (1.5h/day)
 
 Type: task
-Status: open
+Status: resolved
 Blocked by: —
+Resolved: ready-to-run kit in 09-content-kit.md — prompt pack, 30-post calendar, CapCut/Buffer guide, PH checklist. Execution is human-side (~1.5h/day).
 
 ## Question
 
