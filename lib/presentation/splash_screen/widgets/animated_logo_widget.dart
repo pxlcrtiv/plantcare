@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:sizer/sizer.dart';
-
-import '../../../core/app_export.dart';
 
 class AnimatedLogoWidget extends StatefulWidget {
   const AnimatedLogoWidget({Key? key}) : super(key: key);
@@ -97,10 +96,10 @@ class _AnimatedLogoWidgetState extends State<AnimatedLogoWidget>
               child: Center(
                 child: Transform.rotate(
                   angle: _leafRotation.value,
-                  child: CustomIconWidget(
-                    iconName: 'eco',
-                    size: 15.w,
-                    color: Theme.of(context).colorScheme.surface,
+                  child: SvgPicture.asset(
+                    'assets/images/plantcare_logo_light.svg',
+                    width: 18.w,
+                    height: 18.w,
                   ),
                 ),
               ),
